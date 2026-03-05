@@ -1,20 +1,22 @@
 {
-  "name": "mern-chat-app",
+  "name": "vibe-talk",
   "version": "1.0.0",
-  "description": "// Full logic for README.md will go here",
-  "main": "index.js",
+  "description": "Vibe Talk — Real-time MERN chat app",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup": "node -e \"const fs=require('fs'); if(!fs.existsSync('server/.env')){fs.copyFileSync('server/.env.example','server/.env');console.log('✅ Created server/.env — open it and fill in MONGO_URI, JWT_SECRET, and Cloudinary values');} if(!fs.existsSync('client/.env')){fs.copyFileSync('client/.env.example','client/.env');console.log('✅ Created client/.env — defaults already point to localhost:5000');}\"",
+    "install-all": "npm install --prefix server && npm install --prefix client --legacy-peer-deps && npm run setup",
+    "dev": "concurrently --names \"server,client\" --prefix-colors \"cyan,magenta\" \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm start --prefix client",
+    "start": "node server/server.js",
+    "build": "npm run build --prefix client"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/alvi597/Chat-Room.git"
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/alvi597/Chat-Room/issues"
-  },
-  "homepage": "https://github.com/alvi597/Chat-Room#readme"
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
