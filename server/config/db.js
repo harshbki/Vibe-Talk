@@ -6,7 +6,13 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`MongoDB connection error: ${error.message}`);
-    process.exit(1);
+    if (process.env.NODE_ENV === "production") {
+      process.exit(1);
+    } else {
+      console.warn(
+        "⚠️  Running without MongoDB — set MONGO_URI in server/.env to enable database features."
+      );
+    }
   }
 };
 
