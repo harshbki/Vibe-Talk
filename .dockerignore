@@ -1,0 +1,29 @@
+# Ignore everything by default, then whitelist what Docker needs.
+# This keeps the image small and prevents secrets from leaking into the build context.
+
+# Root-level noise
+.git
+.gitignore
+.github
+*.md
+LICENSE
+*.log
+.DS_Store
+
+# Root package files (not used inside Docker — each workspace has its own)
+package.json
+package-lock.json
+render.yaml
+
+# Client — only source is needed; node_modules and build are created inside Docker
+client/node_modules
+client/build
+client/.env
+client/.env.*
+!client/.env.example
+
+# Server — exclude dev dependencies and secrets
+server/node_modules
+server/.env
+server/.env.*
+!server/.env.example
