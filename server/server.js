@@ -15,17 +15,38 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
+// Build allowed origins list from CLIENT_URL env var.
+// CLIENT_URL may be a comma-separated list for multi-origin support,
+// e.g. "https://vibetalk.me,https://www.vibetalk.me,http://localhost:3000"
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:3000")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin '${origin}' not allowed`));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
 // Socket.IO setup with CORS
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true,
   },
   pingTimeout: 60000,
 });
 
 // Middleware
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:3000" }));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
