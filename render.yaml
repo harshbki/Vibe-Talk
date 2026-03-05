@@ -1,0 +1,59 @@
+# render.yaml — Render.com Infrastructure-as-Code
+# Deploy the full Vibe Talk MERN stack (backend + React frontend) as a single web service.
+#
+# Quick deploy steps:
+#   1. Push this repo to GitHub.
+#   2. Go to https://dashboard.render.com → "New +" → "Web Service" → connect your repo.
+#   3. Render auto-detects this file and pre-fills all settings.
+#   4. Add the required environment variables listed below in the Render dashboard.
+#   5. Click "Deploy".
+#
+# Required env vars to set in Render dashboard (marked sync: false):
+#   MONGO_URI              — MongoDB Atlas connection string
+#   JWT_SECRET             — Long random string (openssl rand -hex 64)
+#   CLOUDINARY_CLOUD_NAME  — From Cloudinary dashboard
+#   CLOUDINARY_API_KEY     — From Cloudinary dashboard
+#   CLOUDINARY_API_SECRET  — From Cloudinary dashboard
+
+services:
+  - type: web
+    name: vibe-talk
+    runtime: node
+    plan: free
+
+    # Build: install all deps then compile the React app
+    buildCommand: npm run install-all && npm run build
+
+    # Start: launch the Express + Socket.IO server (serves API + React static files)
+    startCommand: npm start
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # PORT is automatically injected by Render — do NOT set it here.
+
+      # CORS: set this to your Render service URL once deployed.
+      # After your first deploy Render shows the URL (e.g. https://vibe-talk.onrender.com).
+      # Update this value and redeploy if the auto-generated URL differs.
+      - key: CLIENT_URL
+        value: https://vibe-talk.onrender.com  # ← replace with your actual Render URL
+
+      - key: JWT_EXPIRY
+        value: 30d
+
+      # Secrets — set these manually in the Render dashboard:
+      - key: MONGO_URI
+        sync: false
+
+      - key: JWT_SECRET
+        sync: false
+
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+
+      - key: CLOUDINARY_API_KEY
+        sync: false
+
+      - key: CLOUDINARY_API_SECRET
+        sync: false

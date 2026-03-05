@@ -1,8 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatRoutes");
@@ -54,10 +56,36 @@ app.use("/api/auth", authRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/upload", uploadRoutes);
 
-// Health check route
-app.get("/", (req, res) => {
+// Health check route (API only — before static file catch-all)
+app.get("/api/health", (req, res) => {
   res.json({ message: "Vibe Talk API is running", socketIO: "active" });
 });
+
+// Serve React production build when deployed (NODE_ENV=production).
+// In development the React dev server handles the frontend separately.
+if (process.env.NODE_ENV === "production") {
+  const clientBuild = path.join(__dirname, "..", "client", "build");
+
+  // Rate-limit the HTML entry point to prevent file-system DoS
+  const staticLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many requests, please try again later." },
+  });
+
+  app.use(express.static(clientBuild));
+  // Only non-API routes fall through to React's index.html (client-side routing).
+  // API routes that are not matched above will still 404 correctly.
+  app.get(/^(?!\/api\/).*$/, staticLimiter, (req, res) => {
+    res.sendFile(path.join(clientBuild, "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.json({ message: "Vibe Talk API is running", socketIO: "active" });
+  });
+}
 
 // Initialize Socket.IO handlers
 initSocket(io);
