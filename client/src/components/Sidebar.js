@@ -33,9 +33,9 @@ const Sidebar = () => {
   };
 
   const getChatPic = (chat) => {
-    if (chat.isGroupChat) return chat.groupPic || "/group-default.png";
+    if (chat.isGroupChat) return chat.groupPic || "/group-default.svg";
     const other = chat.users.find((u) => u._id !== user._id);
-    return other?.profilePic || "/default-avatar.png";
+    return other?.profilePic || "/default-avatar.svg";
   };
 
   const isUserOnline = (chat) => {
@@ -54,7 +54,7 @@ const Sidebar = () => {
         <h1 className="text-xl font-bold text-indigo-600">Vibe Talk</h1>
         <div className="flex items-center gap-2">
           <img
-            src={user?.profilePic || "/default-avatar.png"}
+            src={user?.profilePic || "/default-avatar.svg"}
             alt={user?.name}
             className="w-9 h-9 rounded-full object-cover cursor-pointer"
             title={user?.name}

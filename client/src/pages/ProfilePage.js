@@ -57,7 +57,7 @@ const ProfilePage = () => {
         {/* Profile Picture */}
         <div className="flex flex-col items-center mb-6">
           <img
-            src={user?.profilePic || "/default-avatar.png"}
+            src={user?.profilePic || "/default-avatar.svg"}
             alt={user?.name}
             className="w-24 h-24 rounded-full object-cover mb-3 shadow"
           />

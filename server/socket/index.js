@@ -36,8 +36,8 @@ const initSocket = (io) => {
         return;
       }
       chat.users.forEach((user) => {
-        if (user._id === message.sender._id) return;
-        socket.to(user._id).emit("message-received", message);
+        if (user._id.toString() === message.sender._id.toString()) return;
+        socket.to(user._id.toString()).emit("message-received", message);
       });
     });
 

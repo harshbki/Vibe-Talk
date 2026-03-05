@@ -26,9 +26,9 @@ const ChatWindow = () => {
   };
 
   const getChatPic = () => {
-    if (selectedChat.isGroupChat) return selectedChat.groupPic || "/group-default.png";
+    if (selectedChat.isGroupChat) return selectedChat.groupPic || "/group-default.svg";
     const other = selectedChat.users.find((u) => u._id !== user._id);
-    return other?.profilePic || "/default-avatar.png";
+    return other?.profilePic || "/default-avatar.svg";
   };
 
   return (
@@ -54,7 +54,7 @@ const ChatWindow = () => {
             >
               {!isOwn && (
                 <img
-                  src={msg.sender.profilePic || "/default-avatar.png"}
+                  src={msg.sender.profilePic || "/default-avatar.svg"}
                   alt={msg.sender.name}
                   className="w-8 h-8 rounded-full mr-2 self-end"
                 />

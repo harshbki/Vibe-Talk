@@ -64,7 +64,7 @@ const UserList = ({ onClose }) => {
           >
             <div className="relative mr-3">
               <img
-                src={user.profilePic || "/default-avatar.png"}
+                src={user.profilePic || "/default-avatar.svg"}
                 alt={user.name}
                 className="w-10 h-10 rounded-full object-cover"
               />
