@@ -1,0 +1,130 @@
+.settings-page {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+}
+
+.settings-card {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 40px;
+  max-width: 480px;
+  width: 100%;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+}
+
+.settings-card h1 {
+  text-align: center;
+  color: var(--text-1);
+  margin-bottom: 28px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-field label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+.settings-field input,
+.settings-field select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 16px;
+  background: var(--bg-1);
+  color: var(--text-1);
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.settings-field input:focus,
+.settings-field select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.save-btn {
+  padding: 13px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: white;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.save-btn:hover {
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 10px 0;
+}
+
+.danger-zone h3 {
+  color: #e74c3c;
+  margin-bottom: 10px;
+}
+
+.danger-zone p {
+  color: var(--text-2);
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.delete-btn {
+  padding: 12px 24px;
+  border: 2px solid #e74c3c;
+  border-radius: 12px;
+  background: transparent;
+  color: #e74c3c;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.delete-btn:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.settings-msg {
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.settings-msg.success {
+  color: #27ae60;
+  background: rgba(39, 174, 96, 0.1);
+}
+
+.settings-msg.error {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+}

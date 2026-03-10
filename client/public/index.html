@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0ea5a0" />
+    <meta name="monetag" content="d965e1389aae19ff5ef25da9cdc7aff3" />
+    <meta name="description" content="Vibe Talk - Random Chat & Video Call App" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Vibe Talk</title>
+
+    <!-- 
+      Ad Network Scripts (Monetag + Adsterra)
+      Replace zone IDs with your real ones from:
+      - Monetag: https://monetag.com 
+      - Adsterra: https://adsterra.com
+    -->
+
+    <!-- Monetag Popunder Script -->
+    <script type="text/javascript">
+      (function(s,u,z,p){
+        s.src=u;s.setAttribute('data-zone',z);p.appendChild(s);
+      })(document.createElement('script'),'https://iclickcdn.com/tag.min.js','d965e1389aae19ff5ef25da9cdc7aff3',document.body||document.documentElement);
+    </script>
+
+    <!-- Monetag In-Page Push -->
+    <script type="text/javascript">
+      (function(d,z,s){
+        s.src='https://'+d+'/400/'+z;
+        try{(document.body||document.documentElement).appendChild(s)}catch(e){}
+      })('grsjorede.net','d965e1389aae19ff5ef25da9cdc7aff3',document.createElement('script'));
+    </script>
+
+    <!-- Adsterra Social Bar Script (replace ADSTERRA_ZONE_ID with yours) -->
+    <!-- <script type='text/javascript' src='//pl24406498.profitablecpmrate.com/ADSTERRA_ZONE_ID/invoke.js'></script> -->
+
+    <!-- Monetag Interstitial config -->
+    <script type="text/javascript">
+      var monetag_interstitial_zone = 'd965e1389aae19ff5ef25da9cdc7aff3';
+    </script>
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5149550826483446" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+
+    <!-- Adsterra Native Banner Container (for UsersList page) -->
+    <div id="adsterra-native-banner"></div>
+  </body>
+</html>

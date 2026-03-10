@@ -1,0 +1,104 @@
+Server running on port 5000
+MongoDB Connected: localhost
+2026-03-06T07:39:27.559Z GET /
+2026-03-06T07:41:05.177Z GET /api/profile/test123
+Get profile error: CastError: Cast to ObjectId failed for value "test123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/schema/objectId.js:253:11)
+    at SchemaType.applySetters (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/schemaType.js:1288:12)
+    at SchemaType.castForQuery (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/schemaType.js:1724:17)
+    at cast (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/cast.js:390:32)
+    at Query.cast (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/query.js:5060:12)
+    at Query._castConditions (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/query.js:2374:10)
+    at model.Query._findOne (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/query.js:2697:8)
+    at model.Query.exec (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/query.js:4627:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /workspaces/Vibe-Talk/server/routes/profileRoutes.js:24:18 {
+  stringValue: '"test123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'test123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/workspaces/Vibe-Talk/server/node_modules/bson/lib/bson.cjs:2538:23)
+      at castObjectId (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/schema/objectId.js:251:12)
+      at SchemaType.applySetters (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/schemaType.js:1288:12)
+      at SchemaType.castForQuery (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/schemaType.js:1724:17)
+      at cast (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/cast.js:390:32)
+      at Query.cast (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/query.js:5060:12)
+      at Query._castConditions (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/query.js:2374:10)
+      at model.Query._findOne (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/query.js:2697:8)
+      at model.Query.exec (/workspaces/Vibe-Talk/server/node_modules/mongoose/lib/query.js:4627:80),
+  valueType: 'string'
+}
+2026-03-06T07:47:40.173Z GET /
+2026-03-06T07:49:09.330Z POST /api/auth/guest
+2026-03-06T07:49:09.525Z GET /api/users
+2026-03-06T07:49:09.569Z GET /api/chat/health
+2026-03-06T07:49:09.579Z GET /api/profile/000000000000000000000000
+2026-03-06T07:49:24.269Z GET /api/users?excludeId=69aa6c8ac1a57f63452c06b6
+2026-03-06T07:49:24.339Z GET /api/users?excludeId=69aa6c8ac1a57f63452c06b6
+2026-03-06T07:49:36.328Z PUT /api/profile/69aa6c8ac1a57f63452c06b6
+2026-03-06T07:49:51.088Z GET /api/users?excludeId=69aa6c8ac1a57f63452c06b6
+2026-03-06T07:49:51.169Z GET /api/users?excludeId=69aa6c8ac1a57f63452c06b6
+2026-03-06T07:49:59.003Z POST /api/users/increment-call
+2026-03-06T07:49:59.047Z POST /api/users/increment-call
+2026-03-06T07:49:59.668Z POST /api/users/increment-call
+2026-03-06T07:56:01.481Z POST /api/users/increment-call
+2026-03-06T07:56:01.637Z POST /api/users/increment-call
+2026-03-06T07:56:01.684Z POST /api/users/increment-call
+2026-03-06T07:56:10.227Z POST /api/users/increment-call
+2026-03-06T07:56:10.946Z POST /api/users/increment-call
+2026-03-06T07:56:46.126Z GET /api/users?excludeId=69aa6c8ac1a57f63452c06b6
+2026-03-06T07:56:47.329Z GET /api/users?excludeId=69aa6c8ac1a57f63452c06b6
+2026-03-06T07:56:48.871Z GET /api/users?excludeId=69aa6c8ac1a57f63452c06b6
+2026-03-06T07:56:49.965Z GET /api/users?excludeId=69aa6c8ac1a57f63452c06b6
+2026-03-06T07:57:26.756Z POST /api/auth/guest
+2026-03-06T08:11:19.997Z POST /api/auth/guest
+2026-03-06T08:15:12.463Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:15:12.765Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:15:18.483Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:15:18.566Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:15:38.841Z POST /api/upload
+2026-03-06T08:15:58.796Z POST /api/users/increment-call
+2026-03-06T08:16:15.552Z GET /
+2026-03-06T08:20:49.198Z GET /
+2026-03-06T08:22:58.303Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:22:58.321Z GET /api/users?gender=Male&excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:22:58.527Z GET /api/users?gender=Female&excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:22:58.547Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:22:58.553Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:22:58.699Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:22:58.854Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:22:58.940Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:23:15.400Z POST /api/upload
+2026-03-06T08:24:30.206Z HEAD /
+2026-03-06T08:27:25.042Z POST /api/users/increment-call
+2026-03-06T08:29:47.455Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:29:50.342Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:30:01.271Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:30:01.465Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:34:54.728Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:34:56.738Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:34:56.743Z GET /api/users?gender=Male&excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:34:56.745Z GET /api/users?gender=Female&excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:34:57.787Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:48:54.582Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:48:54.669Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:49:01.863Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:49:02.223Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:49:11.044Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T08:49:11.231Z GET /api/users?excludeId=69aa8c282fbeae1f61f7e99d
+2026-03-06T09:03:09.265Z POST /api/auth/guest
+2026-03-06T09:03:20.944Z GET /api/users?excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T09:03:21.008Z GET /api/users?excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T09:03:29.283Z GET /api/users?excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T09:03:29.340Z GET /api/users?excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T09:03:30.871Z GET /api/users?gender=Male&excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T09:03:33.257Z GET /api/users?gender=Female&excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T09:07:32.082Z GET /api/users?excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T09:07:32.179Z GET /api/users?excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T09:07:38.704Z GET /api/users?excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T09:07:38.789Z GET /api/users?excludeId=69aa984d2fbeae1f61f7e9bd
+2026-03-06T10:41:02.377Z GET /
+2026-03-06T10:41:03.034Z GET /favicon.ico

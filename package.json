@@ -1,16 +1,21 @@
 {
-  "name": "mern-chat-app",
+  "name": "vibetalk",
   "version": "1.0.0",
-  "description": "// Full logic for README.md will go here",
-  "main": "index.js",
+  "description": "VibeTalk - Real-time anonymous chat and dating app",
+  "main": "server/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/server.js",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm install && npm run build",
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "dev": "cd server && npm run dev"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alvi597/Chat-Room.git"
   },
-  "keywords": [],
+  "keywords": ["chat", "dating", "mern", "socket.io", "webrtc"],
   "author": "",
   "license": "ISC",
   "bugs": {
