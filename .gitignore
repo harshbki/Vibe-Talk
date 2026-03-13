@@ -6,3 +6,4 @@ client/build/
 uploads/
 *.log
 .DS_Store
+data/db/
