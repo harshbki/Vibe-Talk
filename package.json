@@ -15,11 +15,20 @@
     "type": "git",
     "url": "git+https://github.com/alvi597/Chat-Room.git"
   },
-  "keywords": ["chat", "dating", "mern", "socket.io", "webrtc"],
+  "keywords": [
+    "chat",
+    "dating",
+    "mern",
+    "socket.io",
+    "webrtc"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/alvi597/Chat-Room/issues"
   },
-  "homepage": "https://github.com/alvi597/Chat-Room#readme"
+  "homepage": "https://github.com/alvi597/Chat-Room#readme",
+  "devDependencies": {
+    "webpack-cli": "^6.0.1"
+  }
 }
