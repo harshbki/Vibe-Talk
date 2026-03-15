@@ -1,9 +1,23 @@
-node_modules/
+# Dependencies
+/node_modules
+/client/node_modules
+
+# Environment variables
 .env
 server/.env
 client/.env
-client/build/
-uploads/
+
+# Build folder
+/client/build
+
+# Uploads
+/uploads
+
+# Logs
 *.log
+
+#
 .DS_Store
-data/db/
+
+# Database
+/data/db
