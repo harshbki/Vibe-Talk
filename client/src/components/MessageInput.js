@@ -57,7 +57,7 @@ const MessageInput = () => {
       sendStopTyping(selectedUser._id, user._id);
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Upload failed. Please try again.');
+      alert(`Upload failed: ${error.response?.data?.message || error.message}`);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
