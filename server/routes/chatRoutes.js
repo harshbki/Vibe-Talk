@@ -7,11 +7,20 @@ const {
   getUserChats,
   deleteMessage
 } = require('../controllers/chatController');
+const { requireMongo } = require('../middleware');
 
 // GET /api/chat/health - Check if chat service is running
 router.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Chat service is running' });
+  const mongoose = require('mongoose');
+  const dbOk = mongoose.connection.readyState === 1;
+  res.json({
+    status: dbOk ? 'ok' : 'degraded',
+    mongo: dbOk ? 'connected' : 'disconnected',
+    message: dbOk ? 'Chat service is running' : 'MongoDB is not connected — start MongoDB on port 27017',
+  });
 });
+
+router.use(requireMongo);
 
 // POST /api/chat - Get or create a chat between two users
 router.post('/', getOrCreateChat);

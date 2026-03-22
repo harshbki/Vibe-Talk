@@ -7,9 +7,14 @@
     "start": "node server/server.js",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
+    "build": "cd client && npm install && npm run build",
     "install-all": "cd server && npm install && cd ../client && npm install",
     "dev": "cd server && npm run dev",
-    "build": "cd client && npm run build"
+    "dev:all": "concurrently -n server,client -c blue,magenta \"npm run dev --prefix server\" \"npm run start --prefix client\"",
+    "open-browser": "powershell -ExecutionPolicy Bypass -File scripts/open-browsers.ps1",
+    "mongo": "docker compose up -d",
+    "mongo:stop": "docker compose down",
+    "mongo:win": "powershell -ExecutionPolicy Bypass -File scripts/start-mongodb.ps1"
   },
   "repository": {
     "type": "git",
@@ -33,6 +38,7 @@
     "@babel/preset-env": "^7.29.0",
     "@babel/preset-react": "^7.28.5",
     "babel-loader": "^10.1.1",
+    "concurrently": "^9.2.1",
     "webpack-cli": "^6.0.1"
   }
 }

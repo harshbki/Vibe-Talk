@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { guestLogin, getUserById, profileLogin } = require('../controllers/authController');
+const { requireMongo } = require('../middleware');
+
+router.use(requireMongo);
 
 // POST /api/auth/guest - Guest login
 router.post('/guest', guestLogin);

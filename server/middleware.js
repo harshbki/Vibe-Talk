@@ -1,4 +1,14 @@
 const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
+
+/** Block API calls that need DB when MongoDB is not connected (503 + clear message). */
+const requireMongo = (req, res, next) => {
+  if (mongoose.connection.readyState === 1) return next();
+  return res.status(503).json({
+    message:
+      'Database is not connected. Start MongoDB on your PC (Windows: Win+R → services.msc → MongoDB → Start), then restart the server.',
+  });
+};
 
 // Rate limiter for API requests
 const apiLimiter = rateLimit({
@@ -23,15 +33,28 @@ const requestLogger = (req, res, next) => {
 // Error handler middleware
 const errorHandler = (err, req, res, next) => {
   console.error('Error:', err.message);
-  
+
+  const msg = String(err.message || '');
+  if (
+    err.name === 'MongoServerSelectionError' ||
+    err.name === 'MongoNotConnectedError' ||
+    msg.includes('buffering timed out') ||
+    msg.includes('Client must be connected')
+  ) {
+    return res.status(503).json({
+      message:
+        'Database is not connected. Start MongoDB (port 27017), then restart the API server.',
+    });
+  }
+
   if (err.name === 'ValidationError') {
     return res.status(400).json({ message: err.message });
   }
-  
+
   if (err.name === 'CastError') {
     return res.status(400).json({ message: 'Invalid ID format' });
   }
-  
+
   res.status(500).json({ message: 'Internal server error' });
 };
 
@@ -39,5 +62,6 @@ module.exports = {
   apiLimiter,
   authLimiter,
   requestLogger,
-  errorHandler
+  errorHandler,
+  requireMongo,
 };

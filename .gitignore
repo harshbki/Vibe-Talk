@@ -2,8 +2,10 @@
 node_modules
 client/node_modules
 
-# Environment variables
+# Environment variables (never commit real secrets)
 .env
+server/.env
+client/.env
 
 # Build folder
 client/build

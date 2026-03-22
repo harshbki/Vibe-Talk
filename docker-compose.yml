@@ -1,0 +1,15 @@
+# Local MongoDB on port 27017 (same as server/.env MONGO_URI)
+# Run: npm run mongo   OR   docker compose up -d
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: vibetalk-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - vibetalk_mongo_data:/data/db
+
+volumes:
+  vibetalk_mongo_data:

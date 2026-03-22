@@ -122,7 +122,7 @@ Publish `client/build` as static output.
 
 Use port forwarding in this workspace:
 
-1. Forward `3000` as Public (frontend)
+1. Forward `8080` as Public (frontend)
 2. Forward `8081` as Private/Public (backend)
 3. Keep `27017` private
 
@@ -135,7 +135,7 @@ PORT=8081 npm run dev
 
 # terminal 2
 cd client
-npm start
+PORT=8080 npm start
 ```
 
 ## 9. Post-Deploy Smoke Tests
