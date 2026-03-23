@@ -11,6 +11,8 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
   const [remoteStream, setRemoteStream] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  // Prevent accidental double-click / re-entry which can break WebRTC SDP state.
+  const startInProgressRef = useRef(false);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -66,6 +68,10 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
 
   const startCall = async () => {
     try {
+      // Guard: don't start a second offer while first one is still running.
+      if (startInProgressRef.current) return;
+      startInProgressRef.current = true;
+
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       setLocalStream(stream);
       setCallStatus('calling');
@@ -95,6 +101,8 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       console.error('Error starting call:', error);
       alert('Could not access camera/microphone. Please allow permissions.');
       setCallStatus('idle');
+    } finally {
+      startInProgressRef.current = false;
     }
   };
 
@@ -158,6 +166,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
     setLocalStream(null);
     setRemoteStream(null);
     peerConnection.current = null;
+    startInProgressRef.current = false;
   };
 
   const endCall = () => {
@@ -185,6 +194,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
   };
 
   const initiateCall = () => {
+    if (callStatus !== 'idle') return;
     triggerAdOnInteraction();
     if (user.freeCallsUsed < 1) {
       startCall();

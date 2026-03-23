@@ -68,6 +68,7 @@ const Sidebar = () => {
   }, [recentChats, user?._id, isProfileUser, onlineUsers, messages]);
 
   const totalCount = chatItems.length + userGroups.length + (activeMatchChat ? 1 : 0);
+  const randomMatchActive = !!activeMatchChat;
 
   const formatTime = (value) => {
     if (!value) return '';
@@ -144,8 +145,10 @@ const Sidebar = () => {
               </li>
             )}
 
-            {/* Group Chats — visible to ALL users */}
-            {userGroups.map((g) => (
+            {/* Group Chats */}
+            {/* When random match is active, show only that chat (no history accumulation). */}
+            {!randomMatchActive &&
+              userGroups.map((g) => (
               <li key={g._id}>
                 <button
                   className="flex items-start gap-2 rounded-lg p-2 w-full hover:bg-base-200"
@@ -165,10 +168,11 @@ const Sidebar = () => {
                   </div>
                 </button>
               </li>
-            ))}
+              ))}
 
-            {/* DM Chats — only for profile users */}
-            {chatItems.map((item) => (
+            {/* DM Chats */}
+            {!randomMatchActive &&
+              chatItems.map((item) => (
               <li key={item._id}>
                 <button
                   className={`flex items-start gap-2 rounded-lg p-2 w-full ${
@@ -198,7 +202,7 @@ const Sidebar = () => {
                   {item.unread > 0 && <span className="badge badge-primary badge-xs mt-0.5">{item.unread}</span>}
                 </button>
               </li>
-            ))}
+              ))}
           </ul>
         )}
       </div>

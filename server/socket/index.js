@@ -41,13 +41,18 @@ const setupSocket = (io) => {
     socket.on('user_online', async (userId) => {
       try {
         const user = await User.findById(userId);
-        if (user) {
+        if (!user) return;
+
+        // Always attach socket.userId so we can clean up queues/lastSeen on disconnect.
+        socket.userId = userId;
+
+        // But only broadcast "online users" list for users who have completed their profile.
+        if (user.isFullAccount) {
           onlineUsers.set(userId, {
             socketId: socket.id,
             nickname: user.nickname,
-            gender: user.gender
+            gender: user.gender,
           });
-          socket.userId = userId;
           broadcastOnlineUsers(io);
         }
       } catch (error) {

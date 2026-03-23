@@ -50,7 +50,9 @@ const ChatWindow = () => {
         sendSeen(selectedUser._id, user._id);
       }
     }
-  }, [selectedUser, chatMessages, markAsRead, sendSeen, user]);
+    // Important: don't depend on `chatMessages` here.
+    // `markAsRead` updates messages state, which would otherwise cause an update loop.
+  }, [selectedUser, markAsRead, sendSeen, user]);
 
   const renderMessageContent = (msg) => {
     if (msg.mediaUrl) {

@@ -25,6 +25,16 @@ const NotificationBell = () => {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  // Poll so "new" notifications appear even if server doesn't emit
+  // a real-time `new_notification` socket event for every action.
+  useEffect(() => {
+    if (!user?._id) return;
+    const id = setInterval(() => {
+      fetchNotifications();
+    }, 15000);
+    return () => clearInterval(id);
+  }, [fetchNotifications, user?._id]);
+
   // Listen for real-time notifications
   useEffect(() => {
     const socket = getSocket();

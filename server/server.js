@@ -103,6 +103,14 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+// Serve uploaded files when Cloudinary is not configured / fails.
+// (Used as a fallback by uploadRoutes.js.)
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
+
 // Serve React build when present (run `npm run build` in client first)
 const clientBuild = path.join(__dirname, '..', 'client', 'build');
 const clientIndex = path.join(clientBuild, 'index.html');

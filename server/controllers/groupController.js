@@ -1,5 +1,6 @@
 const Group = require('../models/Group');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // Create a new group
 const createGroup = async (req, res, next) => {
@@ -209,6 +210,25 @@ const requestJoinGroup = async (req, res, next) => {
 
     group.joinRequests.push(userId);
     await group.save();
+
+    // Notify admin in DB (NotificationBell shows it; additionally we poll on client).
+    // This fixes "admin ko join request notification nahi aaya".
+    try {
+      const requester = await User.findById(userId, 'nickname gender');
+      const adminId = group.admin;
+
+      await Notification.create({
+        user: adminId,
+        type: 'group_join',
+        title: 'New group join request',
+        body: `${requester?.nickname || 'Someone'} requested to join "${group.name}"`,
+        data: { groupId, requesterId: userId }
+      });
+    } catch (e) {
+      // Don't block join request if notification fails.
+      console.error('Join request notification error:', e);
+    }
+
     res.json({ message: 'Join request sent' });
   } catch (error) {
     next(error);

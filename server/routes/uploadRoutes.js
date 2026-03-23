@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const cloudinary = require('../config/cloudinary');
 
 // Multer setup for memory storage
@@ -52,6 +54,33 @@ router.post('/', upload.single('file'), async (req, res) => {
     });
   } catch (error) {
     console.error('Upload error:', error);
+
+    // Fallback: if Cloudinary is not configured (ex: placeholder API key -> 401),
+    // then save the file locally so the UI upload keeps working.
+    const isCloudinaryAuthError =
+      error?.http_code === 401 ||
+      String(error?.message || '').toLowerCase().includes('unknown api key');
+
+    if (isCloudinaryAuthError) {
+      const uploadsDir = path.join(__dirname, '..', 'uploads');
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+      const mime = req.file?.mimetype || '';
+      const extRaw = mime.split('/')[1] || 'bin';
+      const ext = String(extRaw).replace(/[^a-z0-9]+/gi, '').toLowerCase() || 'bin';
+
+      const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const filePath = path.join(uploadsDir, filename);
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      return res.json({
+        success: true,
+        url: `/uploads/${filename}`,
+        public_id: filename,
+        resource_type: mime.startsWith('video/') ? 'video' : 'image'
+      });
+    }
+
     res.status(500).json({ message: 'Upload failed', error: error.message });
   }
 });
@@ -63,7 +92,15 @@ router.delete('/:publicId', async (req, res) => {
     await cloudinary.uploader.destroy(`vibetalk/${publicId}`);
     res.json({ success: true, message: 'Image deleted' });
   } catch (error) {
-    res.status(500).json({ message: 'Delete failed', error: error.message });
+    // If local fallback was used, try deleting from disk.
+    try {
+      const uploadsDir = path.join(__dirname, '..', 'uploads');
+      const filePath = path.join(uploadsDir, publicId);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      return res.json({ success: true, message: 'Image deleted (local)' });
+    } catch (e) {
+      return res.status(500).json({ message: 'Delete failed', error: error.message });
+    }
   }
 });
 

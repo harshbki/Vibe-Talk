@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [18.x]
 
     defaults:
       run:
@@ -30,9 +30,7 @@ jobs:
 
     # npm install: lockfile remote par missing / mismatch par bhi build chale
     - name: Install dependencies
-      run: npm install
+      run: npm ci --no-audit --no-fund
 
     - name: Build
-      env:
-        CI: false
       run: npm run build

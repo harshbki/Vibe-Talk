@@ -210,9 +210,13 @@ export const ChatProvider = ({ children }) => {
     setMessages(prev => {
       const userMsgs = prev[userId];
       if (!userMsgs) return prev;
+      // If there are no unread messages, don't update state.
+      // This prevents render loops when ChatWindow calls markAsRead on message changes.
+      const hasUnread = userMsgs.some(m => m.unread);
+      if (!hasUnread) return prev;
       return {
         ...prev,
-        [userId]: userMsgs.map(m => m.unread ? { ...m, unread: false } : m)
+        [userId]: userMsgs.map(m => (m.unread ? { ...m, unread: false } : m))
       };
     });
   }, []);
