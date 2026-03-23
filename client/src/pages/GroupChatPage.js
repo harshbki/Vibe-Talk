@@ -319,6 +319,7 @@ const GroupChatPage = () => {
               className="hidden"
               type="file"
               accept="image/*,video/*"
+              capture="environment"
               onChange={handleFileUpload}
             />
             <input

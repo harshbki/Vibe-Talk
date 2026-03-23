@@ -95,6 +95,7 @@ const MessageInput = () => {
           className="hidden"
           type="file"
           accept="image/*,video/*"
+          capture="environment"
           onChange={handleFileChange}
         />
         <input

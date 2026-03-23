@@ -201,7 +201,7 @@ const RandomMatchPage = () => {
             </div>
             <h2 className="text-xl font-bold">Looking for a match...</h2>
             <p className="text-base-content/60">
-              Please wait while we find you a {user?.gender === 'Male' ? 'female' : 'male'} partner
+              Please wait while we find you any partner
             </p>
             <button className="btn btn-ghost btn-sm" onClick={cancelSearch}>
               ✕ Cancel

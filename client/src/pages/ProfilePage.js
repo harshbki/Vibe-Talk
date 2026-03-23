@@ -162,8 +162,15 @@ const ProfilePage = () => {
                       </div>
                     )}
                     <label className="btn btn-circle btn-sm btn-primary absolute -bottom-1 -right-1 cursor-pointer shadow-md">
-                      {uploading ? <span className="loading loading-spinner loading-xs" /> : '📷'}
-                      <input type="file" accept="image/*" onChange={handlePictureUpload} disabled={uploading} className="hidden" />
+                    {uploading ? <span className="loading loading-spinner loading-xs" /> : '📷'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handlePictureUpload}
+                        disabled={uploading}
+                        className="hidden"
+                      />
                     </label>
                   </div>
                 </div>
@@ -317,7 +324,14 @@ const ProfilePage = () => {
               )}
               <label className="btn btn-circle btn-sm btn-primary absolute -bottom-1 -right-1 text-sm cursor-pointer shadow-md">
                 {uploading ? <span className="loading loading-spinner loading-xs" /> : '📷'}
-                <input type="file" accept="image/*" onChange={handlePictureUpload} disabled={uploading} className="hidden" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handlePictureUpload}
+                  disabled={uploading}
+                  className="hidden"
+                />
               </label>
             </div>
 
