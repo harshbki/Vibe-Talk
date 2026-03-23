@@ -10,7 +10,7 @@ const onlineUsers = new Map();
 // Random match queues
 const waitingMales = [];
 const waitingFemales = [];
-const activeMatches = new Map(); // roomId -> { maleId, femaleId }
+const activeMatches = new Map(); // roomId -> { aId, bId }
 
 const broadcastOnlineUsers = (io) => {
   const usersList = Array.from(onlineUsers.entries()).map(([id, data]) => ({
@@ -69,108 +69,89 @@ const setupSocket = (io) => {
       
       const userInfo = { userId, nickname, socketId: socket.id, gender };
       
-      if (gender === 'Male' && waitingFemales.length > 0) {
-        // Male found, pair with waiting female
-        const female = waitingFemales.shift();
+      // Pick any available partner (supports any gender pairing, including same-gender matches).
+      let partner = null;
+      if (gender === 'Male') {
+        if (waitingFemales.length > 0) partner = waitingFemales.shift();
+        else if (waitingMales.length > 0) partner = waitingMales.shift();
+      } else if (gender === 'Female') {
+        if (waitingMales.length > 0) partner = waitingMales.shift();
+        else if (waitingFemales.length > 0) partner = waitingFemales.shift();
+      } else {
+        // Unknown/invalid gender -> fall back to any queue.
+        if (waitingFemales.length > 0) partner = waitingFemales.shift();
+        else if (waitingMales.length > 0) partner = waitingMales.shift();
+      }
+
+      if (partner) {
         const roomId = generateRoomId();
-        
-        // Join both to the room
+
         socket.join(roomId);
-        const femaleSocket = io.sockets.sockets.get(female.socketId);
-        if (femaleSocket) {
-          femaleSocket.join(roomId);
-        }
-        
-        // Store active match
-        activeMatches.set(roomId, { maleId: userId, femaleId: female.userId });
-        
-        // Emit match found to both
+        const partnerSocket = io.sockets.sockets.get(partner.socketId);
+        if (partnerSocket) partnerSocket.join(roomId);
+
+        // Store active match (two participant ids)
+        activeMatches.set(roomId, { aId: userId, bId: partner.userId });
+
+        // Emit match found to initiator
         socket.emit('match_found', {
           roomId,
           partner: {
-            _id: female.userId,
-            nickname: female.nickname,
-            gender: 'Female'
-          }
+            _id: partner.userId,
+            nickname: partner.nickname,
+            gender: partner.gender,
+          },
         });
-        
-        io.to(female.socketId).emit('match_found', {
+
+        // Emit match found to partner
+        io.to(partner.socketId).emit('match_found', {
           roomId,
           partner: {
             _id: userId,
             nickname: nickname,
-            gender: 'Male'
-          }
+            gender: gender,
+          },
         });
-        
-        console.log(`Match created: ${nickname} (M) <-> ${female.nickname} (F) in ${roomId}`);
+
+        console.log(
+          `Match created: ${nickname} (${gender}) <-> ${partner.nickname} (${partner.gender}) in ${roomId}`
+        );
 
         // Create match notifications
         try {
-          const n1 = await Notification.create({ user: userId, type: 'match', title: 'It\'s a Match!', body: `You matched with ${female.nickname}`, data: { roomId } });
+          const n1 = await Notification.create({
+            user: userId,
+            type: 'match',
+            title: 'It\'s a Match!',
+            body: `You matched with ${partner.nickname}`,
+            data: { roomId },
+          });
           socket.emit('new_notification', n1);
-          const n2 = await Notification.create({ user: female.userId, type: 'match', title: 'It\'s a Match!', body: `You matched with ${nickname}`, data: { roomId } });
-          io.to(female.socketId).emit('new_notification', n2);
-        } catch (err) { console.error('Match notification error:', err); }
-        
-      } else if (gender === 'Female' && waitingMales.length > 0) {
-        // Female found, pair with waiting male
-        const male = waitingMales.shift();
-        const roomId = generateRoomId();
-        
-        // Join both to the room
-        socket.join(roomId);
-        const maleSocket = io.sockets.sockets.get(male.socketId);
-        if (maleSocket) {
-          maleSocket.join(roomId);
+
+          const n2 = await Notification.create({
+            user: partner.userId,
+            type: 'match',
+            title: 'It\'s a Match!',
+            body: `You matched with ${nickname}`,
+            data: { roomId },
+          });
+          io.to(partner.socketId).emit('new_notification', n2);
+        } catch (err) {
+          console.error('Match notification error:', err);
         }
-        
-        // Store active match
-        activeMatches.set(roomId, { maleId: male.userId, femaleId: userId });
-        
-        // Emit match found to both
-        socket.emit('match_found', {
-          roomId,
-          partner: {
-            _id: male.userId,
-            nickname: male.nickname,
-            gender: 'Male'
-          }
-        });
-        
-        io.to(male.socketId).emit('match_found', {
-          roomId,
-          partner: {
-            _id: userId,
-            nickname: nickname,
-            gender: 'Female'
-          }
-        });
-        
-        console.log(`Match created: ${male.nickname} (M) <-> ${nickname} (F) in ${roomId}`);
-
-        // Create match notifications
-        try {
-          const n1 = await Notification.create({ user: userId, type: 'match', title: 'It\'s a Match!', body: `You matched with ${male.nickname}`, data: { roomId } });
-          socket.emit('new_notification', n1);
-          const n2 = await Notification.create({ user: male.userId, type: 'match', title: 'It\'s a Match!', body: `You matched with ${nickname}`, data: { roomId } });
-          io.to(male.socketId).emit('new_notification', n2);
-        } catch (err) { console.error('Match notification error:', err); }
-        
       } else {
         // No match available, add to queue
-        if (gender === 'Male') {
-          waitingMales.push(userInfo);
-        } else {
-          waitingFemales.push(userInfo);
-        }
-        
+        if (gender === 'Male') waitingMales.push(userInfo);
+        else waitingFemales.push(userInfo);
+
         socket.emit('searching', {
           message: 'Looking for a match...',
-          queuePosition: gender === 'Male' ? waitingMales.length : waitingFemales.length
+          queuePosition: gender === 'Male' ? waitingMales.length : waitingFemales.length,
         });
-        
-        console.log(`${nickname} (${gender}) added to queue. Males: ${waitingMales.length}, Females: ${waitingFemales.length}`);
+
+        console.log(
+          `${nickname} (${gender}) added to queue. Males: ${waitingMales.length}, Females: ${waitingFemales.length}`
+        );
       }
     });
 
@@ -197,7 +178,7 @@ const setupSocket = (io) => {
       const { roomId, userId } = data;
       const match = activeMatches.get(roomId);
       if (match) {
-        const partnerId = match.maleId === userId ? match.femaleId : match.maleId;
+        const partnerId = match.aId === userId ? match.bId : match.aId;
         const partnerData = onlineUsers.get(partnerId);
         if (partnerData) {
           io.to(partnerData.socketId).emit('match_ended', {
@@ -473,8 +454,8 @@ const setupSocket = (io) => {
         
         // End any active matches
         for (const [roomId, match] of activeMatches.entries()) {
-          if (match.maleId === socket.userId || match.femaleId === socket.userId) {
-            const partnerId = match.maleId === socket.userId ? match.femaleId : match.maleId;
+          if (match.aId === socket.userId || match.bId === socket.userId) {
+            const partnerId = match.aId === socket.userId ? match.bId : match.aId;
             const partnerData = onlineUsers.get(partnerId);
             if (partnerData) {
               io.to(partnerData.socketId).emit('match_ended', {

@@ -35,7 +35,7 @@ router.get('/:userId', async (req, res) => {
 // PUT /api/profile/:userId - Update profile info
 router.put('/:userId', async (req, res) => {
   try {
-    const { fullName, bio, profilePicture, dateOfBirth, location, interests } = req.body;
+    const { fullName, bio, profilePicture, dateOfBirth, location, interests, gender } = req.body;
     
     const updateData = {};
     if (fullName !== undefined) updateData.fullName = fullName;
@@ -44,6 +44,15 @@ router.put('/:userId', async (req, res) => {
     if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
     if (location !== undefined) updateData.location = location;
     if (interests !== undefined) updateData.interests = interests;
+
+    // Allow gender editing for profile users.
+    if (gender !== undefined) {
+      if (!['Male', 'Female'].includes(gender)) {
+        return res.status(400).json({ message: 'Gender must be Male or Female' });
+      }
+      updateData.gender = gender;
+    }
+
     updateData.isFullAccount = true;
 
     const user = await User.findByIdAndUpdate(
@@ -111,7 +120,7 @@ router.post('/:userId/picture', upload.single('file'), async (req, res) => {
 // POST /api/profile/:userId/complete - First-time profile completion
 router.post('/:userId/complete', async (req, res, next) => {
   try {
-    const { fullName, bio, dateOfBirth, location, interests } = req.body;
+    const { fullName, bio, dateOfBirth, location, interests, gender } = req.body;
 
     if (!fullName || !fullName.trim()) {
       return res.status(400).json({ message: 'Full name is required' });
@@ -121,6 +130,12 @@ router.post('/:userId/complete', async (req, res, next) => {
       fullName: fullName.trim(),
       isFullAccount: true
     };
+    if (gender !== undefined) {
+      if (!['Male', 'Female'].includes(gender)) {
+        return res.status(400).json({ message: 'Gender must be Male or Female' });
+      }
+      updateData.gender = gender;
+    }
     if (bio !== undefined) updateData.bio = bio.trim();
     if (dateOfBirth) updateData.dateOfBirth = dateOfBirth;
     if (location) updateData.location = location.trim();

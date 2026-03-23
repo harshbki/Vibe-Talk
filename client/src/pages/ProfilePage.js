@@ -21,7 +21,8 @@ const ProfilePage = () => {
     bio: user?.bio || '',
     dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
     location: user?.location || '',
-    interests: user?.interests || []
+    interests: user?.interests || [],
+    gender: user?.gender || 'Male',
   });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -87,7 +88,8 @@ const ProfilePage = () => {
         fullName: formData.fullName.trim(),
         bio: formData.bio.trim(),
         location: formData.location.trim(),
-        interests: formData.interests
+        interests: formData.interests,
+        gender: formData.gender,
       };
       if (formData.dateOfBirth) {
         payload.dateOfBirth = formData.dateOfBirth;
@@ -378,6 +380,26 @@ const ProfilePage = () => {
                     maxLength={50}
                     className="input input-bordered w-full focus:outline-none focus:input-primary"
                   />
+                </div>
+
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-semibold">Gender</span></label>
+                  <div className="join w-full">
+                    <button
+                      type="button"
+                      className={`btn join-item w-1/2 ${formData.gender === 'Male' ? 'btn-primary' : 'btn-ghost'}`}
+                      onClick={() => setFormData(prev => ({ ...prev, gender: 'Male' }))}
+                    >
+                      👨 Male
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn join-item w-1/2 ${formData.gender === 'Female' ? 'btn-primary' : 'btn-ghost'}`}
+                      onClick={() => setFormData(prev => ({ ...prev, gender: 'Female' }))}
+                    >
+                      👩 Female
+                    </button>
+                  </div>
                 </div>
                 <div className="form-control w-full">
                   <label className="label"><span className="label-text font-semibold">Interests <span className="text-base-content/40 font-normal">(up to 5)</span></span></label>
