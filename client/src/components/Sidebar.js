@@ -22,12 +22,18 @@ const Sidebar = () => {
       setLoadingChats(true);
       try {
         if (isProfileUser) {
-          const [groups, chats] = await Promise.all([
+          const [groupsResult, chatsResult] = await Promise.allSettled([
             getUserGroups(user._id),
             getUserChats(user._id)
           ]);
-          setUserGroups(groups || []);
-          setRecentChats(chats || []);
+          setUserGroups(groupsResult.status === 'fulfilled' ? (groupsResult.value || []) : []);
+          setRecentChats(chatsResult.status === 'fulfilled' ? (chatsResult.value || []) : []);
+          if (groupsResult.status === 'rejected') {
+            console.error('Load groups error:', groupsResult.reason);
+          }
+          if (chatsResult.status === 'rejected') {
+            console.error('Load chats error:', chatsResult.reason);
+          }
         } else {
           const groups = await getUserGroups(user._id);
           setUserGroups(groups || []);

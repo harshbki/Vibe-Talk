@@ -46,20 +46,25 @@ const ChatWindow = () => {
   useEffect(() => {
     if (selectedUser) {
       markAsRead(selectedUser._id);
-      // Notify server that we've seen their messages
       if (user) {
         sendSeen(selectedUser._id, user._id);
       }
-      
-      // Join private room for video calling
       const socket = getSocket();
       if (socket && roomId) {
         socket.emit('join_private_room', { roomId });
       }
     }
-    // Important: don't depend on `chatMessages` here.
-    // `markAsRead` updates messages state, which would otherwise cause an update loop.
   }, [selectedUser, markAsRead, sendSeen, user, roomId]);
+
+  // Read receipts: mark partner messages seen when they arrive while chat is open
+  useEffect(() => {
+    if (!selectedUser || !user) return;
+    const msgs = messages[selectedUser._id] || [];
+    const hasUnread = msgs.some((m) => m.received && m.unread);
+    if (!hasUnread) return;
+    markAsRead(selectedUser._id);
+    sendSeen(selectedUser._id, user._id);
+  }, [messages, selectedUser, user, markAsRead, sendSeen]);
 
   useEffect(() => {
     const socket = getSocket();

@@ -29,6 +29,22 @@ const removeFromQueues = (userId) => {
   if (index !== -1) waitingUsers.splice(index, 1);
 };
 
+/** Emit to a user by MongoDB id (socket joins this room on user_online). */
+const emitToUser = (io, userId, event, payload) => {
+  if (userId) io.to(String(userId)).emit(event, payload);
+};
+
+/** Relay WebRTC/signaling to peer: prefer userId room, else match/DM room. */
+const relayToPeer = (socket, io, { roomId, to, event, payload }) => {
+  if (to) {
+    emitToUser(io, to, event, payload);
+    return;
+  }
+  if (roomId) {
+    socket.to(roomId).emit(event, payload);
+  }
+};
+
 const setupSocket = (io) => {
   io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
@@ -41,6 +57,8 @@ const setupSocket = (io) => {
 
         // Always attach socket.userId so we can clean up queues/lastSeen on disconnect.
         socket.userId = userId;
+        // Join personal room so io.to(userId) reaches this socket (video + DMs).
+        socket.join(String(userId));
 
         // But only broadcast "online users" list for users who have completed their profile.
         if (user.isFullAccount) {
@@ -181,14 +199,20 @@ const setupSocket = (io) => {
 
     // End match
     socket.on('end_match', (data) => {
-      const { roomId, userId } = data;
+      const { roomId } = data;
       const match = activeMatches.get(roomId);
       if (match) {
-        socket.to(roomId).emit('match_ended', {
+        io.to(roomId).emit('match_ended', {
           message: 'Your partner has left the chat'
         });
         activeMatches.delete(roomId);
-        socket.leave(roomId);
+        const room = io.sockets.adapter.rooms.get(roomId);
+        if (room) {
+          for (const socketId of room) {
+            const s = io.sockets.sockets.get(socketId);
+            if (s) s.leave(roomId);
+          }
+        }
       }
     });
 
@@ -248,7 +272,7 @@ const setupSocket = (io) => {
       const msgId = savedMsg ? savedMsg._id.toString() : null;
 
       if (recipient) {
-        io.to(recipient.socketId).emit('receive_message', {
+        emitToUser(io, to, 'receive_message', {
           from,
           message: payload,
           msgId,
@@ -271,7 +295,7 @@ const setupSocket = (io) => {
             body: `${senderUser?.nickname || 'Someone'}: ${payload.text || '[media]'}`,
             data: { from, msgId }
           });
-          io.to(recipient.socketId).emit('new_notification', notif);
+          emitToUser(io, to, 'new_notification', notif);
         } catch (err) {
           console.error('Notification create error:', err);
         }
@@ -325,11 +349,8 @@ const setupSocket = (io) => {
       } catch (error) {
         console.error('Error marking messages seen:', error);
       }
-      // Notify sender their messages were seen
-      const sender = onlineUsers.get(from);
-      if (sender) {
-        io.to(sender.socketId).emit('messages_seen_update', { by, from });
-      }
+      // Notify sender their messages were seen (works for all logged-in users)
+      emitToUser(io, from, 'messages_seen_update', { by, from });
     });
 
     // Handle typing indicator
@@ -370,12 +391,36 @@ const setupSocket = (io) => {
     });
     
     // Start video call request
-    socket.on('call_request', (data) => {
-      const { roomId, from, fromNickname } = data;
-      // Ensure caller is in the room
+    socket.on('call_request', async (data) => {
+      const { roomId, from, fromNickname, to } = data;
       socket.join(roomId);
-      // Send to all users in the room except sender
+
       socket.to(roomId).emit('call_incoming', { roomId, from, fromNickname });
+
+      let calleeId = to;
+      if (!calleeId) {
+        const match = activeMatches.get(roomId);
+        if (match) {
+          calleeId = match.user1Id === from ? match.user2Id : match.user1Id;
+        }
+      }
+
+      if (calleeId) {
+        emitToUser(io, calleeId, 'call_incoming', { roomId, from, fromNickname });
+        try {
+          const notif = await Notification.create({
+            user: calleeId,
+            type: 'call',
+            title: 'Incoming video call',
+            body: `${fromNickname || 'Someone'} is calling you`,
+            data: { roomId, from }
+          });
+          emitToUser(io, calleeId, 'new_notification', notif);
+        } catch (err) {
+          console.error('Call notification error:', err);
+        }
+      }
+
       console.log(`Video call request from ${fromNickname} (${from}) in room ${roomId}`);
     });
 
@@ -400,36 +445,36 @@ const setupSocket = (io) => {
     // WebRTC offer
     socket.on('video_offer', (data) => {
       const { roomId, offer, from, to } = data;
-      // Send to specific user if 'to' is provided, otherwise broadcast to room
-      if (to) {
-        io.to(to).emit('video_offer', { roomId, offer, from });
-      } else {
-        socket.to(roomId).emit('video_offer', { roomId, offer, from });
-      }
+      relayToPeer(socket, io, {
+        roomId,
+        to,
+        event: 'video_offer',
+        payload: { roomId, offer, from }
+      });
       console.log(`Video offer from ${from} in room ${roomId}`);
     });
 
     // WebRTC answer
     socket.on('video_answer', (data) => {
       const { roomId, answer, from, to } = data;
-      // Send to specific user if 'to' is provided, otherwise broadcast to room
-      if (to) {
-        io.to(to).emit('video_answer', { roomId, answer, from });
-      } else {
-        socket.to(roomId).emit('video_answer', { roomId, answer, from });
-      }
+      relayToPeer(socket, io, {
+        roomId,
+        to,
+        event: 'video_answer',
+        payload: { roomId, answer, from }
+      });
       console.log(`Video answer from ${from} in room ${roomId}`);
     });
 
     // ICE candidate
     socket.on('ice_candidate', (data) => {
       const { roomId, candidate, from, to } = data;
-      // Send to specific user if 'to' is provided, otherwise broadcast to room
-      if (to) {
-        io.to(to).emit('ice_candidate', { roomId, candidate, from });
-      } else {
-        socket.to(roomId).emit('ice_candidate', { roomId, candidate, from });
-      }
+      relayToPeer(socket, io, {
+        roomId,
+        to,
+        event: 'ice_candidate',
+        payload: { roomId, candidate, from }
+      });
     });
 
     // End video call

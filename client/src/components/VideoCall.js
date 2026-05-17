@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getSocket } from '../socket';
 import { showAdBeforeCall, triggerAdOnInteraction } from '../utils/adUtils';
-import { playRingingSound, stopRingingSound } from '../utils/soundUtils';
+import { playRingingSound, stopRingingSound, vibrate } from '../utils/soundUtils';
+import { showCallNotification } from '../utils/notificationUtils';
 import api from '../api';
 
 const VideoCall = ({ partner, roomId, onEndCall }) => {
@@ -20,6 +21,11 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
   const remoteVideoRef = useRef(null);
   const peerConnection = useRef(null);
   const pendingIceCandidates = useRef([]);
+  const roomIdRef = useRef(roomId);
+
+  useEffect(() => {
+    roomIdRef.current = roomId;
+  }, [roomId]);
 
   const ICE_SERVERS = {
     iceServers: [
@@ -33,11 +39,14 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
     if (!socket) return;
 
     const handleIncomingCall = (data) => {
-      if (data.from === user?._id) return; // Ignore own call requests
+      if (data.from === user?._id) return;
+      if (data.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
       setIncomingCall(data);
       setCallStatus('incoming');
-      setIsCaller(false);  // Mark as receiver
-      playRingingSound(); // Play ringing sound for incoming call
+      setIsCaller(false);
+      playRingingSound();
+      vibrate([300, 100, 300]);
+      showCallNotification(data.fromNickname || partner?.nickname || 'Someone');
     };
 
     const handleCallAccepted = async () => {
@@ -151,8 +160,19 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
     const pc = new RTCPeerConnection(ICE_SERVERS);
 
     pc.ontrack = (event) => {
-      setRemoteStream(event.streams[0]);
+      const stream = event.streams?.[0] || new MediaStream([event.track]);
+      setRemoteStream(stream);
       setCallStatus('connected');
+    };
+
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'connected') {
+        setCallStatus('connected');
+      } else if (pc.connectionState === 'failed') {
+        setCallError('Connection failed. Check network or try again.');
+        setCallStatus('idle');
+        cleanupCall();
+      }
     };
 
     pc.onicecandidate = (event) => {
@@ -217,11 +237,8 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
       }
 
-      // Fix: Use RTCSessionDescriptionInit format instead of deprecated RTCSessionDescription
-      await pc.setRemoteDescription(new RTCSessionDescription({
-        type: 'offer',
-        sdp: data.offer.sdp
-      }));
+      // Use plain object format for RTCSessionDescription
+      await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
       await flushPendingCandidates();
 
       const answer = await pc.createAnswer();
@@ -243,15 +260,13 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
   const handleAnswer = async (data) => {
     try {
       if (!peerConnection.current) return;
-      // Fix: Use RTCSessionDescriptionInit format instead of deprecated RTCSessionDescription
-      await peerConnection.current.setRemoteDescription(new RTCSessionDescription({
-        type: 'answer',
-        sdp: data.answer.sdp
-      }));
+      // Use plain object format for RTCSessionDescription
+      await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.answer));
       await flushPendingCandidates();
-      setCallStatus('connecting');
+      setCallStatus('connected');
     } catch (error) {
       console.error('Error handling answer:', error);
+      setCallError('Failed to connect: ' + error.message);
     }
   };
 
@@ -319,7 +334,8 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
     socket.emit('call_request', {
       roomId,
       from: user._id,
-      fromNickname: user.nickname
+      fromNickname: user.nickname,
+      to: partner?._id
     });
   };
 
@@ -380,7 +396,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       // Get media permission FIRST before calling
       await ensureLocalMedia();
       triggerAdOnInteraction();
-      if (user.freeCallsUsed < 1) {
+      if ((user?.freeCallsUsed ?? 0) < 1) {
         requestCall();
       } else {
         showAdBeforeCall(() => { requestCall(); });
@@ -422,7 +438,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
           <div className="alert alert-info text-sm">
             <span>🔒 Camera/mic permissions needed. Browser will ask for permission when you click the button above.</span>
           </div>
-          {user.freeCallsUsed >= 1 && (
+          {(user?.freeCallsUsed ?? 0) >= 1 && (
             <p className="text-xs text-base-content/50">* Ad will play before call starts</p>
           )}
         </div>
@@ -430,7 +446,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
 
       {callStatus === 'incoming' && (
         <div className="card bg-base-100 shadow-lg p-8 flex flex-col items-center gap-4">
-          <h3 className="font-bold text-lg">Incoming Call</h3>
+          <h3 className="font-bold text-lg animate-pulse">📹 Incoming Call</h3>
           <p className="text-sm text-base-content/70">{incomingCall?.fromNickname || partner?.nickname} is calling you</p>
           <div className="flex gap-3">
             <button className="btn btn-success btn-sm" onClick={acceptIncomingCall}>Accept</button>
@@ -460,9 +476,14 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       )}
 
       {callStatus === 'connecting' && (
-        <div className="card bg-base-100 shadow-lg p-8 flex flex-col items-center gap-4">
+        <div className="card bg-base-100 shadow-lg p-8 flex flex-col items-center gap-4 w-full">
+          {localStream && (
+            <div className="relative w-full max-w-sm aspect-video bg-black rounded-lg overflow-hidden">
+              <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />
+            </div>
+          )}
           <span className="loading loading-ring loading-md text-primary" />
-          <p className="text-sm text-base-content/70">Connecting media...</p>
+          <p className="text-sm text-base-content/70">Connecting live video...</p>
           <button className="btn btn-error btn-outline btn-sm" onClick={endCall}>Cancel</button>
         </div>
       )}

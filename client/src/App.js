@@ -14,6 +14,7 @@ import GroupChatPage from './pages/GroupChatPage';
 import UserProfilePage from './pages/UserProfilePage';
 import Navbar from './components/Navbar';
 import { initializeAds } from './utils/adUtils';
+import { initSounds } from './utils/soundUtils';
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
@@ -36,6 +37,7 @@ const PrivateLayout = ({ children }) => (
 function App() {
   useEffect(() => {
     initializeAds();
+    initSounds();
   }, []);
 
   return (

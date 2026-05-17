@@ -8,6 +8,8 @@ import {
   deleteAllNotifications
 } from '../api';
 import { getSocket } from '../socket';
+import { playNotificationSound } from '../utils/soundUtils';
+import { showMessageNotification, showCallNotification } from '../utils/notificationUtils';
 
 const NotificationBell = () => {
   const { user } = useAuth();
@@ -49,6 +51,14 @@ const NotificationBell = () => {
     const handleNewNotification = (notif) => {
       setNotifications(prev => [notif, ...prev].slice(0, 50));
       setUnreadCount(prev => prev + 1);
+      playNotificationSound();
+      if (notif.type === 'call') {
+        showCallNotification(notif.body?.replace(' is calling you', '') || 'Someone');
+      } else if (notif.type === 'message') {
+        showMessageNotification(notif.title || 'New message', notif.body || '', `notif-${notif._id}`);
+      } else if (notif.type === 'match') {
+        showMessageNotification(notif.title || 'Match', notif.body || '', 'match-notif');
+      }
     };
 
     socket.on('new_notification', handleNewNotification);

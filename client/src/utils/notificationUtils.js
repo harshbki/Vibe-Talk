@@ -70,6 +70,30 @@ export const showMessageNotification = (senderName, messagePreview, tag) => {
 /**
  * Show a browser notification for a match event.
  */
+/**
+ * Show notification for incoming video call.
+ */
+export const showCallNotification = (callerName) => {
+  if (Notification.permission !== 'granted') return;
+
+  const title = 'Incoming video call 📹';
+  const options = {
+    body: `${callerName} is calling you`,
+    icon: '/logo192.png',
+    badge: '/logo192.png',
+    tag: 'call-notification',
+    renotify: true,
+    requireInteraction: true
+  };
+
+  playNotificationSound();
+  if (swRegistration) {
+    swRegistration.showNotification(title, options);
+  } else {
+    new Notification(title, options);
+  }
+};
+
 export const showMatchNotification = (partnerName) => {
   if (Notification.permission !== 'granted') return;
 

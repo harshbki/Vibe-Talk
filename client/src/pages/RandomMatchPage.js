@@ -5,6 +5,7 @@ import { useChat } from '../context/ChatContext';
 import { getSocket } from '../socket';
 import { showPopunder } from '../utils/adUtils';
 import { playNotificationSound } from '../utils/soundUtils';
+import { showMatchNotification } from '../utils/notificationUtils';
 import VideoCall from '../components/VideoCall';
 import AdBanner from '../components/AdBanner';
 import { uploadMedia } from '../api';
@@ -24,6 +25,11 @@ const RandomMatchPage = () => {
   const messagesEndRef = useRef(null);
   const typingTimeout = useRef(null);
   const fileInputRef = useRef(null);
+  const roomIdRef = useRef(null);
+
+  useEffect(() => {
+    roomIdRef.current = roomId;
+  }, [roomId]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -48,6 +54,8 @@ const RandomMatchPage = () => {
         gender: data.partner.gender,
         lastMessage: 'Matched! Start chatting...'
       });
+      playNotificationSound();
+      showMatchNotification(data.partner.nickname);
     });
 
     socket.on('match_message_received', (data) => {
@@ -74,19 +82,17 @@ const RandomMatchPage = () => {
         lastMessage: payload.text || (payload.mediaUrl ? '📎 Media' : 'New message')
       } : prev);
 
-      // Immediately mark as seen
-      setTimeout(() => {
-        socket.emit('match_messages_seen', {
-          roomId: data.roomId || roomId,
-          msgId: data.msgId,
-          by: user?._id
-        });
-        
-        // Update local message to show as seen
-        setMessages(prev => prev.map(msg => 
-          msg.msgId === data.msgId ? { ...msg, status: 'seen' } : msg
-        ));
-      }, 300);
+      // Tell partner their message was read (read receipt for sender)
+      const activeRoom = data.roomId || roomIdRef.current;
+      if (activeRoom && data.msgId) {
+        setTimeout(() => {
+          socket.emit('match_messages_seen', {
+            roomId: activeRoom,
+            msgId: data.msgId,
+            by: user?._id
+          });
+        }, 200);
+      }
     });
 
     socket.on('match_message_status', ({ tempId, msgId, status }) => {
@@ -119,14 +125,9 @@ const RandomMatchPage = () => {
       }));
     });
 
-    socket.on('video_offer', () => {
-      setShowVideoCall(true);
-    });
-
     socket.on('call_incoming', (data) => {
-      if (data?.roomId === roomId) {
-        setShowVideoCall(true);
-      }
+      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      setShowVideoCall(true);
     });
 
     socket.on('match_partner_typing', () => setIsPartnerTyping(true));
@@ -152,7 +153,6 @@ const RandomMatchPage = () => {
       socket.off('match_message_received');
       socket.off('match_message_status');
       socket.off('match_messages_seen_update');
-      socket.off('video_offer');
       socket.off('call_incoming');
       socket.off('match_partner_typing');
       socket.off('match_partner_stop_typing');
@@ -437,7 +437,7 @@ const RandomMatchPage = () => {
           🎉 You've been matched with {partner?.nickname}!
         </div>
         {messages.map((msg, index) => (
-          <div key={index} className={`chat ${msg.isMine ? 'chat-end' : 'chat-start'}`}>
+          <div key={msg.msgId || msg.tempId || `msg-${index}`} className={`chat ${msg.isMine ? 'chat-end' : 'chat-start'}`}>
             <div className={`chat-bubble ${msg.isMine ? 'chat-bubble-primary' : ''} text-sm`}>
               {renderMessageContent(msg)}
             </div>

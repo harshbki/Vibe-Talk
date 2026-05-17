@@ -1,68 +1,92 @@
-# MERN Chat App
+# Vibe-Talk
 
-A full-stack real-time chat application built with the MERN stack (MongoDB, Express, React, Node.js).  
-Supports user authentication, private and group chats, image/video sharing, and live video calls.
+Real-time MERN chat app: guest login, direct messages, groups, **random match**, media upload, **WebRTC video calls**, notifications, and ad slots (AdSense / Monetag).
+
+**Repo:** [github.com/harshbki/Vibe-Talk](https://github.com/harshbki/Vibe-Talk)  
+**Deploy (DigitalOcean):** see [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ---
 
 ## Features
 
-- User Signup, Login & Profile Management (JWT authentication)
-- Real-time Messaging with Socket.IO
-- File uploads (images, videos) using Multer & Cloudinary
-- Live video/audio calls powered by WebRTC
-- Responsive and modern UI built with React & Tailwind CSS
-- Chat typing indicators and message status
+- Guest + profile login (JWT)
+- Socket.IO messaging, typing, delivered/seen
+- Random match queue (any gender)
+- Image/video upload (Cloudinary or local `/uploads`)
+- Video/audio calls (WebRTC + socket signaling)
+- Groups, notifications, profile settings
 
 ---
 
-## Technologies Used
+## Tech stack
 
-### Frontend
-
-- React.js
-- React Router DOM
-- Context API
-- Axios
-- Socket.IO Client
-- Tailwind CSS
-
-### Backend
-
-- Node.js
-- Express.js
-- MongoDB & Mongoose
-- Socket.IO
-- Multer (for file uploads)
-- Cloudinary (media hosting)
-- JWT & bcrypt (authentication)
-- WebRTC (live calls)
+| Layer | Stack |
+|--------|--------|
+| Client | React 18, CRA, Tailwind, DaisyUI, Socket.IO client |
+| Server | Node, Express, Socket.IO, Mongoose |
+| DB | MongoDB (local Docker or Atlas) |
+| Media | Cloudinary (optional) |
 
 ---
 
-## Getting Started
+## Local development
 
-### Prerequisites
+**Prerequisites:** Node 18+, MongoDB on `27017` (or `npm run mongo` with Docker)
 
-- Node.js & npm
-- MongoDB instance (local or cloud)
-- Cloudinary account (for file uploads)
+```bash
+# 1. Install
+npm run install-all
 
-### Installation
+# 2. Env files (copy examples, fill secrets)
+cp .env.example server/.env
+cp client/.env.example client/.env
 
-1. Clone the repository
+# 3. Start MongoDB (optional Docker)
+npm run mongo
 
-## Setup Backend
-- cd server
-- npm install
+# 4. Terminal A — API + Socket (port 8081)
+npm run dev
 
-## Setup Frontend
-- cd ../client
-- npm install
-- npm start
-##  Start the backend server
-- cd ../server
-- npm start
-## Developed by **M.Hasnain Muawia**— feel free to reach out!
-## hasainalvi@gamil.com
-## github.com/alvi597
+# 5. Terminal B — React (port 8080)
+npm run client
+```
+
+Open `http://localhost:8080`
+
+---
+
+## Production build (single server)
+
+Express serves the React build from `client/build` when it exists:
+
+```bash
+npm run install-all
+npm run build
+npm start
+```
+
+Default API: `http://localhost:8081` — set `CLIENT_URL`, `MONGO_URI`, Cloudinary, and client `REACT_APP_*` vars before building for production (see [DEPLOYMENT.md](./DEPLOYMENT.md)).
+
+---
+
+## Scripts (root `package.json`)
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Server with nodemon |
+| `npm run client` | React dev server |
+| `npm run build` | Production client build |
+| `npm start` | Production server |
+| `npm run mongo` | Docker MongoDB |
+
+---
+
+## CI
+
+GitHub Actions workflow **Client build** (`.github/workflows/ci.yml`) runs `npm ci` + `npm run build` in `client/` on push/PR to `main`.
+
+---
+
+## License
+
+ISC — see [LICENSE](./LICENSE).

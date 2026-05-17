@@ -9,6 +9,15 @@ const api = axios.create({
   }
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error.response?.data?.message || error.message;
+    console.error('API error:', error.config?.url, message);
+    return Promise.reject(error);
+  }
+);
+
 export const guestLogin = async (nickname, gender) => {
   const response = await api.post('/auth/guest', { nickname, gender });
   return response.data;

@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alvi597/Chat-Room.git"
+    "url": "git+https://github.com/harshbki/Vibe-Talk.git"
   },
   "keywords": [
     "chat",
@@ -30,9 +30,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/alvi597/Chat-Room/issues"
+    "url": "https://github.com/harshbki/Vibe-Talk/issues"
   },
-  "homepage": "https://github.com/alvi597/Chat-Room#readme",
+  "homepage": "https://github.com/harshbki/Vibe-Talk#readme",
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",

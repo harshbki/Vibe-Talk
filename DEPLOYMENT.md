@@ -1,148 +1,203 @@
-# Vibe-Talk Deployment Guide
+# Vibe-Talk — DigitalOcean Deployment
 
-This guide gives you a production deployment path and the exact items I need from you.
+Use this guide for **DigitalOcean App Platform** (recommended) or a **Droplet**.  
+Render is **not** required; this project is set up for DO + MongoDB Atlas.
 
-## 1. What I Need From You
+---
 
-Provide these values/accounts first:
+## GitHub vs your machine (important)
 
-1. DigitalOcean account access (App Platform project access).
-2. MongoDB Atlas access (project owner or database user credentials).
-3. Cloudinary credentials:
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
-4. Final frontend domain URL (for CORS and `CLIENT_URL`).
-5. JWT secret value (long random string).
-6. Ad network values:
-- `REACT_APP_ADSENSE_CLIENT_ID`
-- All AdSense slot IDs
-- Monetag zone ID
+What you see on [GitHub `main`](https://github.com/harshbki/Vibe-Talk) today (last green commit ~**Mar 23, 2026**):
 
-## 2. Recommended Production Setup
+| On GitHub `main` | Only on your PC (not pushed yet) |
+|------------------|-----------------------------------|
+| Random match UI, camera upload | Video call socket fixes (`223254d7`) |
+| Gender edit, CI fixes | Random match status tweaks (`eebda79b`) |
+| | `client/src/utils/soundUtils.js` (ringing sounds) |
+| | Latest socket/video/error fixes (uncommitted) |
 
-- Frontend: DigitalOcean App Platform (Static Site)
-- Backend: DigitalOcean App Platform (Web Service, Node.js)
-- Database: MongoDB Atlas (M0/M2/M5)
+**If you deploy from GitHub without pushing**, video calls and ringing sounds may be broken or old.  
+Push local `main` before deploying:
 
-## 3. DigitalOcean App Platform Setup
+```bash
+git add -A
+git commit -m "fix: video routing, sounds, DO docs, error handling"
+git push origin main
+```
 
-Create two app components from the same repo:
+### Files that were removed from the repo over time
 
-1. `frontend` (Static Site)
-- Source dir: `client`
-- Build command: `npm install && npm run build`
-- Output dir: `build`
+| Removed | Why | Replacement |
+|---------|-----|----------------|
+| `.github/workflows/webpack.yml` | Failed builds (empty root webpack) | `.github/workflows/ci.yml` |
+| `render.yaml` | You deploy on DigitalOcean, not Render | This guide |
+| (never on your fork) | — | `DEPLOYMENT.md` (DO steps) |
 
-2. `backend` (Web Service)
-- Source dir: `server`
-- Build command: `npm install`
-- Run command: `npm start`
-- HTTP port: `8081`
+### Files that should **not** be on GitHub (but sometimes are)
 
-3. Add both component domains:
-- Frontend domain: `https://your-frontend-domain`
-- Backend domain: `https://your-backend-domain`
+- `.env` with real secrets  
+- `node_modules/`  
+- `data/db/` (Mongo binary data)  
+- Empty junk: `webpack.config.js`, `react-scripts`, `## Chat Customization Diagnostics.md`
 
-## 4. Server Environment Variables
+---
 
-Set these on backend host:
+## Option A — DigitalOcean App Platform (one Web Service)
+
+Simplest: one Node service builds the client and serves API + React + Socket.IO (see `server/server.js`).
+
+### 1. Create app
+
+1. [DigitalOcean → Apps](https://cloud.digitalocean.com/apps) → **Create App** → GitHub → `harshbki/Vibe-Talk` → branch **`main`**.
+2. **Resource type:** Web Service  
+3. **Source directory:** `/` (repo root)  
+4. **Build command:**
+
+   ```bash
+   npm run install-all && npm run build
+   ```
+
+5. **Run command:**
+
+   ```bash
+   npm start
+   ```
+
+6. **HTTP port:** `8081` (or whatever you set in `PORT`)
+
+### 2. Environment variables (App → Settings → App-Level or Component)
+
+Set **before** the first deploy (CRA bakes `REACT_APP_*` at **build** time):
 
 ```env
+NODE_ENV=production
 PORT=8081
-CLIENT_URL=https://your-frontend-domain.com
-MONGO_URI=mongodb+srv://<db_user>:<db_password>@<cluster>/<db_name>?retryWrites=true&w=majority
-JWT_SECRET=<strong-random-secret>
-CLOUDINARY_CLOUD_NAME=<value>
-CLOUDINARY_API_KEY=<value>
-CLOUDINARY_API_SECRET=<value>
+HOST=0.0.0.0
+
+# Your live app URL (DO gives you something like https://vibe-talk-xxxxx.ondigitalocean.app)
+CLIENT_URL=https://YOUR-APP-URL.ondigitalocean.app
+
+MONGO_URI=mongodb+srv://USER:PASS@CLUSTER/vibetalk?retryWrites=true&w=majority
+JWT_SECRET=<long-random-string>
+
+CLOUDINARY_CLOUD_NAME=<your>
+CLOUDINARY_API_KEY=<your>
+CLOUDINARY_API_SECRET=<your>
+
+# Client (build-time) — use same public URL as the app
+REACT_APP_API_URL=https://YOUR-APP-URL.ondigitalocean.app/api
+REACT_APP_SOCKET_URL=https://YOUR-APP-URL.ondigitalocean.app
+
+# Ads (optional)
+REACT_APP_ADSENSE_CLIENT_ID=ca-pub-xxxxxxxx
+REACT_APP_ADSENSE_SLOT_RANDOM_MATCH_INLINE=xxxxxxxx
+REACT_APP_ADSENSE_SLOT_CHAT_SIDEBAR=xxxxxxxx
+REACT_APP_ADSENSE_SLOT_USERS_LIST_BOTTOM=xxxxxxxx
+REACT_APP_ADSENSE_SLOT_GROUP_CHAT_TOP=xxxxxxxx
+REACT_APP_ADSENSE_SLOT_PROFILE_BOTTOM=xxxxxxxx
+REACT_APP_MONETAG_ZONE_ID=your-zone-id
 ```
 
-## 5. Client Environment Variables
+After changing any `REACT_APP_*` variable, trigger a **new deploy** (rebuild).
 
-Set these on frontend host:
+### 3. MongoDB Atlas
 
-```env
-REACT_APP_API_URL=https://your-backend-domain.com/api
-REACT_APP_ADSENSE_CLIENT_ID=ca-pub-xxxxxxxxxxxxxxxx
-REACT_APP_ADSENSE_SLOT_CHAT_SIDEBAR=1234567890
-REACT_APP_ADSENSE_SLOT_USERS_LIST_BOTTOM=1234567890
-REACT_APP_ADSENSE_SLOT_GROUP_CHAT_TOP=1234567890
-REACT_APP_ADSENSE_SLOT_PROFILE_BOTTOM=1234567890
-REACT_APP_ADSENSE_SLOT_RANDOM_MATCH_INLINE=1234567890
-REACT_APP_MONETAG_ZONE_ID=your_monetag_zone_id
-```
+1. Create cluster + database user.  
+2. Network Access: allow DigitalOcean egress IPs or `0.0.0.0/0` (quick test).  
+3. Put connection string in `MONGO_URI`.
 
-## 6. MongoDB Atlas Access Setup
+### 4. Smoke test
 
-1. Create Atlas cluster.
-2. Create database user with read/write on your app DB.
-3. In Network Access, allow host IPs:
-- For quick setup: `0.0.0.0/0`
-- For stricter setup: only backend provider egress IP ranges.
-4. Use the Atlas connection string in backend `MONGO_URI`.
+1. Open app URL → guest login.  
+2. Open two browsers → **Random Match** → chat + upload.  
+3. Start **video call** → allow camera/mic.  
+4. Check Actions on GitHub: **Client build** should pass after push.
 
-Note for local development:
-- Keep using local DB with `MONGO_URI=mongodb://localhost:27017/vibetalk`.
-- Atlas is only for production deployment.
+---
 
-## 7. Build and Start Commands
+## Option B — Two components (frontend static + backend)
 
-If you prefer a single root-level build command in DigitalOcean, use:
+Use when you want a separate static frontend URL.
+
+### Frontend (Static Site)
+
+- **Source dir:** `client`  
+- **Build:** `npm install && npm run build`  
+- **Output:** `build`  
+- **Env (build time):**
+
+  ```env
+  REACT_APP_API_URL=https://YOUR-BACKEND-URL/api
+  REACT_APP_SOCKET_URL=https://YOUR-BACKEND-URL
+  ```
+
+### Backend (Web Service)
+
+- **Source dir:** `server`  
+- **Build:** `npm install`  
+- **Run:** `npm start`  
+- **Port:** `8081`  
+- **Env:**
+
+  ```env
+  PORT=8081
+  CLIENT_URL=https://YOUR-FRONTEND-URL
+  MONGO_URI=...
+  JWT_SECRET=...
+  CLOUDINARY_*=...
+  ```
+
+CORS must include your frontend URL (`CLIENT_URL` + `server/server.js` allowed origins).
+
+---
+
+## Option C — Droplet (VPS)
 
 ```bash
-cd client && npm install && npm run build && cd .. && cd server && npm install
-```
-
-Run command:
-
-```bash
-cd server && npm start
-```
-
-Backend service:
-
-```bash
-cd server
-npm install
-npm run start
-```
-
-Frontend static build:
-
-```bash
-cd client
-npm install
+# On Ubuntu droplet
+git clone https://github.com/harshbki/Vibe-Talk.git
+cd Vibe-Talk
+cp .env.example server/.env   # edit: MONGO_URI, JWT, Cloudinary, CLIENT_URL
+# Set REACT_APP_* in environment or client/.env before build
+npm run install-all
 npm run build
+npm start
+# Use nginx + SSL in front, proxy to :8081
 ```
 
-Publish `client/build` as static output.
+Use **PM2** or **systemd** to keep `npm start` running.
 
-## 8. Temporary Codespaces Hosting (Fast Demo)
+---
 
-Use port forwarding in this workspace:
+## Local vs production env
 
-1. Forward `8080` as Public (frontend)
-2. Forward `8081` as Private/Public (backend)
-3. Keep `27017` private
+| Variable | Local | Production (DO) |
+|----------|--------|------------------|
+| `MONGO_URI` | `mongodb://127.0.0.1:27017/vibetalk` | Atlas `mongodb+srv://...` |
+| `CLIENT_URL` | `http://localhost:8080` | `https://your-app-url` |
+| `REACT_APP_SOCKET_URL` | `http://localhost:8081` | `https://your-app-url` |
+| `REACT_APP_API_URL` | `/api` (proxy) | `https://your-app-url/api` |
 
-Run:
+Examples: [.env.example](./.env.example), [client/.env.example](./client/.env.example)
 
-```bash
-# terminal 1
-cd server
-PORT=8081 npm run dev
+---
 
-# terminal 2
-cd client
-PORT=8080 npm start
-```
+## GitHub Actions
 
-## 9. Post-Deploy Smoke Tests
+| Workflow | Trigger | What it does |
+|----------|---------|----------------|
+| **Client build** (`ci.yml`) | push/PR `main` | `npm ci` + `npm run build` in `client/` |
+| **Node.js Package** | GitHub Release | Builds client; publish is placeholder |
 
-1. Open frontend URL.
-2. Guest login with nickname + gender.
-3. Send/receive message in two browser sessions.
-4. Validate upload and group media.
-5. Verify ad units render where configured.
-6. Verify notifications and seen/delivered ticks.
+Old **NodeJS with Webpack** failures on the fork parent are from a deleted workflow — ignore them. Use **Client build** on your repo.
+
+---
+
+## What you need from me / checklist
+
+- [ ] DigitalOcean account  
+- [ ] MongoDB Atlas `MONGO_URI`  
+- [ ] `JWT_SECRET`  
+- [ ] Cloudinary keys (or rely on local `/uploads` only)  
+- [ ] Final public URL for `CLIENT_URL` + `REACT_APP_*`  
+- [ ] Push latest code to `main` before deploy  
