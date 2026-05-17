@@ -22,13 +22,18 @@ const Sidebar = () => {
       if (!user?._id) return;
       setLoadingChats(true);
       try {
-        const [groups] = await Promise.all([
-          getUserGroups(user._id),
-          // Only load DM chats for profile users
-          ...(isProfileUser ? [getUserChats(user._id).then(c => setRecentChats(c || []))] : [])
-        ]);
-        setUserGroups(groups || []);
-        if (!isProfileUser) setRecentChats([]);
+        if (isProfileUser) {
+          const [groups, chats] = await Promise.all([
+            getUserGroups(user._id),
+            getUserChats(user._id)
+          ]);
+          setUserGroups(groups || []);
+          setRecentChats(chats || []);
+        } else {
+          const groups = await getUserGroups(user._id);
+          setUserGroups(groups || []);
+          setRecentChats([]);
+        }
       } catch (error) {
         console.error('Load chats error:', error);
       } finally {
