@@ -151,6 +151,7 @@ const setupSocket = (io) => {
       const msgId = `match_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       const timestamp = new Date();
 
+      // Notify receiver with the message
       socket.to(roomId).emit('match_message_received', {
         roomId,
         msgId,
@@ -160,9 +161,10 @@ const setupSocket = (io) => {
         timestamp
       });
 
+      // Send status update back to sender with tempId→msgId mapping
       socket.emit('match_message_status', {
-        tempId,
-        msgId,
+        tempId,     // So sender can map their temp message to real msgId
+        msgId,      // The real message ID
         status: 'delivered'
       });
     });

@@ -91,7 +91,7 @@ const RandomMatchPage = () => {
 
     socket.on('match_message_status', ({ tempId, msgId, status }) => {
       setMessages(prev => prev.map(msg => {
-        // Update by tempId first (for own messages that match)
+        // Update by tempId first (for own messages that were sent)
         if (tempId && msg.tempId === tempId && !msg.msgId) {
           return { ...msg, msgId, status, tempId: undefined };
         }
@@ -295,7 +295,10 @@ const RandomMatchPage = () => {
       alert(`Upload failed: ${error.response?.data?.message || error.message}`);
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      // Safely reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
