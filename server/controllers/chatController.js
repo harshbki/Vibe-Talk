@@ -2,7 +2,7 @@ const Chat = require('../models/Chat');
 const Message = require('../models/Message');
 
 // Get or create a chat between two users
-const getOrCreateChat = async (req, res) => {
+const getOrCreateChat = async (req, res, next) => {
   try {
     const { userId1, userId2 } = req.body;
 
@@ -25,7 +25,7 @@ const getOrCreateChat = async (req, res) => {
     res.json(chat);
   } catch (error) {
     console.error('Get/create chat error:', error);
-    res.status(500).json({ message: 'Server error' });
+    next(error);
   }
 };
 

@@ -14,7 +14,6 @@ const Sidebar = () => {
   const [recentChats, setRecentChats] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
   const [loadingChats, setLoadingChats] = useState(false);
-  const otherUsers = onlineUsers.filter(u => u._id !== user?._id);
   const isProfileUser = !!user?.isFullAccount;
 
   useEffect(() => {
@@ -22,13 +21,18 @@ const Sidebar = () => {
       if (!user?._id) return;
       setLoadingChats(true);
       try {
-        const [groups] = await Promise.all([
-          getUserGroups(user._id),
-          // Only load DM chats for profile users
-          ...(isProfileUser ? [getUserChats(user._id).then(c => setRecentChats(c || []))] : [])
-        ]);
-        setUserGroups(groups || []);
-        if (!isProfileUser) setRecentChats([]);
+        if (isProfileUser) {
+          const [groups, chats] = await Promise.all([
+            getUserGroups(user._id),
+            getUserChats(user._id)
+          ]);
+          setUserGroups(groups || []);
+          setRecentChats(chats || []);
+        } else {
+          const groups = await getUserGroups(user._id);
+          setUserGroups(groups || []);
+          setRecentChats([]);
+        }
       } catch (error) {
         console.error('Load chats error:', error);
       } finally {
@@ -66,6 +70,19 @@ const Sidebar = () => {
       })
       .filter(Boolean);
   }, [recentChats, user?._id, isProfileUser, onlineUsers, messages]);
+
+  // Online tab should only show previously chatted DM contacts who are currently online.
+  const knownOnlineUsers = useMemo(() => {
+    if (!isProfileUser) return [];
+
+    return chatItems
+      .filter((item) => item.isOnline)
+      .map((item) => ({
+        _id: item.peerId,
+        nickname: item.nickname,
+        gender: item.gender
+      }));
+  }, [chatItems, isProfileUser]);
 
   const totalCount = chatItems.length + userGroups.length + (activeMatchChat ? 1 : 0);
   const randomMatchActive = !!activeMatchChat;
@@ -105,15 +122,19 @@ const Sidebar = () => {
           </h3>
         ) : (
           <h3 className="font-bold text-sm flex items-center gap-2">
-            <span className="badge badge-primary badge-sm">{otherUsers.length}</span>
+            <span className="badge badge-primary badge-sm">{knownOnlineUsers.length}</span>
             Online Users
           </h3>
         )}
       </div>
 
       <div className="overflow-y-auto flex-1">
-        {activeTab === 'online' ? (
-          <UserList users={otherUsers} />
+        {activeTab === 'online' && !isProfileUser ? (
+          <div className="p-4 text-sm text-base-content/60 text-center">
+            Complete your profile to access direct chat contacts.
+          </div>
+        ) : activeTab === 'online' ? (
+          <UserList users={knownOnlineUsers} />
         ) : loadingChats ? (
           <div className="p-4 flex justify-center">
             <span className="loading loading-spinner loading-sm text-primary" />

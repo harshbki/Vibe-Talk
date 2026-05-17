@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Notification = require('../models/Notification');
 
 // GET /api/notifications/:userId - Get user notifications
@@ -30,6 +31,9 @@ router.get('/:userId/unread-count', async (req, res, next) => {
 // PUT /api/notifications/:id/read - Mark notification as read
 router.put('/:id/read', async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid notification ID format' });
+    }
     const notification = await Notification.findByIdAndUpdate(
       req.params.id,
       { read: true },
@@ -52,6 +56,29 @@ router.put('/:userId/read-all', async (req, res, next) => {
       { read: true }
     );
     res.json({ message: 'All notifications marked as read' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/notifications/:id - Delete one notification
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const notification = await Notification.findByIdAndDelete(req.params.id);
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+    res.json({ message: 'Notification deleted', id: req.params.id });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/notifications/user/:userId/all - Delete all notifications for a user
+router.delete('/user/:userId/all', async (req, res, next) => {
+  try {
+    const result = await Notification.deleteMany({ user: req.params.userId });
+    res.json({ message: 'All notifications deleted', deletedCount: result.deletedCount });
   } catch (error) {
     next(error);
   }

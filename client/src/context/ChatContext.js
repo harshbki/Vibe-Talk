@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { getSocket } from '../socket';
 import { initNotifications, showMessageNotification } from '../utils/notificationUtils';
+import { playNotificationSound } from '../utils/soundUtils';
 
 const ChatContext = createContext();
 
@@ -44,6 +45,9 @@ export const ChatProvider = ({ children }) => {
       socket.on('receive_message', (data) => {
         const { from, message, msgId, timestamp } = data;
         const payload = typeof message === 'string' ? { text: message } : (message || {});
+
+        // Play notification sound for incoming message
+        playNotificationSound();
 
         setMessages(prev => ({
           ...prev,
@@ -139,6 +143,12 @@ export const ChatProvider = ({ children }) => {
         setTyping(prev => ({ ...prev, [from]: false }));
       });
 
+      socket.on('message_error', ({ message }) => {
+        if (message) {
+          console.error('Message error:', message);
+        }
+      });
+
       return true;
     };
 
@@ -163,6 +173,7 @@ export const ChatProvider = ({ children }) => {
         socket.off('message_deleted');
         socket.off('user_typing');
         socket.off('user_stop_typing');
+        socket.off('message_error');
       }
     };
   }, []);

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const User = require('../models/User');
 
 // Store for online users (will be updated from socket)
@@ -47,6 +48,9 @@ router.get('/', async (req, res) => {
 // GET /api/users/:id - Get single user
 router.get('/:id', async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid user ID format' });
+    }
     const user = await User.findById(req.params.id).select('nickname gender fullName bio profilePicture dateOfBirth location interests createdAt freeCallsUsed privacy');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -66,6 +70,9 @@ router.post('/increment-call', async (req, res) => {
     const { userId } = req.body;
     if (!userId) {
       return res.status(400).json({ message: 'userId is required' });
+    }
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID format' });
     }
     
     const user = await User.findByIdAndUpdate(
@@ -129,6 +136,9 @@ router.delete('/delete', async (req, res, next) => {
     const { userId } = req.body;
     if (!userId) {
       return res.status(400).json({ message: 'userId is required' });
+    }
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID format' });
     }
 
     const Chat = require('../models/Chat');

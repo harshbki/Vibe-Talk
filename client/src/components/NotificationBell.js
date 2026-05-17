@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../api';
+import {
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotification,
+  deleteAllNotifications
+} from '../api';
 import { getSocket } from '../socket';
 
 const NotificationBell = () => {
@@ -83,6 +89,32 @@ const NotificationBell = () => {
     }
   };
 
+  const handleDeleteOne = async (id) => {
+    try {
+      await deleteNotification(id);
+      setNotifications(prev => {
+        const toDelete = prev.find(n => n._id === id);
+        if (toDelete && !toDelete.read) {
+          setUnreadCount(count => Math.max(0, count - 1));
+        }
+        return prev.filter(n => n._id !== id);
+      });
+    } catch (err) {
+      console.error('Delete notification error:', err);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!user) return;
+    try {
+      await deleteAllNotifications(user._id);
+      setNotifications([]);
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Delete all notifications error:', err);
+    }
+  };
+
   const getIcon = (type) => {
     switch (type) {
       case 'message': return '💬';
@@ -124,11 +156,18 @@ const NotificationBell = () => {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-base-200">
             <h3 className="font-bold text-sm">Notifications</h3>
-            {unreadCount > 0 && (
-              <button onClick={handleMarkAllRead} className="text-xs text-primary hover:underline">
-                Mark all read
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {unreadCount > 0 && (
+                <button onClick={handleMarkAllRead} className="text-xs text-primary hover:underline">
+                  Mark all read
+                </button>
+              )}
+              {notifications.length > 0 && (
+                <button onClick={handleDeleteAll} className="text-xs text-error hover:underline">
+                  Delete all
+                </button>
+              )}
+            </div>
           </div>
 
           {/* List */}
@@ -139,10 +178,10 @@ const NotificationBell = () => {
               </div>
             ) : (
               notifications.slice(0, 20).map(notif => (
-                <button
+                <div
                   key={notif._id}
                   onClick={() => handleMarkRead(notif._id)}
-                  className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-base-200/50 transition-colors border-b border-base-200/50 ${
+                  className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-base-200/50 transition-colors border-b border-base-200/50 cursor-pointer ${
                     !notif.read ? 'bg-primary/5' : ''
                   }`}
                 >
@@ -152,10 +191,20 @@ const NotificationBell = () => {
                     <p className="text-xs text-base-content/50 truncate">{notif.body}</p>
                     <p className="text-xs text-base-content/40 mt-0.5">{formatTime(notif.createdAt)}</p>
                   </div>
+                  <button
+                    className="btn btn-ghost btn-xs text-error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteOne(notif._id);
+                    }}
+                    title="Delete notification"
+                  >
+                    ✕
+                  </button>
                   {!notif.read && (
                     <span className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
                   )}
-                </button>
+                </div>
               ))
             )}
           </div>

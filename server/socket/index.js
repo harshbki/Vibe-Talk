@@ -7,10 +7,9 @@ const { updateOnlineUsers } = require('../routes/userRoutes');
 
 const onlineUsers = new Map();
 
-// Random match queues
-const waitingMales = [];
-const waitingFemales = [];
-const activeMatches = new Map(); // roomId -> { aId, bId }
+// Random match queue - single queue for truly random matching
+const waitingUsers = [];
+const activeMatches = new Map(); // roomId -> { user1Id, user2Id }
 
 const broadcastOnlineUsers = (io) => {
   const usersList = Array.from(onlineUsers.entries()).map(([id, data]) => ({
@@ -26,11 +25,8 @@ const generateRoomId = () => {
 };
 
 const removeFromQueues = (userId) => {
-  const maleIndex = waitingMales.findIndex(u => u.userId === userId);
-  if (maleIndex !== -1) waitingMales.splice(maleIndex, 1);
-  
-  const femaleIndex = waitingFemales.findIndex(u => u.userId === userId);
-  if (femaleIndex !== -1) waitingFemales.splice(femaleIndex, 1);
+  const index = waitingUsers.findIndex(u => u.userId === userId);
+  if (index !== -1) waitingUsers.splice(index, 1);
 };
 
 const setupSocket = (io) => {
@@ -60,98 +56,85 @@ const setupSocket = (io) => {
       }
     });
 
-    // Random match finding
+    // Random match finding - TRULY RANDOM (anyone can match with anyone)
     socket.on('find_match', async (data) => {
       const { userId, gender, nickname } = data;
       
-      // Remove from queues if already waiting
+      // Remove from queue if already waiting
       removeFromQueues(userId);
       
       const userInfo = { userId, nickname, socketId: socket.id, gender };
       
-      // Pick any available partner (supports any gender pairing, including same-gender matches).
-      let partner = null;
-      if (gender === 'Male') {
-        if (waitingFemales.length > 0) partner = waitingFemales.shift();
-        else if (waitingMales.length > 0) partner = waitingMales.shift();
-      } else if (gender === 'Female') {
-        if (waitingMales.length > 0) partner = waitingMales.shift();
-        else if (waitingFemales.length > 0) partner = waitingFemales.shift();
-      } else {
-        // Unknown/invalid gender -> fall back to any queue.
-        if (waitingFemales.length > 0) partner = waitingFemales.shift();
-        else if (waitingMales.length > 0) partner = waitingMales.shift();
-      }
-
-      if (partner) {
+      // Check if anyone is waiting in queue
+      if (waitingUsers.length > 0) {
+        // Match with first person in queue (truly random)
+        const partner = waitingUsers.shift();
         const roomId = generateRoomId();
 
         socket.join(roomId);
         const partnerSocket = io.sockets.sockets.get(partner.socketId);
-        if (partnerSocket) partnerSocket.join(roomId);
-
-        // Store active match (two participant ids)
-        activeMatches.set(roomId, { aId: userId, bId: partner.userId });
-
-        // Emit match found to initiator
+        if (partnerSocket) {
+          partnerSocket.join(roomId);
+        }
+        
+        // Store active match
+        activeMatches.set(roomId, { user1Id: userId, user2Id: partner.userId });
+        
+        // Emit match found to current user
         socket.emit('match_found', {
           roomId,
           partner: {
             _id: partner.userId,
             nickname: partner.nickname,
-            gender: partner.gender,
-          },
+            gender: partner.gender
+          }
         });
-
+        
         // Emit match found to partner
         io.to(partner.socketId).emit('match_found', {
           roomId,
           partner: {
             _id: userId,
             nickname: nickname,
-            gender: gender,
-          },
+            gender: gender
+          }
         });
-
-        console.log(
-          `Match created: ${nickname} (${gender}) <-> ${partner.nickname} (${partner.gender}) in ${roomId}`
-        );
+        
+        console.log(`Match created: ${nickname} (${gender}) <-> ${partner.nickname} (${partner.gender}) in ${roomId}`);
 
         // Create match notifications
         try {
-          const n1 = await Notification.create({
-            user: userId,
-            type: 'match',
-            title: 'It\'s a Match!',
-            body: `You matched with ${partner.nickname}`,
-            data: { roomId },
+          const n1 = await Notification.create({ 
+            user: userId, 
+            type: 'match', 
+            title: 'It\'s a Match!', 
+            body: `You matched with ${partner.nickname}`, 
+            data: { roomId } 
           });
           socket.emit('new_notification', n1);
-
-          const n2 = await Notification.create({
-            user: partner.userId,
-            type: 'match',
-            title: 'It\'s a Match!',
-            body: `You matched with ${nickname}`,
-            data: { roomId },
+          
+          const n2 = await Notification.create({ 
+            user: partner.userId, 
+            type: 'match', 
+            title: 'It\'s a Match!', 
+            body: `You matched with ${nickname}`, 
+            data: { roomId } 
           });
           io.to(partner.socketId).emit('new_notification', n2);
-        } catch (err) {
-          console.error('Match notification error:', err);
+        } catch (err) { 
+          console.error('Match notification error:', err); 
         }
+        
       } else {
-        // No match available, add to queue
-        if (gender === 'Male') waitingMales.push(userInfo);
-        else waitingFemales.push(userInfo);
-
+        // No one waiting, add to queue
+        waitingUsers.push(userInfo);
+        
         socket.emit('searching', {
-          message: 'Looking for a match...',
-          queuePosition: gender === 'Male' ? waitingMales.length : waitingFemales.length,
+          message: 'Looking for a random match...',
+          queuePosition: waitingUsers.length
         });
-
-        console.log(
-          `${nickname} (${gender}) added to queue. Males: ${waitingMales.length}, Females: ${waitingFemales.length}`
-        );
+        
+        console.log(`${nickname} (${gender}) added to queue. Total waiting: ${waitingUsers.length}`);
       }
     });
 
@@ -164,12 +147,33 @@ const setupSocket = (io) => {
 
     // Send message in match room (temporary — not saved to DB)
     socket.on('match_message', (data) => {
-      const { roomId, message, from, fromNickname } = data;
+      const { roomId, tempId, message, from, fromNickname } = data;
+      const msgId = `match_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      const timestamp = new Date();
+
       socket.to(roomId).emit('match_message_received', {
+        roomId,
+        msgId,
         from,
         fromNickname,
         message,
-        timestamp: new Date()
+        timestamp
+      });
+
+      socket.emit('match_message_status', {
+        tempId,
+        msgId,
+        status: 'delivered'
+      });
+    });
+
+    // Mark random-match messages as seen
+    socket.on('match_messages_seen', (data) => {
+      const { roomId, msgId, by } = data;
+      socket.to(roomId).emit('match_messages_seen_update', {
+        roomId,
+        msgId,
+        by
       });
     });
 
@@ -178,13 +182,9 @@ const setupSocket = (io) => {
       const { roomId, userId } = data;
       const match = activeMatches.get(roomId);
       if (match) {
-        const partnerId = match.aId === userId ? match.bId : match.aId;
-        const partnerData = onlineUsers.get(partnerId);
-        if (partnerData) {
-          io.to(partnerData.socketId).emit('match_ended', {
-            message: 'Your partner has left the chat'
-          });
-        }
+        socket.to(roomId).emit('match_ended', {
+          message: 'Your partner has left the chat'
+        });
         activeMatches.delete(roomId);
         socket.leave(roomId);
       }
@@ -194,6 +194,21 @@ const setupSocket = (io) => {
     socket.on('send_message', async (data) => {
       const { to, message, from } = data;
       const payload = typeof message === 'string' ? { text: message } : (message || {});
+
+      try {
+        const senderUser = await User.findById(from).select('isFullAccount');
+        if (!senderUser?.isFullAccount) {
+          socket.emit('message_error', {
+            to,
+            code: 'PROFILE_REQUIRED',
+            message: 'Complete profile to use direct messages.'
+          });
+          return;
+        }
+      } catch (error) {
+        console.error('Error validating DM sender:', error);
+        return;
+      }
 
       let savedMsg = null;
       try {
@@ -345,50 +360,82 @@ const setupSocket = (io) => {
 
     // ============ WebRTC Video Call Signaling ============
     
+    // Join private chat room (for video calling in 1-on-1 chats)
+    socket.on('join_private_room', (data) => {
+      const { roomId } = data;
+      socket.join(roomId);
+      console.log(`User joined private room: ${roomId}`);
+    });
+    
     // Start video call request
     socket.on('call_request', (data) => {
       const { roomId, from, fromNickname } = data;
-      socket.to(roomId).emit('call_incoming', { from, fromNickname });
-      console.log(`Video call request from ${fromNickname} in room ${roomId}`);
+      // Ensure caller is in the room
+      socket.join(roomId);
+      // Send to all users in the room except sender
+      socket.to(roomId).emit('call_incoming', { roomId, from, fromNickname });
+      console.log(`Video call request from ${fromNickname} (${from}) in room ${roomId}`);
     });
 
     // Accept video call
     socket.on('call_accept', (data) => {
       const { roomId, from } = data;
-      socket.to(roomId).emit('call_accepted', { from });
-      console.log(`Call accepted in room ${roomId}`);
+      // Ensure acceptor is in the room
+      socket.join(roomId);
+      // Notify the caller that call was accepted
+      socket.to(roomId).emit('call_accepted', { roomId, from });
+      console.log(`Call accepted in room ${roomId} by user ${from}`);
     });
 
     // Reject video call
     socket.on('call_reject', (data) => {
       const { roomId, from } = data;
-      socket.to(roomId).emit('call_rejected', { from });
-      console.log(`Call rejected in room ${roomId}`);
+      // Notify the caller that call was rejected
+      socket.to(roomId).emit('call_rejected', { roomId, from });
+      console.log(`Call rejected in room ${roomId} by user ${from}`);
     });
 
     // WebRTC offer
     socket.on('video_offer', (data) => {
-      const { roomId, offer, from } = data;
-      socket.to(roomId).emit('video_offer', { offer, from });
+      const { roomId, offer, from, to } = data;
+      // Send to specific user if 'to' is provided, otherwise broadcast to room
+      if (to) {
+        io.to(to).emit('video_offer', { roomId, offer, from });
+      } else {
+        socket.to(roomId).emit('video_offer', { roomId, offer, from });
+      }
+      console.log(`Video offer from ${from} in room ${roomId}`);
     });
 
     // WebRTC answer
     socket.on('video_answer', (data) => {
-      const { roomId, answer, from } = data;
-      socket.to(roomId).emit('video_answer', { answer, from });
+      const { roomId, answer, from, to } = data;
+      // Send to specific user if 'to' is provided, otherwise broadcast to room
+      if (to) {
+        io.to(to).emit('video_answer', { roomId, answer, from });
+      } else {
+        socket.to(roomId).emit('video_answer', { roomId, answer, from });
+      }
+      console.log(`Video answer from ${from} in room ${roomId}`);
     });
 
     // ICE candidate
     socket.on('ice_candidate', (data) => {
-      const { roomId, candidate, from } = data;
-      socket.to(roomId).emit('ice_candidate', { candidate, from });
+      const { roomId, candidate, from, to } = data;
+      // Send to specific user if 'to' is provided, otherwise broadcast to room
+      if (to) {
+        io.to(to).emit('ice_candidate', { roomId, candidate, from });
+      } else {
+        socket.to(roomId).emit('ice_candidate', { roomId, candidate, from });
+      }
     });
 
     // End video call
     socket.on('video_call_end', (data) => {
       const { roomId, from } = data;
-      socket.to(roomId).emit('video_call_ended', { from });
-      console.log(`Video call ended in room ${roomId}`);
+      // Notify all users in the room that call has ended
+      io.to(roomId).emit('video_call_ended', { roomId, from });
+      console.log(`Video call ended in room ${roomId} by user ${from}`);
     });
 
     // ============ Group Chat ============
@@ -454,14 +501,10 @@ const setupSocket = (io) => {
         
         // End any active matches
         for (const [roomId, match] of activeMatches.entries()) {
-          if (match.aId === socket.userId || match.bId === socket.userId) {
-            const partnerId = match.aId === socket.userId ? match.bId : match.aId;
-            const partnerData = onlineUsers.get(partnerId);
-            if (partnerData) {
-              io.to(partnerData.socketId).emit('match_ended', {
-                message: 'Your partner has disconnected'
-              });
-            }
+          if (match.user1Id === socket.userId || match.user2Id === socket.userId) {
+            socket.to(roomId).emit('match_ended', {
+              message: 'Your partner has disconnected'
+            });
             activeMatches.delete(roomId);
           }
         }

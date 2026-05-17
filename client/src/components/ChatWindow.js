@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
 import { getProfile } from '../api';
+import { getSocket } from '../socket';
 import MessageInput from './MessageInput';
 import VideoCall from './VideoCall';
 
@@ -49,10 +50,64 @@ const ChatWindow = () => {
       if (user) {
         sendSeen(selectedUser._id, user._id);
       }
+      
+      // Join private room for video calling
+      const socket = getSocket();
+      if (socket && roomId) {
+        socket.emit('join_private_room', { roomId });
+      }
     }
     // Important: don't depend on `chatMessages` here.
     // `markAsRead` updates messages state, which would otherwise cause an update loop.
-  }, [selectedUser, markAsRead, sendSeen, user]);
+  }, [selectedUser, markAsRead, sendSeen, user, roomId]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !roomId) return;
+
+    const handleIncomingCall = (data) => {
+      if (data?.roomId === roomId) {
+        setShowVideoCall(true);
+      }
+    };
+
+    const handleCallEnded = (data) => {
+      if (data?.roomId === roomId) {
+        setShowVideoCall(false);
+      }
+    };
+
+    const handleCallRejected = (data) => {
+      if (data?.roomId === roomId) {
+        setShowVideoCall(false);
+      }
+    };
+
+    socket.on('call_incoming', handleIncomingCall);
+    socket.on('video_call_ended', handleCallEnded);
+    socket.on('call_rejected', handleCallRejected);
+
+    return () => {
+      socket.off('call_incoming', handleIncomingCall);
+      socket.off('video_call_ended', handleCallEnded);
+      socket.off('call_rejected', handleCallRejected);
+    };
+  }, [roomId]);
+
+  if (user && !user.isFullAccount) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-base-200/50 to-base-200/30">
+        <div className="text-center space-y-3 p-8 max-w-sm">
+          <div className="text-5xl">🔒</div>
+          <h3 className="text-xl font-bold">Direct Chat Locked</h3>
+          <p className="text-sm text-base-content/60">
+            Complete your profile to access direct messages and online DM contacts.
+          </p>
+          <a href="/profile" className="btn btn-primary btn-sm">Complete Profile</a>
+        </div>
+      </div>
+    );
+  }
 
   const renderMessageContent = (msg) => {
     if (msg.mediaUrl) {
@@ -137,16 +192,14 @@ const ChatWindow = () => {
         </button>
       </div>
 
-      {/* Video Call */}
-      {showVideoCall && (
-        <div className="border-b border-base-300">
-          <VideoCall
-            partner={selectedUser}
-            roomId={roomId}
-            onEndCall={() => setShowVideoCall(false)}
-          />
-        </div>
-      )}
+      {/* Keep mounted so incoming calls are never missed. */}
+      <div className={`border-b border-base-300 ${showVideoCall ? 'block' : 'hidden'}`}>
+        <VideoCall
+          partner={selectedUser}
+          roomId={roomId}
+          onEndCall={() => setShowVideoCall(false)}
+        />
+      </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-base-200/30">

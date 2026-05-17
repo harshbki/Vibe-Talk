@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import EmojiPicker from 'emoji-picker-react';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { getSocket } from '../socket';
 import { showPopunder } from '../utils/adUtils';
+import { playNotificationSound } from '../utils/soundUtils';
 import VideoCall from '../components/VideoCall';
 import AdBanner from '../components/AdBanner';
+import { uploadMedia } from '../api';
 
 const RandomMatchPage = () => {
   const { user } = useAuth();
@@ -14,10 +17,13 @@ const RandomMatchPage = () => {
   const [roomId, setRoomId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
   const [showVideoCall, setShowVideoCall] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeout = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const socket = getSocket();
@@ -33,6 +39,9 @@ const RandomMatchPage = () => {
       setPartner(data.partner);
       setRoomId(data.roomId);
       setMessages([]);
+      setInputMessage('');
+      setShowEmojiPicker(false);
+      setShowVideoCall(false);
       setActiveMatchChat({
         partnerId: data.partner._id,
         nickname: data.partner.nickname,
@@ -42,14 +51,82 @@ const RandomMatchPage = () => {
     });
 
     socket.on('match_message_received', (data) => {
-      setMessages(prev => [...prev, {
+      const payload = typeof data.message === 'string' ? { text: data.message } : (data.message || {});
+      
+      // Play notification sound for incoming message
+      playNotificationSound();
+      
+      const newMessage = {
+        msgId: data.msgId,
         from: data.from,
         fromNickname: data.fromNickname,
-        text: data.message,
+        text: payload.text || '',
+        mediaUrl: payload.mediaUrl || null,
+        mediaType: payload.mediaType || null,
         timestamp: data.timestamp,
-        isMine: false
-      }]);
-      setActiveMatchChat(prev => prev ? { ...prev, lastMessage: data.message } : prev);
+        isMine: false,
+        status: 'delivered'
+      };
+      
+      setMessages(prev => [...prev, newMessage]);
+      setActiveMatchChat(prev => prev ? {
+        ...prev,
+        lastMessage: payload.text || (payload.mediaUrl ? '📎 Media' : 'New message')
+      } : prev);
+
+      // Immediately mark as seen
+      setTimeout(() => {
+        socket.emit('match_messages_seen', {
+          roomId: data.roomId || roomId,
+          msgId: data.msgId,
+          by: user?._id
+        });
+        
+        // Update local message to show as seen
+        setMessages(prev => prev.map(msg => 
+          msg.msgId === data.msgId ? { ...msg, status: 'seen' } : msg
+        ));
+      }, 300);
+    });
+
+    socket.on('match_message_status', ({ tempId, msgId, status }) => {
+      setMessages(prev => prev.map(msg => {
+        // Update by tempId first (for own messages that match)
+        if (tempId && msg.tempId === tempId && !msg.msgId) {
+          return { ...msg, msgId, status, tempId: undefined };
+        }
+        // Update by msgId if available
+        if (msgId && msg.msgId === msgId) {
+          // Ensure status only increases: sent -> delivered -> seen
+          const statuses = ['sent', 'delivered', 'seen'];
+          const currentIndex = statuses.indexOf(msg.status);
+          const newIndex = statuses.indexOf(status);
+          if (newIndex >= currentIndex) {
+            return { ...msg, status };
+          }
+        }
+        return msg;
+      }));
+    });
+
+    socket.on('match_messages_seen_update', ({ msgId }) => {
+      // Update only outgoing messages (isMine) to 'seen' status
+      setMessages(prev => prev.map(msg => {
+        if (msg.isMine && msg.msgId === msgId) {
+          return { ...msg, status: 'seen' };
+        }
+        return msg;
+      }));
+    });
+
+    socket.on('video_offer', () => {
+      setShowVideoCall(true);
+    });
+
+    socket.on('call_incoming', (data) => {
+      if (data?.roomId === roomId) {
+        setShowVideoCall(true);
+      }
     });
 
     socket.on('match_partner_typing', () => setIsPartnerTyping(true));
@@ -60,6 +137,9 @@ const RandomMatchPage = () => {
       setPartner(null);
       setRoomId(null);
       setMessages([]);
+      setInputMessage('');
+      setShowEmojiPicker(false);
+      setShowVideoCall(false);
       setActiveMatchChat(null);
       alert(data.message);
     });
@@ -70,12 +150,16 @@ const RandomMatchPage = () => {
       socket.off('searching');
       socket.off('match_found');
       socket.off('match_message_received');
+      socket.off('match_message_status');
+      socket.off('match_messages_seen_update');
+      socket.off('video_offer');
+      socket.off('call_incoming');
       socket.off('match_partner_typing');
       socket.off('match_partner_stop_typing');
       socket.off('match_ended');
       socket.off('search_cancelled');
     };
-  }, []);
+  }, [roomId, setActiveMatchChat, user?._id]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -110,32 +194,126 @@ const RandomMatchPage = () => {
       setPartner(null);
       setRoomId(null);
       setMessages([]);
+      setInputMessage('');
+      setShowEmojiPicker(false);
+      setShowVideoCall(false);
       setActiveMatchChat(null);
     }
   };
 
   const sendMessage = (e) => {
     e.preventDefault();
-    if (!inputMessage.trim() || !roomId) return;
+    if (!inputMessage.trim() || !roomId || !user) return;
     const socket = getSocket();
     if (socket) {
+      const tempId = `tmp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const text = inputMessage.trim();
+      
+      const messageObj = {
+        tempId,
+        from: user._id,
+        fromNickname: user.nickname,
+        text,
+        mediaUrl: null,
+        mediaType: null,
+        timestamp: new Date(),
+        isMine: true,
+        status: 'sent'
+      };
+      
       socket.emit('match_message', {
         roomId,
-        message: inputMessage.trim(),
+        tempId,
+        message: { text },
         from: user._id,
         fromNickname: user.nickname
       });
-      setMessages(prev => [...prev, {
-        from: user._id,
-        fromNickname: user.nickname,
-        text: inputMessage.trim(),
-        timestamp: new Date(),
-        isMine: true
-      }]);
-      setActiveMatchChat(prev => prev ? { ...prev, lastMessage: inputMessage.trim() } : prev);
+      
+      setMessages(prev => [...prev, messageObj]);
+      setActiveMatchChat(prev => prev ? { ...prev, lastMessage: text } : prev);
       setInputMessage('');
+      setShowEmojiPicker(false);
       socket.emit('match_stop_typing', { roomId, from: user._id });
     }
+  };
+
+  const handleEmojiClick = (emojiData) => {
+    setInputMessage(prev => prev + emojiData.emoji);
+    const socket = getSocket();
+    if (socket && roomId && user) {
+      socket.emit('match_typing', { roomId, from: user._id });
+    }
+  };
+
+  const handlePickFile = () => {
+    if (isUploading || !roomId) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !roomId || !user) return;
+
+    const socket = getSocket();
+    if (!socket) return;
+
+    setIsUploading(true);
+    try {
+      const response = await uploadMedia(file);
+      const tempId = `tmp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const payload = {
+        text: '',
+        mediaUrl: response.url,
+        mediaType: file.type
+      };
+
+      socket.emit('match_message', {
+        roomId,
+        tempId,
+        message: payload,
+        from: user._id,
+        fromNickname: user.nickname
+      });
+
+      const messageObj = {
+        tempId,
+        from: user._id,
+        fromNickname: user.nickname,
+        text: '',
+        mediaUrl: response.url,
+        mediaType: file.type,
+        timestamp: new Date(),
+        isMine: true,
+        status: 'sent'
+      };
+
+      setMessages(prev => [...prev, messageObj]);
+      setActiveMatchChat(prev => prev ? { ...prev, lastMessage: '📎 Media' } : prev);
+      socket.emit('match_stop_typing', { roomId, from: user._id });
+    } catch (error) {
+      console.error('Random match upload error:', error);
+      alert(`Upload failed: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const renderMessageContent = (msg) => {
+    if (msg.mediaUrl) {
+      const isVideo = (msg.mediaType || '').startsWith('video/');
+      return (
+        <div className="max-w-xs">
+          {isVideo ? (
+            <video controls src={msg.mediaUrl} className="rounded-lg max-w-full" />
+          ) : (
+            <img src={msg.mediaUrl} alt="Shared media" className="rounded-lg max-w-full" />
+          )}
+        </div>
+      );
+    }
+
+    return msg.text;
   };
 
   const handleTyping = (e) => {
@@ -201,7 +379,7 @@ const RandomMatchPage = () => {
             </div>
             <h2 className="text-xl font-bold">Looking for a match...</h2>
             <p className="text-base-content/60">
-              Please wait while we find you any partner
+              Please wait while we find you a random partner
             </p>
             <button className="btn btn-ghost btn-sm" onClick={cancelSearch}>
               ✕ Cancel
@@ -214,7 +392,9 @@ const RandomMatchPage = () => {
 
   // Matched state
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] bg-base-100">
+  
+  
+  <div className="flex flex-col h-[calc(100vh-64px)] bg-base-100">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-base-300 bg-base-100">
         <div className="flex items-center gap-3">
@@ -243,12 +423,10 @@ const RandomMatchPage = () => {
         </div>
       </div>
 
-      {/* Video Call */}
-      {showVideoCall && (
-        <div className="border-b border-base-300">
-          <VideoCall partner={partner} roomId={roomId} onEndCall={() => setShowVideoCall(false)} />
-        </div>
-      )}
+      {/* Keep mounted so incoming offers are not missed when collapsed. */}
+      <div className={`border-b border-base-300 ${showVideoCall ? 'block' : 'hidden'}`}>
+        <VideoCall partner={partner} roomId={roomId} onEndCall={() => setShowVideoCall(false)} />
+      </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-base-200/30">
@@ -258,11 +436,22 @@ const RandomMatchPage = () => {
         {messages.map((msg, index) => (
           <div key={index} className={`chat ${msg.isMine ? 'chat-end' : 'chat-start'}`}>
             <div className={`chat-bubble ${msg.isMine ? 'chat-bubble-primary' : ''} text-sm`}>
-              {msg.text}
+              {renderMessageContent(msg)}
             </div>
-            <div className="chat-footer opacity-50 text-xs">
+            <div className="chat-footer opacity-50 text-xs mt-1">
               {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
+            {msg.isMine && msg.status && (
+              <div className="chat-footer text-xs flex items-center gap-1 mt-0.5">
+                {msg.status === 'seen' ? (
+                  <span className="text-info font-bold" title="Seen by recipient">✓✓</span>
+                ) : msg.status === 'delivered' ? (
+                  <span className="text-base-content/60" title="Delivered to recipient">✓✓</span>
+                ) : (
+                  <span className="text-base-content/40" title="Sent">✓</span>
+                )}
+              </div>
+            )}
           </div>
         ))}
         {isPartnerTyping && (
@@ -276,18 +465,51 @@ const RandomMatchPage = () => {
       </div>
 
       {/* Input */}
+      <div className="relative">
+        {showEmojiPicker && (
+          <div className="absolute bottom-full left-0 z-50 mb-2">
+            <EmojiPicker onEmojiClick={handleEmojiClick} />
+          </div>
+        )}
       <form onSubmit={sendMessage} className="flex items-center gap-2 p-3 border-t border-base-300 bg-base-100">
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm btn-circle text-lg"
+          onClick={() => setShowEmojiPicker(prev => !prev)}
+          title="Add emoji"
+          disabled={isUploading}
+        >
+          😊
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm btn-circle text-lg"
+          onClick={handlePickFile}
+          title="Upload image or video"
+          disabled={isUploading}
+        >
+          📎
+        </button>
+        <input
+          ref={fileInputRef}
+          className="hidden"
+          type="file"
+          accept="image/*,video/*"
+          onChange={handleFileChange}
+        />
         <input
           type="text"
           value={inputMessage}
           onChange={handleTyping}
-          placeholder="Type a message..."
+          placeholder={isUploading ? 'Uploading...' : 'Type a message...'}
+          disabled={isUploading}
           className="input input-bordered input-sm flex-1 focus:outline-none focus:input-primary"
         />
-        <button type="submit" disabled={!inputMessage.trim()} className="btn btn-primary btn-sm">
-          Send
+        <button type="submit" disabled={!inputMessage.trim() || isUploading} className="btn btn-primary btn-sm">
+          {isUploading ? <span className="loading loading-spinner loading-xs" /> : 'Send'}
         </button>
       </form>
+      </div>
     </div>
   );
 };

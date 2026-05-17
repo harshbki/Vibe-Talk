@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const mongoose = require('mongoose');
 const cloudinary = require('../config/cloudinary');
 const User = require('../models/User');
 
@@ -21,6 +22,9 @@ const upload = multer({
 // GET /api/profile/:userId - Get user profile
 router.get('/:userId', async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.userId)) {
+      return res.status(400).json({ message: 'Invalid user ID format' });
+    }
     const user = await User.findById(req.params.userId).select('-__v');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -35,6 +39,9 @@ router.get('/:userId', async (req, res) => {
 // PUT /api/profile/:userId - Update profile info
 router.put('/:userId', async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.userId)) {
+      return res.status(400).json({ message: 'Invalid user ID format' });
+    }
     const { fullName, bio, profilePicture, dateOfBirth, location, interests, gender } = req.body;
     
     const updateData = {};
@@ -75,6 +82,9 @@ router.put('/:userId', async (req, res) => {
 // POST /api/profile/:userId/picture - Upload profile picture
 router.post('/:userId/picture', upload.single('file'), async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.userId)) {
+      return res.status(400).json({ message: 'Invalid user ID format' });
+    }
     if (!req.file) {
       return res.status(400).json({ message: 'No file provided' });
     }
@@ -120,6 +130,9 @@ router.post('/:userId/picture', upload.single('file'), async (req, res) => {
 // POST /api/profile/:userId/complete - First-time profile completion
 router.post('/:userId/complete', async (req, res, next) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.userId)) {
+      return res.status(400).json({ message: 'Invalid user ID format' });
+    }
     const { fullName, bio, dateOfBirth, location, interests, gender } = req.body;
 
     if (!fullName || !fullName.trim()) {

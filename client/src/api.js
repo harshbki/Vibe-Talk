@@ -100,6 +100,16 @@ export const markAllNotificationsRead = async (userId) => {
   return response.data;
 };
 
+export const deleteNotification = async (id) => {
+  const response = await api.delete(`/notifications/${id}`);
+  return response.data;
+};
+
+export const deleteAllNotifications = async (userId) => {
+  const response = await api.delete(`/notifications/user/${userId}/all`);
+  return response.data;
+};
+
 // Group API
 export const createGroup = async (name, adminId, memberIds, isPrivate = false) => {
   const response = await api.post('/groups', { name, adminId, memberIds, isPrivate });
