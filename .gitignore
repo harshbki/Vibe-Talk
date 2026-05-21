@@ -1,6 +1,8 @@
 # Dependencies
 node_modules
 client/node_modules
+client/node_modules/
+**/node_modules/.cache
 
 # Environment variables (never commit real secrets)
 .env
@@ -21,3 +23,7 @@ uploads
 
 # Database
 data/db
+data/mongodb.log
+
+# Local audit / scratch
+REPO_FULL_SCAN.md
