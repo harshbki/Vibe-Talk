@@ -304,15 +304,31 @@ const RandomMatchPage = () => {
 
   const renderMessageContent = (msg) => {
     if (msg.mediaUrl) {
-      const isVideo = (msg.mediaType || '').startsWith('video/');
-      return (
-        <div className="max-w-xs">
-          {isVideo ? (
-            <video controls src={msg.mediaUrl} className="rounded-lg max-w-full" />
-          ) : (
+      const mediaType = msg.mediaType || '';
+      if (mediaType.startsWith('image/')) {
+        return (
+          <div className="max-w-xs">
             <img src={msg.mediaUrl} alt="Shared media" className="rounded-lg max-w-full" />
-          )}
-        </div>
+          </div>
+        );
+      }
+      if (mediaType.startsWith('video/')) {
+        return (
+          <div className="max-w-xs">
+            <video controls src={msg.mediaUrl} className="rounded-lg max-w-full" />
+          </div>
+        );
+      }
+      return (
+        <a
+          href={msg.mediaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          download
+          className="link link-hover text-sm underline"
+        >
+          📎 Download file
+        </a>
       );
     }
 
@@ -441,20 +457,22 @@ const RandomMatchPage = () => {
             <div className={`chat-bubble ${msg.isMine ? 'chat-bubble-primary' : ''} text-sm`}>
               {renderMessageContent(msg)}
             </div>
-            <div className="chat-footer opacity-50 text-xs mt-1">
-              {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <div className="chat-footer opacity-50 text-xs flex items-center justify-end gap-1.5 mt-0.5 min-h-[1rem]">
+              <span className="shrink-0">
+                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              {msg.isMine && msg.status && (
+                <span className="shrink-0 leading-none" title={msg.status}>
+                  {msg.status === 'seen' ? (
+                    <span className="text-info font-bold">✓✓</span>
+                  ) : msg.status === 'delivered' ? (
+                    <span className="text-base-content/60">✓✓</span>
+                  ) : (
+                    <span className="text-base-content/40">✓</span>
+                  )}
+                </span>
+              )}
             </div>
-            {msg.isMine && msg.status && (
-              <div className="chat-footer text-xs flex items-center gap-1 mt-0.5">
-                {msg.status === 'seen' ? (
-                  <span className="text-info font-bold" title="Seen by recipient">✓✓</span>
-                ) : msg.status === 'delivered' ? (
-                  <span className="text-base-content/60" title="Delivered to recipient">✓✓</span>
-                ) : (
-                  <span className="text-base-content/40" title="Sent">✓</span>
-                )}
-              </div>
-            )}
           </div>
         ))}
         {isPartnerTyping && (
@@ -497,7 +515,7 @@ const RandomMatchPage = () => {
           ref={fileInputRef}
           className="hidden"
           type="file"
-          accept="image/*,video/*"
+          accept="*/*"
           onChange={handleFileChange}
         />
         <input

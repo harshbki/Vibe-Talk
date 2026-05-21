@@ -86,7 +86,7 @@ const MessageInput = () => {
           className="btn btn-ghost btn-sm btn-circle text-lg"
           onClick={handlePickFile}
           disabled={!selectedUser || isUploading}
-          title="Upload image or video"
+          title="Upload file"
         >
           📎
         </button>
@@ -94,8 +94,7 @@ const MessageInput = () => {
           ref={fileInputRef}
           className="hidden"
           type="file"
-          accept="image/*,video/*"
-          capture="environment"
+          accept="*/*"
           onChange={handleFileChange}
         />
         <input

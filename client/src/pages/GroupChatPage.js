@@ -266,8 +266,18 @@ const GroupChatPage = () => {
                       <div className="max-w-xs">
                         {(msg.mediaType || '').startsWith('video/') ? (
                           <video controls src={msg.mediaUrl} className="rounded-lg max-w-full" />
-                        ) : (
+                        ) : (msg.mediaType || '').startsWith('image/') ? (
                           <img src={msg.mediaUrl} alt="Upload" className="rounded-lg max-w-full" />
+                        ) : (
+                          <a
+                            href={msg.mediaUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                            className="link link-hover text-sm underline"
+                          >
+                            📎 Download file
+                          </a>
                         )}
                         {msg.text && <p className="mt-1">{msg.text}</p>}
                       </div>
@@ -318,7 +328,7 @@ const GroupChatPage = () => {
               ref={fileInputRef}
               className="hidden"
               type="file"
-              accept="image/*,video/*"
+              accept="*/*"
               capture="environment"
               onChange={handleFileUpload}
             />

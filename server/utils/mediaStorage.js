@@ -35,7 +35,7 @@ const saveLocalFile = (file, req) => {
     success: true,
     url: `${base}/uploads/${filename}`,
     public_id: filename,
-    resource_type: mime.startsWith('video/') ? 'video' : 'image',
+    resource_type: mime.startsWith('video/') ? 'video' : mime.startsWith('image/') ? 'image' : 'raw',
   };
 };
 

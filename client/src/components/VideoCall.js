@@ -21,11 +21,17 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
   const remoteVideoRef = useRef(null);
   const peerConnection = useRef(null);
   const pendingIceCandidates = useRef([]);
+  const remoteMediaStreamRef = useRef(null);
   const roomIdRef = useRef(roomId);
+  const partnerIdRef = useRef(partner?._id);
 
   useEffect(() => {
     roomIdRef.current = roomId;
   }, [roomId]);
+
+  useEffect(() => {
+    partnerIdRef.current = partner?._id;
+  }, [partner?._id]);
 
   const ICE_SERVERS = {
     iceServers: [
@@ -110,7 +116,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       socket.off('video_call_ended', handleVideoCallEnded);
       cleanupCall();
     };
-  }, [onEndCall, partner?.nickname, user?._id]);
+  }, [onEndCall, partner?._id, partner?.nickname, roomId, user?._id]);
 
   useEffect(() => {
     if (localStream && localVideoRef.current) {
@@ -160,8 +166,25 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
     const pc = new RTCPeerConnection(ICE_SERVERS);
 
     pc.ontrack = (event) => {
-      const stream = event.streams?.[0] || new MediaStream([event.track]);
+      if (event.streams?.[0]) {
+        remoteMediaStreamRef.current = event.streams[0];
+      } else {
+        if (!remoteMediaStreamRef.current) {
+          remoteMediaStreamRef.current = new MediaStream();
+        }
+        const stream = remoteMediaStreamRef.current;
+        if (!stream.getTracks().some((t) => t.id === event.track.id)) {
+          stream.addTrack(event.track);
+        }
+      }
+      const stream = remoteMediaStreamRef.current;
       setRemoteStream(stream);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = stream;
+        remoteVideoRef.current.play().catch((error) => {
+          console.error('Remote video autoplay blocked:', error);
+        });
+      }
       setCallStatus('connected');
     };
 
@@ -179,7 +202,12 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       if (event.candidate) {
         const socket = getSocket();
         if (socket) {
-          socket.emit('ice_candidate', { roomId, candidate: event.candidate, to: targetUserId, from: user._id });
+          socket.emit('ice_candidate', {
+            roomId: roomIdRef.current,
+            candidate: event.candidate,
+            to: targetUserId,
+            from: user._id
+          });
         }
       }
     };
@@ -212,11 +240,11 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       const socket = getSocket();
       if (socket) {
         // Send offer to specific user (partner._id) for direct routing
-        socket.emit('video_offer', { 
-          roomId, 
-          offer, 
-          to: partner?._id,  // Ensure direct routing to partner
-          from: user._id 
+        socket.emit('video_offer', {
+          roomId: roomIdRef.current,
+          offer,
+          to: partnerIdRef.current,
+          from: user._id
         });
       }
       await incrementCallCount();
@@ -246,7 +274,12 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
 
       const socket = getSocket();
       if (socket) {
-        socket.emit('video_answer', { roomId, answer, to: data.from, from: user._id });
+        socket.emit('video_answer', {
+          roomId: roomIdRef.current,
+          answer,
+          to: data.from,
+          from: user._id
+        });
       }
       setCallStatus('connecting');
     } catch (error) {
@@ -306,6 +339,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
     }
     setLocalStream(null);
     setRemoteStream(null);
+    remoteMediaStreamRef.current = null;
     peerConnection.current = null;
     pendingIceCandidates.current = [];
     setIsMuted(false);
@@ -352,7 +386,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       
       const socket = getSocket();
       if (socket) {
-        socket.emit('call_accept', { roomId, from: user._id });
+        socket.emit('call_accept', { roomId: roomIdRef.current, from: user._id, to: partnerIdRef.current });
       }
       setIncomingCall(null);
       setCallStatus('connecting');

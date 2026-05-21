@@ -45,6 +45,32 @@ const relayToPeer = (socket, io, { roomId, to, event, payload }) => {
   }
 };
 
+const getPrivateRoomPeer = (roomId, userId) => {
+  if (!roomId?.startsWith('private_')) return null;
+  const parts = roomId.split('_');
+  if (parts.length < 3) return null;
+  const id1 = parts[1];
+  const id2 = parts[2];
+  const uid = String(userId);
+  if (uid === id1) return id2;
+  if (uid === id2) return id1;
+  return null;
+};
+
+const getMatchPeer = (roomId, userId) => {
+  const match = activeMatches.get(roomId);
+  if (!match) return null;
+  const uid = String(userId);
+  if (uid === String(match.user1Id)) return match.user2Id;
+  if (uid === String(match.user2Id)) return match.user1Id;
+  return null;
+};
+
+const resolveCallPeer = (roomId, userId, explicitTo) => {
+  if (explicitTo) return explicitTo;
+  return getMatchPeer(roomId, userId) || getPrivateRoomPeer(roomId, userId);
+};
+
 const setupSocket = (io) => {
   io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
@@ -221,21 +247,6 @@ const setupSocket = (io) => {
       const { to, message, from } = data;
       const payload = typeof message === 'string' ? { text: message } : (message || {});
 
-      try {
-        const senderUser = await User.findById(from).select('isFullAccount');
-        if (!senderUser?.isFullAccount) {
-          socket.emit('message_error', {
-            to,
-            code: 'PROFILE_REQUIRED',
-            message: 'Complete profile to use direct messages.'
-          });
-          return;
-        }
-      } catch (error) {
-        console.error('Error validating DM sender:', error);
-        return;
-      }
-
       let savedMsg = null;
       try {
         // Get or create chat
@@ -247,13 +258,14 @@ const setupSocket = (io) => {
         }
 
         // Save message to DB with status
-        const recipient = onlineUsers.get(to);
+        const recipientSocket = io.sockets.adapter.rooms.get(String(to));
+        const isRecipientOnline = !!(recipientSocket && recipientSocket.size > 0);
         savedMsg = await Message.create({
           chat: chat._id,
           sender: from,
           text: payload.text || '',
           image: payload.mediaUrl || null,
-          status: recipient ? 'delivered' : 'sent'
+          status: isRecipientOnline ? 'delivered' : 'sent'
         });
 
         // Update last message on chat
@@ -268,44 +280,42 @@ const setupSocket = (io) => {
         console.error('Error persisting message:', error);
       }
 
-      const recipient = onlineUsers.get(to);
       const msgId = savedMsg ? savedMsg._id.toString() : null;
+      const recipientSocket = io.sockets.adapter.rooms.get(String(to));
+      const isRecipientOnline = !!(recipientSocket && recipientSocket.size > 0);
 
-      if (recipient) {
+      if (isRecipientOnline) {
         emitToUser(io, to, 'receive_message', {
           from,
           message: payload,
           msgId,
           timestamp: new Date()
         });
-        // Tell sender the message was delivered
         socket.emit('message_status_update', {
           msgId,
           to,
           status: 'delivered'
         });
-
-        // Create notification for recipient
-        try {
-          const senderUser = onlineUsers.get(from);
-          const notif = await Notification.create({
-            user: to,
-            type: 'message',
-            title: 'New message',
-            body: `${senderUser?.nickname || 'Someone'}: ${payload.text || '[media]'}`,
-            data: { from, msgId }
-          });
-          emitToUser(io, to, 'new_notification', notif);
-        } catch (err) {
-          console.error('Notification create error:', err);
-        }
       } else {
-        // Recipient offline – status stays 'sent'
         socket.emit('message_status_update', {
           msgId,
           to,
           status: 'sent'
         });
+      }
+
+      try {
+        const senderUser = await User.findById(from).select('nickname');
+        const notif = await Notification.create({
+          user: to,
+          type: 'message',
+          title: 'New message',
+          body: `${senderUser?.nickname || 'Someone'}: ${payload.text || '[media]'}`,
+          data: { from, msgId }
+        });
+        emitToUser(io, to, 'new_notification', notif);
+      } catch (err) {
+        console.error('Notification create error:', err);
       }
     });
 
@@ -321,10 +331,7 @@ const setupSocket = (io) => {
           await msg.save();
 
           // Notify the other user in the chat
-          const recipient = onlineUsers.get(chatUserId);
-          if (recipient) {
-            io.to(recipient.socketId).emit('message_deleted', { msgId, from });
-          }
+          emitToUser(io, chatUserId, 'message_deleted', { msgId, from });
           // Confirm to sender
           socket.emit('message_deleted', { msgId, from });
         }
@@ -356,18 +363,12 @@ const setupSocket = (io) => {
     // Handle typing indicator
     socket.on('typing', (data) => {
       const { to, from } = data;
-      const recipient = onlineUsers.get(to);
-      if (recipient) {
-        io.to(recipient.socketId).emit('user_typing', { from });
-      }
+      emitToUser(io, to, 'user_typing', { from });
     });
 
     socket.on('stop_typing', (data) => {
       const { to, from } = data;
-      const recipient = onlineUsers.get(to);
-      if (recipient) {
-        io.to(recipient.socketId).emit('user_stop_typing', { from });
-      }
+      emitToUser(io, to, 'user_stop_typing', { from });
     });
 
     // Match typing indicator
@@ -426,19 +427,26 @@ const setupSocket = (io) => {
 
     // Accept video call
     socket.on('call_accept', (data) => {
-      const { roomId, from } = data;
-      // Ensure acceptor is in the room
+      const { roomId, from, to } = data;
       socket.join(roomId);
-      // Notify the caller that call was accepted
-      socket.to(roomId).emit('call_accepted', { roomId, from });
+      const payload = { roomId, from };
+      socket.to(roomId).emit('call_accepted', payload);
+      const callerId = resolveCallPeer(roomId, from, to);
+      if (callerId) {
+        emitToUser(io, callerId, 'call_accepted', payload);
+      }
       console.log(`Call accepted in room ${roomId} by user ${from}`);
     });
 
     // Reject video call
     socket.on('call_reject', (data) => {
-      const { roomId, from } = data;
-      // Notify the caller that call was rejected
-      socket.to(roomId).emit('call_rejected', { roomId, from });
+      const { roomId, from, to } = data;
+      const payload = { roomId, from };
+      socket.to(roomId).emit('call_rejected', payload);
+      const callerId = resolveCallPeer(roomId, from, to);
+      if (callerId) {
+        emitToUser(io, callerId, 'call_rejected', payload);
+      }
       console.log(`Call rejected in room ${roomId} by user ${from}`);
     });
 

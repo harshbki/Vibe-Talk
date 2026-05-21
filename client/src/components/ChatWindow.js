@@ -99,14 +99,15 @@ const ChatWindow = () => {
     };
   }, [roomId]);
 
-  if (user && !user.isFullAccount) {
+  if (user && !user.isFullAccount && !selectedUser) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-base-200/50 to-base-200/30">
         <div className="text-center space-y-3 p-8 max-w-sm">
-          <div className="text-5xl">🔒</div>
-          <h3 className="text-xl font-bold">Direct Chat Locked</h3>
+          <div className="text-5xl">💬</div>
+          <h3 className="text-xl font-bold">Guest Chat</h3>
           <p className="text-sm text-base-content/60">
-            Complete your profile to access direct messages and online DM contacts.
+            Select a conversation from the sidebar to reply when a profile user messages you.
+            Complete your profile to start new direct chats.
           </p>
           <a href="/profile" className="btn btn-primary btn-sm">Complete Profile</a>
         </div>
@@ -116,15 +117,31 @@ const ChatWindow = () => {
 
   const renderMessageContent = (msg) => {
     if (msg.mediaUrl) {
-      const isVideo = (msg.mediaType || '').startsWith('video/');
-      return (
-        <div className="max-w-xs">
-          {isVideo ? (
-            <video controls src={msg.mediaUrl} className="rounded-lg max-w-full" />
-          ) : (
+      const mediaType = msg.mediaType || '';
+      if (mediaType.startsWith('image/')) {
+        return (
+          <div className="max-w-xs">
             <img src={msg.mediaUrl} alt="Upload" className="rounded-lg max-w-full" />
-          )}
-        </div>
+          </div>
+        );
+      }
+      if (mediaType.startsWith('video/')) {
+        return (
+          <div className="max-w-xs">
+            <video controls src={msg.mediaUrl} className="rounded-lg max-w-full" />
+          </div>
+        );
+      }
+      return (
+        <a
+          href={msg.mediaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          download
+          className="link link-hover text-sm underline"
+        >
+          📎 Download file
+        </a>
       );
     }
     return <p>{msg.text}</p>;
@@ -234,9 +251,11 @@ const ChatWindow = () => {
                   </div>
                 )}
               </div>
-              <div className="chat-footer opacity-50 text-xs flex items-center">
-                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                {renderStatusIcon(msg)}
+              <div className="chat-footer opacity-50 text-xs flex items-center justify-end gap-1.5 min-h-[1rem]">
+                <span className="shrink-0">
+                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                {isMine && <span className="shrink-0 leading-none">{renderStatusIcon(msg)}</span>}
               </div>
             </div>
           );

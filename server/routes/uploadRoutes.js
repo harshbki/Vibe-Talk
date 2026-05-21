@@ -17,11 +17,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image or video files are allowed'), false);
-    }
+    cb(null, true);
   },
 });
 
@@ -30,7 +26,7 @@ router.get('/', (req, res) => {
     message: 'Upload API is running',
     usage: 'POST /api/upload with multipart form data containing "file" field',
     maxSize: '20MB',
-    allowedTypes: 'image/*, video/*',
+    allowedTypes: 'all file types (max 20MB)',
     storage: isCloudinaryConfigured() ? 'cloudinary' : 'local',
   });
 });

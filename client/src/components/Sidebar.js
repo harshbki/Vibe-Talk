@@ -21,23 +21,17 @@ const Sidebar = () => {
       if (!user?._id) return;
       setLoadingChats(true);
       try {
-        if (isProfileUser) {
-          const [groupsResult, chatsResult] = await Promise.allSettled([
-            getUserGroups(user._id),
-            getUserChats(user._id)
-          ]);
-          setUserGroups(groupsResult.status === 'fulfilled' ? (groupsResult.value || []) : []);
-          setRecentChats(chatsResult.status === 'fulfilled' ? (chatsResult.value || []) : []);
-          if (groupsResult.status === 'rejected') {
-            console.error('Load groups error:', groupsResult.reason);
-          }
-          if (chatsResult.status === 'rejected') {
-            console.error('Load chats error:', chatsResult.reason);
-          }
-        } else {
-          const groups = await getUserGroups(user._id);
-          setUserGroups(groups || []);
-          setRecentChats([]);
+        const [groupsResult, chatsResult] = await Promise.allSettled([
+          getUserGroups(user._id),
+          getUserChats(user._id)
+        ]);
+        setUserGroups(groupsResult.status === 'fulfilled' ? (groupsResult.value || []) : []);
+        setRecentChats(chatsResult.status === 'fulfilled' ? (chatsResult.value || []) : []);
+        if (groupsResult.status === 'rejected') {
+          console.error('Load groups error:', groupsResult.reason);
+        }
+        if (chatsResult.status === 'rejected') {
+          console.error('Load chats error:', chatsResult.reason);
         }
       } catch (error) {
         console.error('Load chats error:', error);
@@ -49,9 +43,8 @@ const Sidebar = () => {
     loadChats();
   }, [user?._id, isProfileUser]);
 
-  // DM chat items — only for profile users
   const chatItems = useMemo(() => {
-    if (!user?._id || !isProfileUser) return [];
+    if (!user?._id) return [];
 
     return recentChats
       .map((chat) => {
