@@ -6,7 +6,7 @@ import { playRingingSound, stopRingingSound, vibrate } from '../utils/soundUtils
 import { showCallNotification } from '../utils/notificationUtils';
 import api from '../api';
 
-const VideoCall = ({ partner, roomId, onEndCall }) => {
+const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingIncomingConsumed }) => {
   const { user } = useAuth();
   const [callStatus, setCallStatus] = useState('idle');
   const [incomingCall, setIncomingCall] = useState(null);
@@ -118,20 +118,50 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
     };
   }, [onEndCall, partner?._id, partner?.nickname, roomId, user?._id]);
 
-  useEffect(() => {
-    if (localStream && localVideoRef.current) {
-      localVideoRef.current.srcObject = localStream;
+  const attachStreamToVideo = (el, stream, muted = false) => {
+    if (!el || !stream) return;
+    if (el.srcObject !== stream) {
+      el.srcObject = stream;
     }
-  }, [localStream]);
+    el.muted = muted;
+    el.play().catch((error) => {
+      console.error('Video autoplay blocked:', error);
+    });
+  };
+
+  const bindLocalVideoRef = (el) => {
+    localVideoRef.current = el;
+    attachStreamToVideo(el, localStream, true);
+  };
+
+  const bindRemoteVideoRef = (el) => {
+    remoteVideoRef.current = el;
+    attachStreamToVideo(el, remoteStream, false);
+  };
 
   useEffect(() => {
-    if (remoteStream && remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-      remoteVideoRef.current.play().catch((error) => {
-        console.error('Remote video autoplay blocked:', error);
-      });
-    }
-  }, [remoteStream]);
+    attachStreamToVideo(localVideoRef.current, localStream, true);
+  }, [localStream, callStatus]);
+
+  useEffect(() => {
+    attachStreamToVideo(remoteVideoRef.current, remoteStream, false);
+  }, [remoteStream, callStatus]);
+
+  // Restore incoming-call UI when opened from a notification (socket event may have been missed).
+  useEffect(() => {
+    if (!pendingIncomingCall?.accept || !roomId) return;
+    if (pendingIncomingCall.roomId !== roomId) return;
+    if (callStatus !== 'idle') return;
+
+    setIncomingCall({
+      from: pendingIncomingCall.from,
+      fromNickname: partner?.nickname,
+      roomId: pendingIncomingCall.roomId
+    });
+    setCallStatus('incoming');
+    setIsCaller(false);
+    onPendingIncomingConsumed?.();
+  }, [pendingIncomingCall, roomId, partner?.nickname, callStatus, onPendingIncomingConsumed]);
 
   const incrementCallCount = async () => {
     try {
@@ -153,6 +183,8 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
         }
       });
       setLocalStream(stream);
+      const videoTrack = stream.getVideoTracks()[0];
+      setIsVideoOff(videoTrack ? !videoTrack.enabled : false);
       return stream;
     } catch (error) {
       console.error('Camera/Microphone permission denied:', error.name);
@@ -179,12 +211,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       }
       const stream = remoteMediaStreamRef.current;
       setRemoteStream(stream);
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = stream;
-        remoteVideoRef.current.play().catch((error) => {
-          console.error('Remote video autoplay blocked:', error);
-        });
-      }
+      attachStreamToVideo(remoteVideoRef.current, stream, false);
       setCallStatus('connected');
     };
 
@@ -385,8 +412,9 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       }
       
       const socket = getSocket();
+      const calleeTarget = incomingCall?.from || partnerIdRef.current;
       if (socket) {
-        socket.emit('call_accept', { roomId: roomIdRef.current, from: user._id, to: partnerIdRef.current });
+        socket.emit('call_accept', { roomId: roomIdRef.current, from: user._id, to: calleeTarget });
       }
       setIncomingCall(null);
       setCallStatus('connecting');
@@ -513,7 +541,7 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
         <div className="card bg-base-100 shadow-lg p-8 flex flex-col items-center gap-4 w-full">
           {localStream && (
             <div className="relative w-full max-w-sm aspect-video bg-black rounded-lg overflow-hidden">
-              <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />
+              <video ref={bindLocalVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />
             </div>
           )}
           <span className="loading loading-ring loading-md text-primary" />
@@ -525,10 +553,10 @@ const VideoCall = ({ partner, roomId, onEndCall }) => {
       {callStatus === 'connected' && (
         <div className="w-full flex flex-col items-center gap-4">
           <div className="relative w-full max-w-3xl aspect-video bg-black rounded-xl overflow-hidden">
-            <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+            <video ref={bindRemoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
             <span className="absolute top-2 left-2 badge badge-neutral badge-sm">{partner?.nickname}</span>
             <div className="absolute bottom-3 right-3 w-32 aspect-video bg-base-300 rounded-lg overflow-hidden border-2 border-base-100 shadow-lg">
-              <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              <video ref={bindLocalVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />
               <span className="absolute bottom-1 left-1 badge badge-neutral badge-xs">You</span>
             </div>
           </div>

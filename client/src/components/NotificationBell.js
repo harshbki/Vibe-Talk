@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useChat } from '../context/ChatContext';
 import {
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead,
   deleteNotification,
-  deleteAllNotifications
+  deleteAllNotifications,
+  getUser
 } from '../api';
 import { getSocket } from '../socket';
 import { playNotificationSound } from '../utils/soundUtils';
@@ -13,6 +16,8 @@ import { showMessageNotification, showCallNotification } from '../utils/notifica
 
 const NotificationBell = () => {
   const { user } = useAuth();
+  const { setSelectedUser } = useChat();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -125,6 +130,81 @@ const NotificationBell = () => {
     }
   };
 
+  const resolveSenderForChat = async (userId, notif) => {
+    try {
+      const sender = await getUser(userId);
+      return {
+        _id: userId,
+        nickname: sender.nickname,
+        gender: sender.gender
+      };
+    } catch {
+      const fallbackName = notif.body?.split(':')[0]?.trim()
+        || notif.body?.replace(' is calling you', '')?.trim()
+        || 'User';
+      return { _id: userId, nickname: fallbackName, gender: 'Male' };
+    }
+  };
+
+  const handleNotificationClick = async (notif) => {
+    if (!notif.read) {
+      await handleMarkRead(notif._id);
+    }
+    setOpen(false);
+
+    const data = notif.data || {};
+
+    if (notif.type === 'message' && data.from) {
+      const sender = await resolveSenderForChat(data.from, notif);
+      setSelectedUser(sender);
+      navigate('/chat');
+      return;
+    }
+
+    if (notif.type === 'call' && data.roomId) {
+      if (String(data.roomId).startsWith('room_')) {
+        navigate('/match', {
+          state: {
+            videoCall: {
+              roomId: data.roomId,
+              from: data.from,
+              accept: true
+            }
+          }
+        });
+        return;
+      }
+      if (data.from) {
+        const sender = await resolveSenderForChat(data.from, notif);
+        setSelectedUser(sender);
+        navigate('/chat', {
+          state: {
+            openVideoCall: true,
+            videoCall: {
+              roomId: data.roomId,
+              from: data.from,
+              accept: true
+            }
+          }
+        });
+      }
+      return;
+    }
+
+    if (notif.type === 'match') {
+      navigate('/match');
+    }
+  };
+
+  const getActionHint = (type) => {
+    switch (type) {
+      case 'message': return 'Open chat';
+      case 'call': return 'Answer call';
+      case 'match': return 'Go to match';
+      default: return null;
+    }
+  };
+
   const getIcon = (type) => {
     switch (type) {
       case 'message': return '💬';
@@ -187,19 +267,35 @@ const NotificationBell = () => {
                 No notifications yet
               </div>
             ) : (
-              notifications.slice(0, 20).map(notif => (
+              notifications.slice(0, 20).map(notif => {
+                const actionHint = getActionHint(notif.type);
+                const isActionable = ['message', 'call', 'match'].includes(notif.type);
+                return (
                 <div
                   key={notif._id}
-                  onClick={() => handleMarkRead(notif._id)}
-                  className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-base-200/50 transition-colors border-b border-base-200/50 cursor-pointer ${
-                    !notif.read ? 'bg-primary/5' : ''
-                  }`}
+                  role={isActionable ? 'button' : undefined}
+                  tabIndex={isActionable ? 0 : undefined}
+                  onClick={() => isActionable ? handleNotificationClick(notif) : handleMarkRead(notif._id)}
+                  onKeyDown={(e) => {
+                    if (isActionable && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      handleNotificationClick(notif);
+                    }
+                  }}
+                  className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-base-200/50 transition-colors border-b border-base-200/50 ${
+                    isActionable ? 'cursor-pointer' : 'cursor-default'
+                  } ${!notif.read ? 'bg-primary/5' : ''}`}
                 >
                   <span className="text-lg mt-0.5">{getIcon(notif.type)}</span>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm truncate ${!notif.read ? 'font-semibold' : ''}`}>{notif.title}</p>
                     <p className="text-xs text-base-content/50 truncate">{notif.body}</p>
-                    <p className="text-xs text-base-content/40 mt-0.5">{formatTime(notif.createdAt)}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-xs text-base-content/40">{formatTime(notif.createdAt)}</p>
+                      {actionHint && (
+                        <span className="text-xs text-primary font-medium">{actionHint} →</span>
+                      )}
+                    </div>
                   </div>
                   <button
                     className="btn btn-ghost btn-xs text-error"
@@ -215,7 +311,8 @@ const NotificationBell = () => {
                     <span className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
                   )}
                 </div>
-              ))
+              );
+              })
             )}
           </div>
         </div>

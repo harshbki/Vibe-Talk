@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import EmojiPicker from 'emoji-picker-react';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
@@ -13,6 +14,9 @@ import { uploadMedia } from '../api';
 const RandomMatchPage = () => {
   const { user } = useAuth();
   const { setActiveMatchChat } = useChat();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [pendingVideoCall, setPendingVideoCall] = useState(null);
   const [status, setStatus] = useState('idle');
   const [partner, setPartner] = useState(null);
   const [roomId, setRoomId] = useState(null);
@@ -30,6 +34,16 @@ const RandomMatchPage = () => {
   useEffect(() => {
     roomIdRef.current = roomId;
   }, [roomId]);
+
+  useEffect(() => {
+    const videoCall = location.state?.videoCall;
+    if (!videoCall?.roomId || status !== 'matched' || roomId !== videoCall.roomId) return;
+    setShowVideoCall(true);
+    if (videoCall.accept) {
+      setPendingVideoCall(videoCall);
+    }
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state, status, roomId, navigate, location.pathname]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -444,7 +458,13 @@ const RandomMatchPage = () => {
 
       {/* Keep mounted so incoming offers are not missed when collapsed. */}
       <div className={`border-b border-base-300 ${showVideoCall ? 'block' : 'hidden'}`}>
-        <VideoCall partner={partner} roomId={roomId} onEndCall={() => setShowVideoCall(false)} />
+        <VideoCall
+          partner={partner}
+          roomId={roomId}
+          onEndCall={() => setShowVideoCall(false)}
+          pendingIncomingCall={pendingVideoCall}
+          onPendingIncomingConsumed={() => setPendingVideoCall(null)}
+        />
       </div>
 
       {/* Messages */}

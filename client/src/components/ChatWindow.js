@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
 import { getProfile } from '../api';
@@ -9,7 +10,10 @@ import VideoCall from './VideoCall';
 const ChatWindow = () => {
   const { selectedUser, messages, typing, markAsRead, sendSeen, deleteMessage } = useChat();
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [showVideoCall, setShowVideoCall] = useState(false);
+  const [pendingVideoCall, setPendingVideoCall] = useState(null);
   const [profile, setProfile] = useState(null);
 
   const chatMessages = selectedUser ? messages[selectedUser._id] || [] : [];
@@ -42,6 +46,20 @@ const ChatWindow = () => {
     };
     fetchProfile();
   }, [selectedUser]);
+
+  useEffect(() => {
+    if (location.state?.openVideoCall) {
+      setShowVideoCall(true);
+    }
+    const videoCall = location.state?.videoCall;
+    if (videoCall?.accept && selectedUser && roomId && videoCall.roomId === roomId) {
+      setShowVideoCall(true);
+      setPendingVideoCall(videoCall);
+    }
+    if (location.state?.openVideoCall || location.state?.videoCall) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, selectedUser, roomId, navigate, location.pathname]);
 
   useEffect(() => {
     if (selectedUser) {
@@ -220,6 +238,8 @@ const ChatWindow = () => {
           partner={selectedUser}
           roomId={roomId}
           onEndCall={() => setShowVideoCall(false)}
+          pendingIncomingCall={pendingVideoCall}
+          onPendingIncomingConsumed={() => setPendingVideoCall(null)}
         />
       </div>
 
