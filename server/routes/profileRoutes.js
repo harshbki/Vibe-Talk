@@ -2,8 +2,13 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const mongoose = require('mongoose');
-const cloudinary = require('../config/cloudinary');
 const User = require('../models/User');
+const {
+  isCloudinaryConfigured,
+  saveLocalFile,
+  uploadToCloudinary,
+  shouldUseLocalFallback,
+} = require('../utils/mediaStorage');
 
 // Multer setup for memory storage
 const storage = multer.memoryStorage();
@@ -89,25 +94,31 @@ router.post('/:userId/picture', upload.single('file'), async (req, res) => {
       return res.status(400).json({ message: 'No file provided' });
     }
 
-    // Convert buffer to base64
-    const b64 = Buffer.from(req.file.buffer).toString('base64');
-    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    let pictureUrl;
 
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(dataURI, {
-      folder: 'vibetalk/profiles',
-      resource_type: 'image',
-      transformation: [
-        { width: 400, height: 400, crop: 'fill', gravity: 'face' }
-      ]
-    });
+    if (!isCloudinaryConfigured()) {
+      pictureUrl = saveLocalFile(req.file, req).url;
+    } else {
+      try {
+        const result = await uploadToCloudinary(req.file, {
+          folder: 'vibetalk/profiles',
+          resource_type: 'image',
+          transformation: [
+            { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+          ],
+        });
+        pictureUrl = result.secure_url;
+      } catch (cloudinaryError) {
+        if (!shouldUseLocalFallback(cloudinaryError)) throw cloudinaryError;
+        pictureUrl = saveLocalFile(req.file, req).url;
+      }
+    }
 
-    // Update user profile picture
     const user = await User.findByIdAndUpdate(
       req.params.userId,
-      { 
-        profilePicture: result.secure_url,
-        isFullAccount: true
+      {
+        profilePicture: pictureUrl,
+        isFullAccount: true,
       },
       { new: true }
     ).select('-__v');
@@ -118,8 +129,8 @@ router.post('/:userId/picture', upload.single('file'), async (req, res) => {
 
     res.json({
       success: true,
-      url: result.secure_url,
-      user
+      url: pictureUrl,
+      user,
     });
   } catch (error) {
     console.error('Upload picture error:', error);
