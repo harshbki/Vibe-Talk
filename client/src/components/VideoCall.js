@@ -6,6 +6,11 @@ import { playRingingSound, stopRingingSound, vibrate } from '../utils/soundUtils
 import { showCallNotification } from '../utils/notificationUtils';
 import api from '../api';
 
+// WebRTC signaling state constants
+const VALID_OFFER_STATES = ['stable', 'have-remote-offer'];
+const VALID_ANSWER_STATES = ['have-local-offer', 'stable'];
+const OFFER_PROCESSING_TIMEOUT = 1500; // ms - timeout to reset concurrent offer flag
+
 const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingIncomingConsumed }) => {
   const { user } = useAuth();
   const [callStatus, setCallStatus] = useState('idle');
@@ -305,7 +310,7 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
 
       // Guard: Check if we can process this offer based on signaling state
       // Valid states for receiving an offer: 'stable' (normal), 'have-remote-offer' (glare/collision)
-      if (['stable', 'have-remote-offer'].includes(pc.signalingState)) {
+      if (VALID_OFFER_STATES.includes(pc.signalingState)) {
         await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
         await flushPendingCandidates();
 
@@ -332,10 +337,10 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
       setCallStatus('idle');
       setCallError('Failed to connect video call: ' + error.message);
     } finally {
-      // Reset offer processing flag after a timeout to prevent getting stuck
+      // Reset offer processing flag after timeout to prevent getting stuck
       setTimeout(() => {
         isProcessingOffer.current = false;
-      }, 0);
+      }, OFFER_PROCESSING_TIMEOUT);
     }
   };
 
@@ -344,8 +349,7 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
       if (!peerConnection.current) return;
       // Valid states for setting remote answer: 'have-local-offer' (normal case)
       // In edge cases, might also receive answer in 'stable' state (after timeout/retry)
-      const validStates = ['have-local-offer', 'stable'];
-      if (validStates.includes(peerConnection.current.signalingState)) {
+      if (VALID_ANSWER_STATES.includes(peerConnection.current.signalingState)) {
         await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.answer));
         await flushPendingCandidates();
         setCallStatus('connected');
