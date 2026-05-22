@@ -8,7 +8,7 @@ import api from '../api';
 
 // WebRTC signaling state constants
 const VALID_OFFER_STATES = ['stable', 'have-remote-offer'];
-const VALID_ANSWER_STATES = ['have-local-offer', 'stable'];
+const VALID_ANSWER_STATES = ['have-local-offer']; // Per WebRTC spec, answer only valid in this state
 const OFFER_PROCESSING_TIMEOUT = 1500; // ms - timeout to reset concurrent offer flag
 
 const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingIncomingConsumed }) => {
@@ -293,6 +293,7 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
   };
 
   const handleOffer = async (data) => {
+    let timeoutId = null;
     try {
       // Prevent concurrent offer processing
       if (isProcessingOffer.current) {
@@ -300,6 +301,14 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
         return;
       }
       isProcessingOffer.current = true;
+      
+      // Set timeout as safety net only if processing hangs
+      timeoutId = setTimeout(() => {
+        if (isProcessingOffer.current) {
+          console.warn('Offer processing timeout, resetting flag');
+          isProcessingOffer.current = false;
+        }
+      }, OFFER_PROCESSING_TIMEOUT);
 
       setCallError(null);
       const stream = await ensureLocalMedia();
@@ -343,21 +352,15 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
       // Reset flag after error
       isProcessingOffer.current = false;
     } finally {
-      // Fallback timeout to reset flag in case of unexpected hangs
-      setTimeout(() => {
-        if (isProcessingOffer.current) {
-          console.warn('Offer processing timeout, resetting flag');
-          isProcessingOffer.current = false;
-        }
-      }, OFFER_PROCESSING_TIMEOUT);
+      // Clear timeout if processing completed
+      if (timeoutId) clearTimeout(timeoutId);
     }
   };
 
   const handleAnswer = async (data) => {
     try {
       if (!peerConnection.current) return;
-      // Valid states for setting remote answer: 'have-local-offer' (normal case)
-      // In edge cases, might also receive answer in 'stable' state (after timeout/retry)
+      // Per WebRTC spec: setRemoteDescription with answer is only valid when in 'have-local-offer' state
       if (VALID_ANSWER_STATES.includes(peerConnection.current.signalingState)) {
         await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.answer));
         await flushPendingCandidates();
