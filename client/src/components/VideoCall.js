@@ -327,19 +327,28 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
           });
         }
         setCallStatus('connecting');
+        // Reset flag after successful processing
+        isProcessingOffer.current = false;
       } else {
-        console.warn('Peer connection not in valid state for offer. State:', pc.signalingState);
-        setCallError('Video call negotiation in progress. Please wait or try again.');
+        console.warn(`Peer connection not in valid state for offer. State: ${pc.signalingState}`);
+        setCallError('Unable to process call request. The connection is currently being established. Please try again in a moment.');
+        // Reset flag after error
+        isProcessingOffer.current = false;
       }
     } catch (error) {
       console.error('Error handling offer:', error);
       stopRingingSound();
       setCallStatus('idle');
       setCallError('Failed to connect video call: ' + error.message);
+      // Reset flag after error
+      isProcessingOffer.current = false;
     } finally {
-      // Reset offer processing flag after timeout to prevent getting stuck
+      // Fallback timeout to reset flag in case of unexpected hangs
       setTimeout(() => {
-        isProcessingOffer.current = false;
+        if (isProcessingOffer.current) {
+          console.warn('Offer processing timeout, resetting flag');
+          isProcessingOffer.current = false;
+        }
       }, OFFER_PROCESSING_TIMEOUT);
     }
   };
@@ -354,7 +363,7 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
         await flushPendingCandidates();
         setCallStatus('connected');
       } else {
-        console.warn('Peer connection not in valid state for answer. State:', peerConnection.current.signalingState, 'Ignoring answer.');
+        console.warn(`Peer connection not in valid state for answer. State: ${peerConnection.current.signalingState}. Ignoring answer.`);
       }
     } catch (error) {
       console.error('Error handling answer:', error);
