@@ -24,6 +24,7 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
   const remoteMediaStreamRef = useRef(null);
   const roomIdRef = useRef(roomId);
   const partnerIdRef = useRef(partner?._id);
+  const isProcessingOffer = useRef(false);
 
   useEffect(() => {
     roomIdRef.current = roomId;
@@ -125,7 +126,10 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
     }
     el.muted = muted;
     el.play().catch((error) => {
-      console.error('Video autoplay blocked:', error);
+      // Suppress harmless AbortError: video element was removed or stream changed during playback
+      if (error.name !== 'AbortError') {
+        console.error('Video autoplay error:', error);
+      }
     });
   };
 
@@ -285,6 +289,13 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
 
   const handleOffer = async (data) => {
     try {
+      // Prevent concurrent offer processing
+      if (isProcessingOffer.current) {
+        console.warn('Offer already being processed, ignoring new offer');
+        return;
+      }
+      isProcessingOffer.current = true;
+
       setCallError(null);
       const stream = await ensureLocalMedia();
       const pc = ensurePeerConnection(data.from);
@@ -292,38 +303,49 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
       }
 
-      // Use plain object format for RTCSessionDescription
-      await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-      await flushPendingCandidates();
+      // Guard: Only set remote description if not already set
+      if (pc.signalingState === 'stable') {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+        await flushPendingCandidates();
 
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
 
-      const socket = getSocket();
-      if (socket) {
-        socket.emit('video_answer', {
-          roomId: roomIdRef.current,
-          answer,
-          to: data.from,
-          from: user._id
-        });
+        const socket = getSocket();
+        if (socket) {
+          socket.emit('video_answer', {
+            roomId: roomIdRef.current,
+            answer,
+            to: data.from,
+            from: user._id
+          });
+        }
+        setCallStatus('connecting');
+      } else {
+        console.warn('Peer connection not in stable state, ignoring offer. State:', pc.signalingState);
+        setCallError('Connection state error. Please try the call again.');
       }
-      setCallStatus('connecting');
     } catch (error) {
       console.error('Error handling offer:', error);
       stopRingingSound();
       setCallStatus('idle');
       setCallError('Failed to connect video call: ' + error.message);
+    } finally {
+      isProcessingOffer.current = false;
     }
   };
 
   const handleAnswer = async (data) => {
     try {
       if (!peerConnection.current) return;
-      // Use plain object format for RTCSessionDescription
-      await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.answer));
-      await flushPendingCandidates();
-      setCallStatus('connected');
+      // Guard: Only set remote description if in the right state
+      if (peerConnection.current.signalingState === 'have-local-offer') {
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+        await flushPendingCandidates();
+        setCallStatus('connected');
+      } else {
+        console.warn('Peer connection not ready for answer. State:', peerConnection.current.signalingState);
+      }
     } catch (error) {
       console.error('Error handling answer:', error);
       setCallError('Failed to connect: ' + error.message);

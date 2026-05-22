@@ -43,7 +43,7 @@ function App() {
   return (
     <AuthProvider>
       <ChatProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <div className="min-h-screen flex flex-col bg-base-100 text-base-content">
             <Routes>
               <Route path="/" element={<PublicRoute><LoginPage /></PublicRoute>} />
