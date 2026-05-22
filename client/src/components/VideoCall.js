@@ -303,8 +303,9 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
       }
 
-      // Guard: Only set remote description if not already set
-      if (pc.signalingState === 'stable') {
+      // Guard: Check if we can process this offer based on signaling state
+      // Valid states for receiving an offer: 'stable' (normal), 'have-remote-offer' (glare/collision)
+      if (['stable', 'have-remote-offer'].includes(pc.signalingState)) {
         await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
         await flushPendingCandidates();
 
@@ -322,8 +323,8 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
         }
         setCallStatus('connecting');
       } else {
-        console.warn('Peer connection not in stable state, ignoring offer. State:', pc.signalingState);
-        setCallError('Connection state error. Please try the call again.');
+        console.warn('Peer connection not in valid state for offer. State:', pc.signalingState);
+        setCallError('Video call negotiation in progress. Please wait or try again.');
       }
     } catch (error) {
       console.error('Error handling offer:', error);
@@ -331,24 +332,29 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
       setCallStatus('idle');
       setCallError('Failed to connect video call: ' + error.message);
     } finally {
-      isProcessingOffer.current = false;
+      // Reset offer processing flag after a timeout to prevent getting stuck
+      setTimeout(() => {
+        isProcessingOffer.current = false;
+      }, 0);
     }
   };
 
   const handleAnswer = async (data) => {
     try {
       if (!peerConnection.current) return;
-      // Guard: Only set remote description if in the right state
-      if (peerConnection.current.signalingState === 'have-local-offer') {
+      // Valid states for setting remote answer: 'have-local-offer' (normal case)
+      // In edge cases, might also receive answer in 'stable' state (after timeout/retry)
+      const validStates = ['have-local-offer', 'stable'];
+      if (validStates.includes(peerConnection.current.signalingState)) {
         await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.answer));
         await flushPendingCandidates();
         setCallStatus('connected');
       } else {
-        console.warn('Peer connection not ready for answer. State:', peerConnection.current.signalingState);
+        console.warn('Peer connection not in valid state for answer. State:', peerConnection.current.signalingState, 'Ignoring answer.');
       }
     } catch (error) {
       console.error('Error handling answer:', error);
-      setCallError('Failed to connect: ' + error.message);
+      setCallError('Failed to establish connection: ' + error.message);
     }
   };
 
