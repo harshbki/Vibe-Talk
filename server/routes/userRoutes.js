@@ -16,8 +16,8 @@ router.get('/', async (req, res) => {
   try {
     const { gender, excludeId } = req.query;
     
-    let query = {};
-    
+    let query = { isFullAccount: true };
+
     // Filter by gender if provided
     if (gender && ['Male', 'Female'].includes(gender)) {
       query.gender = gender;

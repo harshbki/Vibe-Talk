@@ -24,6 +24,7 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
   const remoteMediaStreamRef = useRef(null);
   const roomIdRef = useRef(roomId);
   const partnerIdRef = useRef(partner?._id);
+  const isCallerRef = useRef(false);
 
   useEffect(() => {
     roomIdRef.current = roomId;
@@ -56,12 +57,11 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
     };
 
     const handleCallAccepted = async () => {
+      if (!isCallerRef.current) return;
       try {
         stopRingingSound();
         setCallStatus('connecting');
-        // isCaller already set true in requestCall()
-        // Media should already be loaded from initiateCall()
-        await createOffer();  // ONLY caller creates offer
+        await createOffer();
       } catch (error) {
         console.error('Error on call accepted:', error);
         stopRingingSound();
@@ -114,9 +114,14 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
       socket.off('call_accepted', handleCallAccepted);
       socket.off('call_rejected', handleCallRejected);
       socket.off('video_call_ended', handleVideoCallEnded);
+    };
+  }, [onEndCall, partner?._id, roomId, user?._id]);
+
+  useEffect(() => {
+    return () => {
       cleanupCall();
     };
-  }, [onEndCall, partner?._id, partner?.nickname, roomId, user?._id]);
+  }, []);
 
   const attachStreamToVideo = (el, stream, muted = false) => {
     if (!el || !stream) return;
@@ -125,7 +130,10 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
     }
     el.muted = muted;
     el.play().catch((error) => {
-      console.error('Video autoplay blocked:', error);
+      // Ignore AbortError when video element unmounts or interrupts its own play
+      if (error.name !== 'AbortError') {
+        console.error('Video autoplay blocked:', error);
+      }
     });
   };
 
@@ -285,15 +293,27 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
 
   const handleOffer = async (data) => {
     try {
+      if (!data?.offer || data.offer.type !== 'offer') {
+        console.warn('Ignoring invalid video offer payload:', data);
+        return;
+      }
       setCallError(null);
       const stream = await ensureLocalMedia();
       const pc = ensurePeerConnection(data.from);
+      if (pc.signalingState !== 'stable') {
+        console.warn('Ignoring video offer while signaling state is:', pc.signalingState);
+        return;
+      }
       if (!pc.getSenders().length) {
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
       }
 
       // Use plain object format for RTCSessionDescription
       await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+      if (pc.signalingState !== 'have-remote-offer') {
+        console.warn('Unexpected signaling state after remote offer:', pc.signalingState);
+        return;
+      }
       await flushPendingCandidates();
 
       const answer = await pc.createAnswer();
@@ -319,9 +339,10 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
 
   const handleAnswer = async (data) => {
     try {
-      if (!peerConnection.current) return;
-      // Use plain object format for RTCSessionDescription
-      await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+      if (!data?.answer || data.answer.type !== 'answer') return;
+      const pc = peerConnection.current;
+      if (!pc || pc.signalingState !== 'have-local-offer') return;
+      await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
       await flushPendingCandidates();
       setCallStatus('connected');
     } catch (error) {
@@ -371,6 +392,7 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
     pendingIceCandidates.current = [];
     setIsMuted(false);
     setIsVideoOff(false);
+    isCallerRef.current = false;
     setIsCaller(false);
     setCallError(null);
   };
@@ -389,7 +411,8 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
   const requestCall = () => {
     const socket = getSocket();
     if (!socket || !roomId || !partner?._id) return;
-    setIsCaller(true);  // Mark as caller IMMEDIATELY
+    isCallerRef.current = true;
+    setIsCaller(true);
     setCallStatus('calling');
     playRingingSound(); // Play ringing sound for caller
     socket.emit('call_request', {
@@ -416,6 +439,8 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
       if (socket) {
         socket.emit('call_accept', { roomId: roomIdRef.current, from: user._id, to: calleeTarget });
       }
+      isCallerRef.current = false;
+      setIsCaller(false);
       setIncomingCall(null);
       setCallStatus('connecting');
     } catch (error) {

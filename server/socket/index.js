@@ -430,7 +430,7 @@ const setupSocket = (io) => {
       const { roomId, from, to } = data;
       socket.join(roomId);
       const payload = { roomId, from };
-      socket.to(roomId).emit('call_accepted', payload);
+      // Only notify the caller — broadcasting to the room made the callee create a second offer (WebRTC glare).
       const callerId = resolveCallPeer(roomId, from, to);
       if (callerId) {
         emitToUser(io, callerId, 'call_accepted', payload);
