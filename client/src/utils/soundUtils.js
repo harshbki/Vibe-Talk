@@ -3,7 +3,7 @@
 let notificationAudio = null;
 let ringingInterval = null;
 let ringingAudioContext = null;
-let ringingOscillator = null;
+let ringingOscillators = [];
 
 const getNotificationAudio = () => {
   if (!notificationAudio) {
@@ -51,27 +51,39 @@ const playBeepFallback = () => {
   }
 };
 
+/** Classic two-tone phone ring (440 Hz + 480 Hz alternating). */
 export const playRingingSound = () => {
   try {
     stopRingingSound();
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.connect(gain);
+    gain.gain.value = 0.22;
     gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.value = 440;
-    gain.gain.value = 0.25;
-    osc.start();
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+    osc1.frequency.value = 440;
+    osc2.frequency.value = 480;
+    osc1.connect(gain);
+    osc2.connect(gain);
+    osc1.start();
+    osc2.start();
+
     ringingAudioContext = ctx;
-    ringingOscillator = osc;
-    let high = false;
-    ringingInterval = setInterval(() => {
-      if (ringingOscillator) {
-        ringingOscillator.frequency.value = high ? 523 : 440;
-        high = !high;
-      }
-    }, 450);
+    ringingOscillators = [osc1, osc2];
+
+    let ringOn = true;
+    const pulse = () => {
+      if (!ringingAudioContext) return;
+      const t = ringingAudioContext.currentTime;
+      gain.gain.cancelScheduledValues(t);
+      gain.gain.setValueAtTime(ringOn ? 0.22 : 0.02, t);
+      ringOn = !ringOn;
+    };
+    pulse();
+    ringingInterval = setInterval(pulse, 1000);
   } catch (error) {
     console.error('Ringing sound error:', error);
     playNotificationSound();
@@ -84,10 +96,14 @@ export const stopRingingSound = () => {
       clearInterval(ringingInterval);
       ringingInterval = null;
     }
-    if (ringingOscillator) {
-      ringingOscillator.stop();
-      ringingOscillator = null;
-    }
+    ringingOscillators.forEach((osc) => {
+      try {
+        osc.stop();
+      } catch {
+        /* already stopped */
+      }
+    });
+    ringingOscillators = [];
     if (ringingAudioContext) {
       ringingAudioContext.close().catch(() => {});
       ringingAudioContext = null;

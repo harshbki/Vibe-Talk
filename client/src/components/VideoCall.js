@@ -400,7 +400,11 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
   const endCall = () => {
     const socket = getSocket();
     if (socket) {
-      socket.emit('video_call_end', { roomId, from: user._id });
+      socket.emit('video_call_end', {
+        roomId,
+        from: user._id,
+        to: partnerIdRef.current || incomingCall?.from
+      });
     }
     cleanupCall();
     setCallStatus('ended');
@@ -456,7 +460,11 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
     stopRingingSound(); // Stop ringing when rejecting
     const socket = getSocket();
     if (socket) {
-      socket.emit('call_reject', { roomId, from: user._id });
+      socket.emit('call_reject', {
+        roomId,
+        from: user._id,
+        to: incomingCall?.from || partnerIdRef.current
+      });
     }
     setIncomingCall(null);
     cleanupCall();

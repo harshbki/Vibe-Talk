@@ -18,19 +18,20 @@
       - Adsterra: https://adsterra.com
     -->
 
-    <!-- Monetag Popunder Script -->
+    <!-- Monetag scripts (enabled only when REACT_APP_ENABLE_ADS=true) -->
     <script type="text/javascript">
-      (function(s,u,z,p){
-        s.src=u;s.setAttribute('data-zone',z);p.appendChild(s);
-      })(document.createElement('script'),'https://iclickcdn.com/tag.min.js','d965e1389aae19ff5ef25da9cdc7aff3',document.body||document.documentElement);
-    </script>
-
-    <!-- Monetag In-Page Push -->
-    <script type="text/javascript">
-      (function(d,z,s){
-        s.src='https://'+d+'/400/'+z;
-        try{(document.body||document.documentElement).appendChild(s)}catch(e){}
-      })('grsjorede.net','d965e1389aae19ff5ef25da9cdc7aff3',document.createElement('script'));
+      (function(){
+        var enableAds = '%REACT_APP_ENABLE_ADS%' === 'true';
+        if (!enableAds) return;
+        var zoneId = 'd965e1389aae19ff5ef25da9cdc7aff3';
+        var popunder = document.createElement('script');
+        popunder.src = 'https://iclickcdn.com/tag.min.js';
+        popunder.setAttribute('data-zone', zoneId);
+        (document.body || document.documentElement).appendChild(popunder);
+        var inpage = document.createElement('script');
+        inpage.src = 'https://grsjorede.net/400/' + zoneId;
+        (document.body || document.documentElement).appendChild(inpage);
+      })();
     </script>
 
     <!-- Adsterra Social Bar Script (replace ADSTERRA_ZONE_ID with yours) -->
@@ -38,7 +39,9 @@
 
     <!-- Monetag Interstitial config -->
     <script type="text/javascript">
-      var monetag_interstitial_zone = 'd965e1389aae19ff5ef25da9cdc7aff3';
+      if ('%REACT_APP_ENABLE_ADS%' === 'true') {
+        var monetag_interstitial_zone = 'd965e1389aae19ff5ef25da9cdc7aff3';
+      }
     </script>
 
     <!-- Google AdSense -->

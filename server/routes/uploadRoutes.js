@@ -12,10 +12,13 @@ const {
   uploadsDir,
 } = require('../utils/mediaStorage');
 
+const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB) || 100;
+const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
+
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: { fileSize: MAX_UPLOAD_BYTES },
   fileFilter: (req, file, cb) => {
     cb(null, true);
   },
@@ -25,13 +28,25 @@ router.get('/', (req, res) => {
   res.json({
     message: 'Upload API is running',
     usage: 'POST /api/upload with multipart form data containing "file" field',
-    maxSize: '20MB',
-    allowedTypes: 'all file types (max 20MB)',
+    maxSize: `${MAX_UPLOAD_MB}MB`,
+    allowedTypes: `all file types (max ${MAX_UPLOAD_MB}MB)`,
     storage: isCloudinaryConfigured() ? 'cloudinary' : 'local',
   });
 });
 
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          message: `File too large. Maximum allowed size is ${MAX_UPLOAD_MB}MB.`,
+        });
+      }
+      return res.status(400).json({ message: err.message || 'Upload failed' });
+    }
+    return next();
+  });
+}, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file provided' });

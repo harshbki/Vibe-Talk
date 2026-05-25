@@ -14,6 +14,7 @@ export const ChatProvider = ({ children }) => {
   const [typing, setTyping] = useState({});
   const [messageStatuses, setMessageStatuses] = useState({}); // { [userId]: 'sent'|'delivered'|'seen' }
   const [activeMatchChat, setActiveMatchChat] = useState(null); // { partnerId, nickname, gender, lastMessage }
+  const [dmToast, setDmToast] = useState(null); // { from, nickname, preview }
   const selectedUserRef = useRef(null);
   const onlineUsersRef = useRef([]);
 
@@ -67,13 +68,17 @@ export const ChatProvider = ({ children }) => {
           ]
         }));
 
-        // Show browser notification if not currently chatting with sender
         const currentlyViewing = selectedUserRef.current?._id;
-        if (from !== currentlyViewing || document.hidden) {
-          const senderData = onlineUsersRef.current.find(u => u._id === from);
-          const senderName = senderData?.nickname || 'Someone';
-          const preview = payload.text || (payload.mediaUrl ? '📎 Media' : 'New message');
+        const onChatPage = window.location.pathname === '/chat';
+        const senderData = onlineUsersRef.current.find(u => u._id === from);
+        const senderName = senderData?.nickname || 'Someone';
+        const preview = payload.text || (payload.mediaUrl ? '📎 Media' : 'New message');
+
+        if (from !== currentlyViewing || !onChatPage || document.hidden) {
           showMessageNotification(senderName, preview, `msg-${from}`);
+        }
+        if (from !== currentlyViewing || !onChatPage) {
+          setDmToast({ from, nickname: senderName, preview });
         }
       });
 
@@ -248,6 +253,8 @@ export const ChatProvider = ({ children }) => {
     }
   }, []);
 
+  const clearDmToast = useCallback(() => setDmToast(null), []);
+
   return (
     <ChatContext.Provider value={{
       onlineUsers,
@@ -258,6 +265,8 @@ export const ChatProvider = ({ children }) => {
       messageStatuses,
       activeMatchChat,
       setActiveMatchChat,
+      dmToast,
+      clearDmToast,
       sendMessage,
       sendTyping,
       sendStopTyping,

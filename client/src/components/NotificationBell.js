@@ -44,7 +44,7 @@ const NotificationBell = () => {
     if (!user?._id) return;
     const id = setInterval(() => {
       fetchNotifications();
-    }, 15000);
+    }, 30000);
     return () => clearInterval(id);
   }, [fetchNotifications, user?._id]);
 

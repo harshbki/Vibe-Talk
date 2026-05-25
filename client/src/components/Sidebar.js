@@ -70,18 +70,17 @@ const Sidebar = () => {
       .filter(Boolean);
   }, [recentChats, user?._id, isProfileUser, onlineUsers, messages]);
 
-  // Online tab should only show previously chatted DM contacts who are currently online.
+  // Online tab: all profile users currently online (from socket), excluding self.
   const knownOnlineUsers = useMemo(() => {
     if (!isProfileUser) return [];
-
-    return chatItems
-      .filter((item) => item.isOnline)
-      .map((item) => ({
-        _id: item.peerId,
-        nickname: item.nickname,
-        gender: item.gender
+    return onlineUsers
+      .filter((u) => u._id !== user?._id)
+      .map((u) => ({
+        _id: u._id,
+        nickname: u.nickname,
+        gender: u.gender || 'Male'
       }));
-  }, [chatItems, isProfileUser]);
+  }, [onlineUsers, isProfileUser, user?._id]);
 
   const totalCount = chatItems.length + userGroups.length + (activeMatchChat ? 1 : 0);
   const randomMatchActive = !!activeMatchChat;

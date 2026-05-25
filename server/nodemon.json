@@ -1,0 +1,6 @@
+{
+  "watch": ["*.js", "routes", "controllers", "models", "socket", "config", "middleware.js", "utils"],
+  "ignore": ["uploads/**", "node_modules/**"],
+  "ext": "js,json",
+  "delay": 800
+}

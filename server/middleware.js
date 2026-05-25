@@ -55,6 +55,11 @@ const errorHandler = (err, req, res, next) => {
     return res.status(400).json({ message: 'Invalid ID format' });
   }
 
+  if (err.code === 'LIMIT_FILE_SIZE' || msg.includes('File too large')) {
+    const maxMb = Number(process.env.MAX_UPLOAD_MB) || 100;
+    return res.status(400).json({ message: `File too large. Maximum size is ${maxMb}MB.` });
+  }
+
   res.status(500).json({ message: 'Internal server error' });
 };
 

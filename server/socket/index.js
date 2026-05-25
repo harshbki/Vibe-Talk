@@ -487,9 +487,13 @@ const setupSocket = (io) => {
 
     // End video call
     socket.on('video_call_end', (data) => {
-      const { roomId, from } = data;
-      // Notify all users in the room that call has ended
-      io.to(roomId).emit('video_call_ended', { roomId, from });
+      const { roomId, from, to } = data;
+      const payload = { roomId, from };
+      io.to(roomId).emit('video_call_ended', payload);
+      const peerId = resolveCallPeer(roomId, from, to);
+      if (peerId) {
+        emitToUser(io, peerId, 'video_call_ended', payload);
+      }
       console.log(`Video call ended in room ${roomId} by user ${from}`);
     });
 

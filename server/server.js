@@ -77,6 +77,18 @@ app.use(cors({ origin: corsCallback }));
 app.use(express.json());
 app.use(requestLogger);
 
+// Lightweight health (no DB required)
+app.get('/api/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const mongoState = mongoose.connection.readyState;
+  const mongoLabels = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  res.json({
+    status: mongoState === 1 ? 'ok' : 'degraded',
+    mongo: mongoLabels[mongoState] || 'unknown',
+    uptime: process.uptime(),
+  });
+});
+
 // Root route
 app.get('/', (req, res) => {
   res.json({
@@ -130,6 +142,13 @@ setupSocket(io);
 
 const PORT = process.env.PORT || 8081;
 const HOST = process.env.HOST ?? '0.0.0.0';
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+});
 
 const start = async () => {
   server

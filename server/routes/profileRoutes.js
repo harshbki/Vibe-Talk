@@ -149,9 +149,13 @@ router.post('/:userId/complete', async (req, res, next) => {
     if (!fullName || !fullName.trim()) {
       return res.status(400).json({ message: 'Full name is required' });
     }
+    if (!dateOfBirth) {
+      return res.status(400).json({ message: 'Date of birth is required' });
+    }
 
     const updateData = {
       fullName: fullName.trim(),
+      dateOfBirth: new Date(dateOfBirth),
       isFullAccount: true
     };
     if (gender !== undefined) {
@@ -161,7 +165,6 @@ router.post('/:userId/complete', async (req, res, next) => {
       updateData.gender = gender;
     }
     if (bio !== undefined) updateData.bio = bio.trim();
-    if (dateOfBirth) updateData.dateOfBirth = dateOfBirth;
     if (location) updateData.location = location.trim();
     if (interests) updateData.interests = interests;
 

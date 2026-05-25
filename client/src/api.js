@@ -41,7 +41,13 @@ export const getUsers = async (gender, excludeId) => {
   return response.data;
 };
 
+const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
+
 export const uploadMedia = async (file) => {
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return Promise.reject(new Error('File too large. Maximum allowed size is 100MB.'));
+  }
+
   const formData = new FormData();
   formData.append('file', file);
 

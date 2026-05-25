@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 
+mongoose.set('bufferCommands', false);
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('[MongoDB] disconnected — API may return errors until reconnected');
+});
+mongoose.connection.on('reconnected', () => {
+  console.log('[MongoDB] reconnected');
+});
+
 const connectDB = async () => {
   const uri = process.env.MONGO_URI;
   if (!uri || !String(uri).trim()) {

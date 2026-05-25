@@ -62,6 +62,10 @@ const ProfileCompletionModal = () => {
       setError('Full name is required');
       return;
     }
+    if (!formData.dateOfBirth) {
+      setError('Date of birth is required for profile login');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -71,9 +75,7 @@ const ProfileCompletionModal = () => {
         location: formData.location.trim(),
         interests: formData.interests
       };
-      if (formData.dateOfBirth) {
-        payload.dateOfBirth = formData.dateOfBirth;
-      }
+      payload.dateOfBirth = formData.dateOfBirth;
       const updatedUser = await completeProfile(user._id, payload);
       setUser(updatedUser);
     } catch (err) {

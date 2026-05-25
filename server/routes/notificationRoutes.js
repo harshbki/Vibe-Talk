@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Notification = require('../models/Notification');
+const { requireMongo } = require('../middleware');
+
+router.use(requireMongo);
 
 // GET /api/notifications/:userId - Get user notifications
 router.get('/:userId', async (req, res, next) => {

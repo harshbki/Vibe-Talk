@@ -203,6 +203,9 @@ const RandomMatchPage = () => {
   const endMatch = () => {
     const socket = getSocket();
     if (socket && roomId) {
+      if (showVideoCall) {
+        socket.emit('video_call_end', { roomId, from: user._id, to: partner?._id });
+      }
       socket.emit('end_match', { roomId, userId: user._id });
       setStatus('idle');
       setPartner(null);

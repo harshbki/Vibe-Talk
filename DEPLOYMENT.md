@@ -5,6 +5,24 @@ Render is **not** required; this project is set up for DO + MongoDB Atlas.
 
 ---
 
+## Local errors: `ERR_EMPTY_RESPONSE` / `ERR_CONNECTION_RESET`
+
+These mean the **API on port 8081 stopped or restarted** for a moment — not a React bug.
+
+| Cause | Fix |
+|--------|-----|
+| Server not running | Terminal: `cd server && npm start` (or root `npm run dev:all`) |
+| **Nodemon** restarted while you edited server files | Normal in dev; refresh page. Avoid saving `server/` during a call. |
+| Port 8081 busy / two Node processes | Close extra terminals; only one server on 8081 |
+| MongoDB stopped | `npm run mongo` (Docker) or start MongoDB service (Windows) |
+| Mongo down during request | Open `http://localhost:8081/api/health` — `mongo` should be `connected` |
+
+After errors you may see **`Socket connected`** again — the client reconnected; that matches a short server restart.
+
+**Large video uploads** can take 30s–2min (Cloudinary/network). That is slow, not a disconnect, unless the server crashes (check server terminal).
+
+---
+
 ## GitHub vs your machine (important)
 
 What you see on [GitHub `main`](https://github.com/harshbki/Vibe-Talk) today (last green commit ~**Mar 23, 2026**):
@@ -100,11 +118,17 @@ REACT_APP_MONETAG_ZONE_ID=your-zone-id
 
 After changing any `REACT_APP_*` variable, trigger a **new deploy** (rebuild).
 
-### 3. MongoDB Atlas
+### 3. MongoDB Atlas + DigitalOcean (step by step)
 
-1. Create cluster + database user.  
-2. Network Access: allow DigitalOcean egress IPs or `0.0.0.0/0` (quick test).  
-3. Put connection string in `MONGO_URI`.
+1. [MongoDB Atlas](https://cloud.mongodb.com) → **Create cluster** (free M0 is fine).  
+2. **Database Access** → Add user (username + password) → role **Read and write to any database**.  
+3. **Network Access** → **Add IP Address** → `0.0.0.0/0` (allow from anywhere; tighten later).  
+4. **Database** → Connect → **Drivers** → copy connection string, e.g.  
+   `mongodb+srv://USER:PASS@cluster0.xxxxx.mongodb.net/vibetalk?retryWrites=true&w=majority`  
+   Replace `USER`, `PASS`, and set database name `vibetalk`.  
+5. DigitalOcean App → **Settings** → **App-Level Environment Variables** → paste as **`MONGO_URI`**.  
+6. **Redeploy** after changing `MONGO_URI` or any `REACT_APP_*`.  
+7. Smoke test: `https://YOUR-APP.ondigitalocean.app/api/health` → `"mongo":"connected"`.
 
 ### 4. Smoke test
 

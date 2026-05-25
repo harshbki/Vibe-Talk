@@ -113,7 +113,7 @@ const LoginPage = () => {
               <>
                 <div className="form-control w-full">
                   <label className="label">
-                    <span className="label-text font-semibold">Full Name</span>
+                    <span className="label-text font-semibold">Full Name <span className="text-error">*</span></span>
                   </label>
                   <input
                     type="text"
@@ -126,7 +126,7 @@ const LoginPage = () => {
                 </div>
                 <div className="form-control w-full">
                   <label className="label">
-                    <span className="label-text font-semibold">Date of Birth</span>
+                    <span className="label-text font-semibold">Date of Birth <span className="text-error">*</span></span>
                   </label>
                   <input
                     type="date"

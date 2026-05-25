@@ -13,6 +13,9 @@ const {
   approveJoinRequest,
   rejectJoinRequest
 } = require('../controllers/groupController');
+const { requireMongo } = require('../middleware');
+
+router.use(requireMongo);
 
 router.post('/', createGroup);
 router.get('/discover', getAllPublicGroups);

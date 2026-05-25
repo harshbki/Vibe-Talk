@@ -2,7 +2,7 @@ import { io } from 'socket.io-client';
 
 function getSocketUrl() {
   if (process.env.REACT_APP_SOCKET_URL) return process.env.REACT_APP_SOCKET_URL;
-  const { protocol, hostname, port } = window.location;
+  const { hostname } = window.location;
   if (hostname.endsWith('.app.github.dev')) {
     const base = hostname.replace(/-\d+\.app\.github\.dev$/, '');
     return `https://${base}-8081.app.github.dev`;
@@ -14,15 +14,37 @@ const SOCKET_URL = getSocketUrl();
 
 let socket = null;
 
+const SOCKET_OPTIONS = {
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 8000,
+  timeout: 20000,
+  transports: ['polling', 'websocket'],
+};
+
 export const initSocket = (userId) => {
   if (!socket) {
-    socket = io(SOCKET_URL);
+    socket = io(SOCKET_URL, SOCKET_OPTIONS);
+
     socket.on('connect', () => {
       console.log('Socket connected');
-      socket.emit('user_online', userId);
+      if (userId) socket.emit('user_online', userId);
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.warn('Socket disconnected:', reason);
+    });
+
+    socket.on('connect_error', (err) => {
+      console.warn('Socket connect error (is API on 8081 running?):', err.message);
     });
   } else if (userId) {
-    socket.emit('user_online', userId);
+    if (socket.connected) {
+      socket.emit('user_online', userId);
+    } else {
+      socket.once('connect', () => socket.emit('user_online', userId));
+    }
   }
   return socket;
 };

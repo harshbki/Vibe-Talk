@@ -13,6 +13,8 @@ import CreateGroupPage from './pages/CreateGroupPage';
 import GroupChatPage from './pages/GroupChatPage';
 import UserProfilePage from './pages/UserProfilePage';
 import Navbar from './components/Navbar';
+import IncomingCallOverlay from './components/IncomingCallOverlay';
+import DmToast from './components/DmToast';
 import { initializeAds } from './utils/adUtils';
 import { initSounds } from './utils/soundUtils';
 
@@ -43,8 +45,10 @@ function App() {
   return (
     <AuthProvider>
       <ChatProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <div className="min-h-screen flex flex-col bg-base-100 text-base-content">
+            <IncomingCallOverlay />
+            <DmToast />
             <Routes>
               <Route path="/" element={<PublicRoute><LoginPage /></PublicRoute>} />
               <Route path="/chat" element={<PrivateRoute><PrivateLayout><ChatPage /></PrivateLayout></PrivateRoute>} />
