@@ -11,6 +11,10 @@ const updateOnlineUsers = (users) => {
   onlineUsersMap = new Map(users.map(u => [u._id, true]));
 };
 
+const { requireMongo } = require('../middleware');
+
+router.use(requireMongo);
+
 // GET /api/users - Get users with optional gender filter
 router.get('/', async (req, res) => {
   try {
@@ -23,8 +27,10 @@ router.get('/', async (req, res) => {
       query.gender = gender;
     }
     
-    // Exclude current user if provided
     if (excludeId) {
+      if (!mongoose.isValidObjectId(excludeId)) {
+        return res.status(400).json({ message: 'Invalid user ID format' });
+      }
       query._id = { $ne: excludeId };
     }
     

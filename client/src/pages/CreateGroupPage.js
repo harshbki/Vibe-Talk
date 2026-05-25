@@ -12,14 +12,22 @@ const CreateGroupPage = () => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState(null);
+  const [usersError, setUsersError] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
+      setUsersError(null);
       try {
         const data = await getUsers(null, user._id);
         setUsers(data);
       } catch (err) {
         console.error('Fetch users error:', err);
+        const offline = !err.response;
+        setUsersError(
+          offline
+            ? 'API server not reachable. Start backend: cd server && npm start (port 8081).'
+            : err.response?.data?.message || 'Could not load users'
+        );
       }
     };
     fetchUsers();
@@ -41,7 +49,12 @@ const CreateGroupPage = () => {
       navigate(`/group/${group._id}`);
     } catch (err) {
       console.error('Create group error:', err);
-      setError(err.response?.data?.message || 'Failed to create group');
+      const offline = !err.response;
+      setError(
+        offline
+          ? 'API server not running on port 8081. Start: cd server && npm start'
+          : err.response?.data?.message || 'Failed to create group'
+      );
     } finally {
       setCreating(false);
     }
@@ -91,8 +104,12 @@ const CreateGroupPage = () => {
             <div>
               <h3 className="font-semibold text-sm mb-2">Add Members ({selectedMembers.length} selected)</h3>
               <div className="bg-base-200 rounded-xl max-h-60 overflow-y-auto p-2 space-y-1">
-                {users.length === 0 ? (
-                  <p className="text-center text-base-content/50 text-sm py-4">No users available</p>
+                {usersError ? (
+                  <p className="text-center text-error text-sm py-4">{usersError}</p>
+                ) : users.length === 0 ? (
+                  <p className="text-center text-base-content/50 text-sm py-4">
+                    No profile users yet. Complete profile on other accounts to add members.
+                  </p>
                 ) : (
                   users.map((u) => (
                     <label

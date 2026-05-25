@@ -12,8 +12,14 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message || error.message;
+    const message = error.response?.data?.message
+      || (error.message === 'Network Error'
+        ? 'Cannot reach API (start server on port 8081)'
+        : error.message);
     console.error('API error:', error.config?.url, message);
+    if (!error.response) {
+      error.friendlyMessage = message;
+    }
     return Promise.reject(error);
   }
 );

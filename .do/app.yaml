@@ -1,0 +1,67 @@
+# DigitalOcean App Platform spec — import or mirror in dashboard
+name: vibetalk
+region: nyc
+
+services:
+  - name: web
+    github:
+      repo: harshbki/Vibe-Talk
+      branch: main
+      deploy_on_push: true
+    source_dir: /
+    build_command: npm run install-all && npm run build
+    run_command: npm start
+    http_port: 8081
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8081"
+      - key: HOST
+        value: 0.0.0.0
+      - key: CLIENT_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: MONGO_URI
+        scope: RUN_TIME
+        type: SECRET
+      - key: JWT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: CLOUDINARY_CLOUD_NAME
+        scope: RUN_TIME
+        type: SECRET
+      - key: CLOUDINARY_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: CLOUDINARY_API_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: REACT_APP_API_URL
+        scope: BUILD_TIME
+        type: SECRET
+      - key: REACT_APP_SOCKET_URL
+        scope: BUILD_TIME
+        type: SECRET
+      - key: REACT_APP_ADSENSE_CLIENT_ID
+        scope: BUILD_TIME
+        type: SECRET
+      - key: REACT_APP_ADSENSE_SLOT_CHAT_SIDEBAR
+        scope: BUILD_TIME
+        value: "3628542402"
+      - key: REACT_APP_ADSENSE_SLOT_RANDOM_MATCH_INLINE
+        scope: BUILD_TIME
+        value: "3628542402"
+      - key: REACT_APP_ADSENSE_SLOT_GROUP_CHAT_TOP
+        scope: BUILD_TIME
+        value: "3628542402"
+      - key: REACT_APP_ADSENSE_SLOT_USERS_LIST_BOTTOM
+        scope: BUILD_TIME
+        value: ""
+      - key: REACT_APP_ADSENSE_SLOT_PROFILE_BOTTOM
+        scope: BUILD_TIME
+        value: ""
+      - key: MAX_UPLOAD_MB
+        value: "100"
