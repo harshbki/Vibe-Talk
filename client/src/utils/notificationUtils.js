@@ -1,19 +1,12 @@
 // Browser Notification Utilities for VibeTalk
 
+import { isChatSoundEnabled, playNotificationSound as playChatSound } from './soundUtils';
 
 let swRegistration = null;
-let notificationAudio = null;
 
-export const playNotificationSound = () => {
-  try {
-    if (!notificationAudio) {
-      notificationAudio = new Audio('/notification.mp3');
-      notificationAudio.volume = 0.7;
-    }
-    // Always clone to allow overlapping sounds
-    const sound = notificationAudio.cloneNode();
-    sound.play().catch(() => {});
-  } catch {}
+const playNotificationSound = () => {
+  if (!isChatSoundEnabled()) return;
+  playChatSound();
 };
 
 /**

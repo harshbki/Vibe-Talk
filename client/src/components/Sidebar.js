@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { getUserChats, getUserGroups } from '../api';
 import UserList from './UserList';
 import AdBanner from './AdBanner';
+import { isProfileComplete } from '../utils/profileUtils';
 
 const Sidebar = () => {
   const { onlineUsers, messages, selectedUser, setSelectedUser, activeMatchChat } = useChat();
@@ -14,7 +15,8 @@ const Sidebar = () => {
   const [recentChats, setRecentChats] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
   const [loadingChats, setLoadingChats] = useState(false);
-  const isProfileUser = !!user?.isFullAccount;
+
+  const isProfileUser = isProfileComplete(user);
 
   useEffect(() => {
     const loadChats = async () => {

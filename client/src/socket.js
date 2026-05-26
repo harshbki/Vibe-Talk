@@ -1,12 +1,16 @@
 import { io } from 'socket.io-client';
 
 function getSocketUrl() {
-  if (process.env.REACT_APP_SOCKET_URL) return process.env.REACT_APP_SOCKET_URL;
   const { hostname } = window.location;
-  if (hostname.endsWith('.app.github.dev')) {
-    const base = hostname.replace(/-\d+\.app\.github\.dev$/, '');
-    return `https://${base}-8081.app.github.dev`;
+  // Codespace: connect through React proxy (same origin) since port 8081 isn't tunneled
+  if (
+    hostname.endsWith('.app.github.dev') ||
+    hostname.endsWith('.codespaces.dev')
+  ) {
+    return window.location.origin;
   }
+  // Use env var if provided (for custom setups)
+  if (process.env.REACT_APP_SOCKET_URL) return process.env.REACT_APP_SOCKET_URL;
   return 'http://localhost:8081';
 }
 

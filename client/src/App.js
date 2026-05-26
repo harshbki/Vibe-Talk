@@ -15,7 +15,7 @@ import UserProfilePage from './pages/UserProfilePage';
 import Navbar from './components/Navbar';
 import IncomingCallOverlay from './components/IncomingCallOverlay';
 import DmToast from './components/DmToast';
-import ApiOfflineBanner from './components/ApiOfflineBanner';
+import { VideoCallProvider, useVideoCall } from './context/VideoCallContext';
 import { initializeAds } from './utils/adUtils';
 import { initSounds } from './utils/soundUtils';
 
@@ -30,12 +30,15 @@ const PublicRoute = ({ children }) => {
   return !user ? children : <Navigate to="/chat" />;
 };
 
-const PrivateLayout = ({ children }) => (
-  <>
-    <Navbar />
-    {children}
-  </>
-);
+const PrivateLayout = ({ children }) => {
+  const { callActive } = useVideoCall();
+  return (
+    <>
+      <Navbar />
+      <div className={callActive ? 'pt-[min(42vh,360px)]' : undefined}>{children}</div>
+    </>
+  );
+};
 
 function App() {
   useEffect(() => {
@@ -46,9 +49,9 @@ function App() {
   return (
     <AuthProvider>
       <ChatProvider>
+        <VideoCallProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <div className="min-h-screen flex flex-col bg-base-100 text-base-content">
-            <ApiOfflineBanner />
             <IncomingCallOverlay />
             <DmToast />
             <Routes>
@@ -66,6 +69,7 @@ function App() {
             </Routes>
           </div>
         </Router>
+        </VideoCallProvider>
       </ChatProvider>
     </AuthProvider>
   );

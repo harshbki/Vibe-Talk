@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { getSocket } from '../socket';
 import { getUser } from '../api';
+import { useVideoCall } from '../context/VideoCallContext';
 import { playRingingSound, stopRingingSound, vibrate } from '../utils/soundUtils';
 import { showCallNotification } from '../utils/notificationUtils';
 
@@ -13,6 +14,7 @@ import { showCallNotification } from '../utils/notificationUtils';
 const IncomingCallOverlay = () => {
   const { user } = useAuth();
   const { setSelectedUser } = useChat();
+  const { openCall } = useVideoCall();
   const location = useLocation();
   const navigate = useNavigate();
   const [incoming, setIncoming] = useState(null);
@@ -80,44 +82,38 @@ const IncomingCallOverlay = () => {
 
     const isRandomMatch = String(incoming.roomId).startsWith('room_');
 
+    const partnerInfo = {
+      _id: incoming.from,
+      nickname: incoming.fromNickname || 'User',
+      gender: 'Male',
+    };
+
     if (isRandomMatch) {
-      navigate('/match', {
-        state: {
-          videoCall: {
-            roomId: incoming.roomId,
-            from: incoming.from,
-            accept: true
-          }
-        }
+      openCall(partnerInfo, incoming.roomId, {
+        roomId: incoming.roomId,
+        from: incoming.from,
+        accept: true,
       });
+      navigate('/match');
       return;
     }
 
     try {
       const sender = await getUser(incoming.from);
-      setSelectedUser({
-        _id: sender._id,
-        nickname: sender.nickname,
-        gender: sender.gender
-      });
+      partnerInfo._id = sender._id;
+      partnerInfo.nickname = sender.nickname;
+      partnerInfo.gender = sender.gender;
+      setSelectedUser(partnerInfo);
     } catch {
-      setSelectedUser({
-        _id: incoming.from,
-        nickname: incoming.fromNickname || 'User',
-        gender: 'Male'
-      });
+      setSelectedUser(partnerInfo);
     }
 
-    navigate('/chat', {
-      state: {
-        openVideoCall: true,
-        videoCall: {
-          roomId: incoming.roomId,
-          from: incoming.from,
-          accept: true
-        }
-      }
+    openCall(partnerInfo, incoming.roomId, {
+      roomId: incoming.roomId,
+      from: incoming.from,
+      accept: true,
     });
+    navigate('/chat');
   };
 
   if (!incoming || onCallPages) return null;

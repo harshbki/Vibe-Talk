@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
 import { getProfile } from '../api';
 import { getSocket } from '../socket';
 import MessageInput from './MessageInput';
-import VideoCall from './VideoCall';
+import { useVideoCall } from '../context/VideoCallContext';
+import { isProfileComplete } from '../utils/profileUtils';
 
 const ChatWindow = () => {
   const { selectedUser, messages, typing, markAsRead, sendSeen, deleteMessage } = useChat();
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [showVideoCall, setShowVideoCall] = useState(false);
-  const [pendingVideoCall, setPendingVideoCall] = useState(null);
+  const { openCall, closeCall, startCall, isActiveForRoom } = useVideoCall();
   const [profile, setProfile] = useState(null);
 
   const chatMessages = selectedUser ? messages[selectedUser._id] || [] : [];
@@ -48,18 +48,17 @@ const ChatWindow = () => {
   }, [selectedUser]);
 
   useEffect(() => {
-    if (location.state?.openVideoCall) {
-      setShowVideoCall(true);
+    if (location.state?.openVideoCall && selectedUser && roomId) {
+      openCall(selectedUser, roomId);
     }
     const videoCall = location.state?.videoCall;
     if (videoCall?.accept && selectedUser && roomId && videoCall.roomId === roomId) {
-      setShowVideoCall(true);
-      setPendingVideoCall(videoCall);
+      openCall(selectedUser, roomId, videoCall);
     }
     if (location.state?.openVideoCall || location.state?.videoCall) {
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state, selectedUser, roomId, navigate, location.pathname]);
+  }, [location.state, selectedUser, roomId, navigate, location.pathname, openCall]);
 
   useEffect(() => {
     if (selectedUser) {
@@ -89,21 +88,17 @@ const ChatWindow = () => {
     if (!socket || !roomId) return;
 
     const handleIncomingCall = (data) => {
-      if (data?.roomId === roomId) {
-        setShowVideoCall(true);
+      if (data?.roomId === roomId && selectedUser) {
+        openCall(selectedUser, roomId);
       }
     };
 
     const handleCallEnded = (data) => {
-      if (data?.roomId === roomId) {
-        setShowVideoCall(false);
-      }
+      if (data?.roomId === roomId) closeCall();
     };
 
     const handleCallRejected = (data) => {
-      if (data?.roomId === roomId) {
-        setShowVideoCall(false);
-      }
+      if (data?.roomId === roomId) closeCall();
     };
 
     socket.on('call_incoming', handleIncomingCall);
@@ -115,9 +110,9 @@ const ChatWindow = () => {
       socket.off('video_call_ended', handleCallEnded);
       socket.off('call_rejected', handleCallRejected);
     };
-  }, [roomId]);
+  }, [roomId, selectedUser, openCall, closeCall]);
 
-  if (user && !user.isFullAccount && !selectedUser) {
+  if (user && !isProfileComplete(user) && !selectedUser) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-base-200/50 to-base-200/30">
         <div className="text-center space-y-3 p-8 max-w-sm">
@@ -194,7 +189,7 @@ const ChatWindow = () => {
     <div className="flex-1 flex flex-col bg-base-100 h-full">
       {/* Header — WhatsApp-style profile */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-base-300 bg-base-100">
-        <a href={`/user/${selectedUser._id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
+        <Link to={`/user/${selectedUser._id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
           {/* Avatar */}
           {profile?.profilePicture ? (
             <div className="avatar">
@@ -223,24 +218,17 @@ const ChatWindow = () => {
               <p className="text-xs text-base-content/40 truncate max-w-[200px]">{profile.bio}</p>
             )}
           </div>
-        </a>
+        </Link>
         <button
-          className={`btn btn-sm ${showVideoCall ? 'btn-error' : 'btn-primary'} gap-1`}
-          onClick={() => setShowVideoCall(!showVideoCall)}
+          type="button"
+          className={`btn btn-sm ${isActiveForRoom(roomId) ? 'btn-error' : 'btn-primary'} gap-1`}
+          onClick={() => {
+            if (isActiveForRoom(roomId)) closeCall();
+            else startCall(selectedUser, roomId);
+          }}
         >
-          📹 {showVideoCall ? 'Hide' : 'Video'}
+          📹 {isActiveForRoom(roomId) ? 'End video' : 'Video'}
         </button>
-      </div>
-
-      {/* Keep mounted so incoming calls are never missed. */}
-      <div className={`border-b border-base-300 ${showVideoCall ? 'block' : 'hidden'}`}>
-        <VideoCall
-          partner={selectedUser}
-          roomId={roomId}
-          onEndCall={() => setShowVideoCall(false)}
-          pendingIncomingCall={pendingVideoCall}
-          onPendingIncomingConsumed={() => setPendingVideoCall(null)}
-        />
       </div>
 
       {/* Messages */}

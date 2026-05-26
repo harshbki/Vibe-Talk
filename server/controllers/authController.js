@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const User = require('../models/User');
+const { isProfileComplete, syncProfileCompleteFlag } = require('../utils/profileUtils');
 
 // Generate unique nickname suggestions
 const generateSuggestions = async (base, count = 5) => {
@@ -82,8 +83,13 @@ const profileLogin = async (req, res, next) => {
       return res.status(404).json({ message: 'No account found with this nickname' });
     }
 
-    if (!user.isFullAccount) {
-      return res.status(400).json({ message: 'This account has no profile. Use guest login instead.' });
+    syncProfileCompleteFlag(user);
+    if (user.isModified()) await user.save();
+
+    if (!isProfileComplete(user)) {
+      return res.status(400).json({
+        message: 'Profile is incomplete. Finish name and date of birth on the profile page first.',
+      });
     }
 
     // Verify fullName (case-insensitive)

@@ -9,6 +9,7 @@ const {
   uploadToCloudinary,
   shouldUseLocalFallback,
 } = require('../utils/mediaStorage');
+const { isProfileComplete, syncProfileCompleteFlag } = require('../utils/profileUtils');
 
 // Multer setup for memory storage
 const storage = multer.memoryStorage();
@@ -34,6 +35,8 @@ router.get('/:userId', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    syncProfileCompleteFlag(user);
+    if (user.isModified()) await user.save();
     res.json(user);
   } catch (error) {
     console.error('Get profile error:', error);
@@ -65,8 +68,6 @@ router.put('/:userId', async (req, res) => {
       updateData.gender = gender;
     }
 
-    updateData.isFullAccount = true;
-
     const user = await User.findByIdAndUpdate(
       req.params.userId,
       updateData,
@@ -76,6 +77,9 @@ router.put('/:userId', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    syncProfileCompleteFlag(user);
+    await user.save();
 
     res.json(user);
   } catch (error) {
@@ -116,16 +120,16 @@ router.post('/:userId/picture', upload.single('file'), async (req, res) => {
 
     const user = await User.findByIdAndUpdate(
       req.params.userId,
-      {
-        profilePicture: pictureUrl,
-        isFullAccount: true,
-      },
+      { profilePicture: pictureUrl },
       { new: true }
     ).select('-__v');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    syncProfileCompleteFlag(user);
+    await user.save();
 
     res.json({
       success: true,
@@ -156,7 +160,7 @@ router.post('/:userId/complete', async (req, res, next) => {
     const updateData = {
       fullName: fullName.trim(),
       dateOfBirth: new Date(dateOfBirth),
-      isFullAccount: true
+      isFullAccount: true,
     };
     if (gender !== undefined) {
       if (!['Male', 'Female'].includes(gender)) {

@@ -20,7 +20,11 @@ router.get('/', async (req, res) => {
   try {
     const { gender, excludeId } = req.query;
     
-    let query = { isFullAccount: true };
+    let query = {
+      isFullAccount: true,
+      fullName: { $exists: true, $nin: [null, ''] },
+      dateOfBirth: { $exists: true, $ne: null },
+    };
 
     // Filter by gender if provided
     if (gender && ['Male', 'Female'].includes(gender)) {

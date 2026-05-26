@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { completeProfile, updateProfile, uploadProfilePicture } from '../api';
 import AdBanner from '../components/AdBanner';
+import { isProfileComplete } from '../utils/profileUtils';
 
 const INTEREST_OPTIONS = [
   'Music', 'Gaming', 'Travel', 'Movies', 'Sports', 'Cooking',
@@ -13,7 +14,8 @@ const ProfilePage = () => {
   const { user, setUser, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isNewUser = !user?.isFullAccount;
+  const profileComplete = isProfileComplete(user);
+  const isNewUser = !profileComplete;
   const [step, setStep] = useState(1);
   const [isEditing, setIsEditing] = useState(isNewUser);
   const [formData, setFormData] = useState({
@@ -64,7 +66,8 @@ const ProfilePage = () => {
     try {
       const response = await uploadProfilePicture(user._id, file);
       setUser(response.user);
-      if (!isNewUser) showToast('Profile picture updated!');
+      if (profileComplete) showToast('Profile picture updated!');
+      else showToast('Add full name and date of birth to complete your profile', 'error');
     } catch (error) {
       console.error('Upload error:', error);
       showToast('Failed to upload picture', 'error');
@@ -74,11 +77,11 @@ const ProfilePage = () => {
   };
 
   const handleSave = async () => {
-    if (isNewUser && !formData.fullName.trim()) {
+    if (!formData.fullName.trim()) {
       showToast('Full name is required', 'error');
       return;
     }
-    if (isNewUser && !formData.dateOfBirth) {
+    if (!formData.dateOfBirth) {
       showToast('Date of birth is required', 'error');
       return;
     }
@@ -341,14 +344,18 @@ const ProfilePage = () => {
                 <span className={`badge ${user.gender === 'Male' ? 'badge-primary' : 'badge-secondary'} badge-outline gap-1`}>
                   {user.gender === 'Male' ? '👨' : '👩'} {user.gender}
                 </span>
-                <span className="badge badge-success badge-outline badge-sm">✅ Complete</span>
+                {profileComplete ? (
+                  <span className="badge badge-success badge-outline badge-sm">✅ Complete</span>
+                ) : (
+                  <span className="badge badge-warning badge-outline badge-sm">⚠️ Incomplete — name &amp; DOB required</span>
+                )}
               </div>
             </div>
 
             {isEditing ? (
               <div className="w-full space-y-4 mt-2">
                 <div className="form-control w-full">
-                  <label className="label"><span className="label-text font-semibold">Full Name</span></label>
+                  <label className="label"><span className="label-text font-semibold">Full Name <span className="text-error">*</span></span></label>
                   <input
                     type="text"
                     name="fullName"
@@ -373,7 +380,7 @@ const ProfilePage = () => {
                   <label className="label"><span className="label-text-alt text-base-content/40">{formData.bio.length}/150</span></label>
                 </div>
                 <div className="form-control w-full">
-                  <label className="label"><span className="label-text font-semibold">Date of Birth</span></label>
+                  <label className="label"><span className="label-text font-semibold">Date of Birth <span className="text-error">*</span></span></label>
                   <input
                     type="date"
                     name="dateOfBirth"

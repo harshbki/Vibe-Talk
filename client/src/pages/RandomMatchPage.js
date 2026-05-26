@@ -5,9 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { getSocket } from '../socket';
 import { showPopunder } from '../utils/adUtils';
-import { playNotificationSound } from '../utils/soundUtils';
+import { isChatSoundEnabled, playNotificationSound } from '../utils/soundUtils';
 import { showMatchNotification } from '../utils/notificationUtils';
-import VideoCall from '../components/VideoCall';
+import { useVideoCall } from '../context/VideoCallContext';
 import AdBanner from '../components/AdBanner';
 import { uploadMedia } from '../api';
 
@@ -16,7 +16,7 @@ const RandomMatchPage = () => {
   const { setActiveMatchChat } = useChat();
   const location = useLocation();
   const navigate = useNavigate();
-  const [pendingVideoCall, setPendingVideoCall] = useState(null);
+  const { openCall, closeCall, startCall, isActiveForRoom } = useVideoCall();
   const [status, setStatus] = useState('idle');
   const [partner, setPartner] = useState(null);
   const [roomId, setRoomId] = useState(null);
@@ -25,7 +25,6 @@ const RandomMatchPage = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
-  const [showVideoCall, setShowVideoCall] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeout = useRef(null);
   const fileInputRef = useRef(null);
@@ -37,13 +36,10 @@ const RandomMatchPage = () => {
 
   useEffect(() => {
     const videoCall = location.state?.videoCall;
-    if (!videoCall?.roomId || status !== 'matched' || roomId !== videoCall.roomId) return;
-    setShowVideoCall(true);
-    if (videoCall.accept) {
-      setPendingVideoCall(videoCall);
-    }
+    if (!videoCall?.roomId || status !== 'matched' || roomId !== videoCall.roomId || !partner) return;
+    openCall(partner, roomId, videoCall.accept ? videoCall : null);
     navigate(location.pathname, { replace: true, state: {} });
-  }, [location.state, status, roomId, navigate, location.pathname]);
+  }, [location.state, status, roomId, partner, navigate, location.pathname, openCall]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -61,22 +57,21 @@ const RandomMatchPage = () => {
       setMessages([]);
       setInputMessage('');
       setShowEmojiPicker(false);
-      setShowVideoCall(false);
+      closeCall();
       setActiveMatchChat({
         partnerId: data.partner._id,
         nickname: data.partner.nickname,
         gender: data.partner.gender,
         lastMessage: 'Matched! Start chatting...'
       });
-      playNotificationSound();
+      if (isChatSoundEnabled()) playNotificationSound();
       showMatchNotification(data.partner.nickname);
     });
 
     socket.on('match_message_received', (data) => {
       const payload = typeof data.message === 'string' ? { text: data.message } : (data.message || {});
       
-      // Play notification sound for incoming message
-      playNotificationSound();
+      if (isChatSoundEnabled()) playNotificationSound();
       
       const newMessage = {
         msgId: data.msgId,
@@ -141,7 +136,7 @@ const RandomMatchPage = () => {
 
     socket.on('call_incoming', (data) => {
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
-      setShowVideoCall(true);
+      if (partner) openCall(partner, roomIdRef.current);
     });
 
     socket.on('match_partner_typing', () => setIsPartnerTyping(true));
@@ -154,7 +149,7 @@ const RandomMatchPage = () => {
       setMessages([]);
       setInputMessage('');
       setShowEmojiPicker(false);
-      setShowVideoCall(false);
+      closeCall();
       setActiveMatchChat(null);
       alert(data.message);
     });
@@ -173,7 +168,7 @@ const RandomMatchPage = () => {
       socket.off('match_ended');
       socket.off('search_cancelled');
     };
-  }, [roomId, setActiveMatchChat, user?._id]);
+  }, [roomId, setActiveMatchChat, user?._id, partner, openCall, closeCall]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -203,8 +198,8 @@ const RandomMatchPage = () => {
   const endMatch = () => {
     const socket = getSocket();
     if (socket && roomId) {
-      if (showVideoCall) {
-        socket.emit('video_call_end', { roomId, from: user._id, to: partner?._id });
+      if (isActiveForRoom(roomId)) {
+        closeCall();
       }
       socket.emit('end_match', { roomId, userId: user._id });
       setStatus('idle');
@@ -213,7 +208,6 @@ const RandomMatchPage = () => {
       setMessages([]);
       setInputMessage('');
       setShowEmojiPicker(false);
-      setShowVideoCall(false);
       setActiveMatchChat(null);
     }
   };
@@ -448,26 +442,20 @@ const RandomMatchPage = () => {
         </div>
         <div className="flex gap-2">
           <button
-            className={`btn btn-sm ${showVideoCall ? 'btn-error' : 'btn-primary'} gap-1`}
-            onClick={() => setShowVideoCall(!showVideoCall)}
+            type="button"
+            className={`btn btn-sm ${isActiveForRoom(roomId) ? 'btn-error' : 'btn-primary'} gap-1`}
+            onClick={() => {
+              if (!partner || !roomId) return;
+              if (isActiveForRoom(roomId)) closeCall();
+              else startCall(partner, roomId);
+            }}
           >
-            📹 {showVideoCall ? 'Hide' : 'Video'}
+            📹 {isActiveForRoom(roomId) ? 'End video' : 'Video'}
           </button>
           <button className="btn btn-sm btn-error btn-outline" onClick={endMatch}>
             End Chat
           </button>
         </div>
-      </div>
-
-      {/* Keep mounted so incoming offers are not missed when collapsed. */}
-      <div className={`border-b border-base-300 ${showVideoCall ? 'block' : 'hidden'}`}>
-        <VideoCall
-          partner={partner}
-          roomId={roomId}
-          onEndCall={() => setShowVideoCall(false)}
-          pendingIncomingCall={pendingVideoCall}
-          onPendingIncomingConsumed={() => setPendingVideoCall(null)}
-        />
       </div>
 
       {/* Messages */}

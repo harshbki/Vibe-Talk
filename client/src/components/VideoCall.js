@@ -6,7 +6,14 @@ import { playRingingSound, stopRingingSound, vibrate } from '../utils/soundUtils
 import { showCallNotification } from '../utils/notificationUtils';
 import api from '../api';
 
-const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingIncomingConsumed }) => {
+const VideoCall = ({
+  partner,
+  roomId,
+  onEndCall,
+  pendingIncomingCall,
+  onPendingIncomingConsumed,
+  embedded = false,
+}) => {
   const { user } = useAuth();
   const [callStatus, setCallStatus] = useState('idle');
   const [incomingCall, setIncomingCall] = useState(null);
@@ -16,6 +23,8 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isCaller, setIsCaller] = useState(false);
   const [callError, setCallError] = useState(null);
+  const [facingMode, setFacingMode] = useState('user');
+  const callStatusRef = useRef('idle');
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -25,6 +34,10 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
   const roomIdRef = useRef(roomId);
   const partnerIdRef = useRef(partner?._id);
   const isCallerRef = useRef(false);
+
+  useEffect(() => {
+    callStatusRef.current = callStatus;
+  }, [callStatus]);
 
   useEffect(() => {
     roomIdRef.current = roomId;
@@ -119,9 +132,19 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
 
   useEffect(() => {
     return () => {
+      if (['connected', 'connecting', 'calling', 'incoming'].includes(callStatusRef.current)) {
+        const socket = getSocket();
+        if (socket && user?._id) {
+          socket.emit('video_call_end', {
+            roomId: roomIdRef.current,
+            from: user._id,
+            to: partnerIdRef.current,
+          });
+        }
+      }
       cleanupCall();
     };
-  }, []);
+  }, [user?._id]);
 
   const attachStreamToVideo = (el, stream, muted = false) => {
     if (!el || !stream) return;
@@ -179,16 +202,26 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
     }
   };
 
-  const ensureLocalMedia = async () => {
-    if (localStream) return localStream;
+  const ensureLocalMedia = async (facing = facingMode) => {
+    if (localStream) {
+      const videoTrack = localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        setIsVideoOff(!videoTrack.enabled);
+      }
+      return localStream;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          facingMode: facing,
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
-        }
+          autoGainControl: true,
+        },
       });
       setLocalStream(stream);
       const videoTrack = stream.getVideoTracks()[0];
@@ -197,6 +230,38 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
     } catch (error) {
       console.error('Camera/Microphone permission denied:', error.name);
       throw new Error('Camera/Microphone access denied. Please allow permissions and try again.');
+    }
+  };
+
+  const flipCamera = async () => {
+    const next = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(next);
+    try {
+      if (localStream) {
+        localStream.getTracks().forEach((t) => t.stop());
+      }
+      setLocalStream(null);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: next },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+      setLocalStream(stream);
+      const videoTrack = stream.getVideoTracks()[0];
+      setIsVideoOff(videoTrack ? !videoTrack.enabled : false);
+      if (peerConnection.current) {
+        const sender = peerConnection.current.getSenders().find((s) => s.track?.kind === 'video');
+        const newTrack = stream.getVideoTracks()[0];
+        if (sender && newTrack) {
+          await sender.replaceTrack(newTrack);
+        }
+      }
+    } catch (error) {
+      console.error('Flip camera error:', error);
+      setCallError('Could not switch camera');
     }
   };
 
@@ -502,8 +567,12 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
     }
   };
 
+  const shellClass = embedded
+    ? 'flex flex-col items-center justify-center p-2 bg-base-200'
+    : 'flex flex-col items-center justify-center min-h-[400px] p-6 bg-base-200 rounded-xl';
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] p-6 bg-base-200 rounded-xl">
+    <div className={shellClass}>
       {callStatus === 'idle' && (
         <div className="card bg-base-100 shadow-lg p-8 flex flex-col items-center gap-4">
           {callError && (
@@ -584,23 +653,37 @@ const VideoCall = ({ partner, roomId, onEndCall, pendingIncomingCall, onPendingI
       )}
 
       {callStatus === 'connected' && (
-        <div className="w-full flex flex-col items-center gap-4">
-          <div className="relative w-full max-w-3xl aspect-video bg-black rounded-xl overflow-hidden">
+        <div className="w-full flex flex-col items-center gap-2">
+          <div
+            className={`relative w-full bg-black rounded-xl overflow-hidden ${
+              embedded ? 'aspect-video max-h-[28vh]' : 'max-w-3xl aspect-video'
+            }`}
+          >
             <video ref={bindRemoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
             <span className="absolute top-2 left-2 badge badge-neutral badge-sm">{partner?.nickname}</span>
-            <div className="absolute bottom-3 right-3 w-32 aspect-video bg-base-300 rounded-lg overflow-hidden border-2 border-base-100 shadow-lg">
-              <video ref={bindLocalVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />
+            <div className="absolute bottom-3 right-3 w-24 sm:w-32 aspect-video bg-base-300 rounded-lg overflow-hidden border-2 border-base-100 shadow-lg">
+              <video
+                ref={bindLocalVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+                style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
+              />
               <span className="absolute bottom-1 left-1 badge badge-neutral badge-xs">You</span>
             </div>
           </div>
-          <div className="flex gap-3">
-            <button className={`btn btn-circle ${isMuted ? 'btn-warning' : 'btn-ghost'}`} onClick={toggleMute}>
+          <div className="flex gap-2 flex-wrap justify-center">
+            <button type="button" className={`btn btn-circle btn-sm ${isMuted ? 'btn-warning' : 'btn-ghost'}`} onClick={toggleMute}>
               {isMuted ? '🔇' : '🔊'}
             </button>
-            <button className={`btn btn-circle ${isVideoOff ? 'btn-warning' : 'btn-ghost'}`} onClick={toggleVideo}>
+            <button type="button" className={`btn btn-circle btn-sm ${isVideoOff ? 'btn-warning' : 'btn-ghost'}`} onClick={toggleVideo}>
               {isVideoOff ? '📷' : '📹'}
             </button>
-            <button className="btn btn-circle btn-error" onClick={endCall}>
+            <button type="button" className="btn btn-circle btn-sm btn-ghost" onClick={flipCamera} title="Switch front/back camera">
+              🔄
+            </button>
+            <button type="button" className="btn btn-circle btn-sm btn-error" onClick={endCall}>
               📞
             </button>
           </div>

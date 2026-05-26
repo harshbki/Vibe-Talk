@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { completeProfile, uploadProfilePicture } from '../api';
+import { isProfileComplete } from '../utils/profileUtils';
 
 const INTEREST_OPTIONS = [
   'Music', 'Gaming', 'Travel', 'Movies', 'Sports', 'Cooking',
@@ -21,11 +22,7 @@ const ProfileCompletionModal = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (user?.isFullAccount) return;
-  }, [user]);
-
-  if (!user || user.isFullAccount) return null;
+  if (!user || isProfileComplete(user)) return null;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

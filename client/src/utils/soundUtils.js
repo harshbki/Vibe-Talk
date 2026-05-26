@@ -5,6 +5,9 @@ let ringingInterval = null;
 let ringingAudioContext = null;
 let ringingOscillators = [];
 
+/** Respects Settings → Message sounds (localStorage vt_chatSound). */
+export const isChatSoundEnabled = () => localStorage.getItem('vt_chatSound') !== 'false';
+
 const getNotificationAudio = () => {
   if (!notificationAudio) {
     notificationAudio = new Audio('/notification.mp3');
@@ -23,6 +26,7 @@ export const initSounds = () => {
 };
 
 export const playNotificationSound = () => {
+  if (!isChatSoundEnabled()) return;
   try {
     const audio = getNotificationAudio();
     const clone = audio.cloneNode();
@@ -36,6 +40,7 @@ export const playNotificationSound = () => {
 };
 
 const playBeepFallback = () => {
+  if (!isChatSoundEnabled()) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -86,7 +91,7 @@ export const playRingingSound = () => {
     ringingInterval = setInterval(pulse, 1000);
   } catch (error) {
     console.error('Ringing sound error:', error);
-    playNotificationSound();
+    if (isChatSoundEnabled()) playNotificationSound();
   }
 };
 
@@ -121,8 +126,9 @@ export const vibrate = (pattern = [200, 100, 200]) => {
 
 export default {
   initSounds,
+  isChatSoundEnabled,
   playNotificationSound,
   playRingingSound,
   stopRingingSound,
-  vibrate
+  vibrate,
 };

@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { getSocket } from '../socket';
 import { initNotifications, showMessageNotification } from '../utils/notificationUtils';
-import { playNotificationSound } from '../utils/soundUtils';
 
 const ChatContext = createContext();
 
@@ -46,9 +45,6 @@ export const ChatProvider = ({ children }) => {
       socket.on('receive_message', (data) => {
         const { from, message, msgId, timestamp } = data;
         const payload = typeof message === 'string' ? { text: message } : (message || {});
-
-        // Play notification sound for incoming message
-        playNotificationSound();
 
         setMessages(prev => ({
           ...prev,

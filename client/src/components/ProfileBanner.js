@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { isProfileComplete } from '../utils/profileUtils';
 
 const ProfileBanner = () => {
   const { user } = useAuth();
   const [dismissed, setDismissed] = useState(false);
 
-  if (!user || user.isFullAccount || dismissed) return null;
+  if (!user || isProfileComplete(user) || dismissed) return null;
 
   return (
     <div className="bg-warning/10 border-b border-warning/30 px-4 py-2.5 flex items-center justify-between gap-3 animate-fade-in-up">
@@ -20,6 +21,7 @@ const ProfileBanner = () => {
         </Link>
       </div>
       <button
+        type="button"
         onClick={() => setDismissed(true)}
         className="btn btn-ghost btn-xs btn-circle text-base-content/40 hover:text-base-content"
       >

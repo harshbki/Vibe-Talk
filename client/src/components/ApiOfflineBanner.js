@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
+function getSocketUrl() {
+  const { hostname } = window.location;
+  if (hostname.endsWith('.app.github.dev') || hostname.endsWith('.codespaces.dev'))
+    return window.location.origin;
+  return process.env.REACT_APP_SOCKET_URL || 'http://localhost:8081';
+}
+
 const healthUrl = () => {
-  const base = process.env.REACT_APP_SOCKET_URL || 'http://localhost:8081';
+  const base = getSocketUrl();
   return `${base.replace(/\/$/, '')}/api/health`;
 };
 

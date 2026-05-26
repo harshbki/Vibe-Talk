@@ -11,7 +11,6 @@ import {
   getUser
 } from '../api';
 import { getSocket } from '../socket';
-import { playNotificationSound } from '../utils/soundUtils';
 import { showMessageNotification, showCallNotification } from '../utils/notificationUtils';
 
 const NotificationBell = () => {
@@ -56,7 +55,6 @@ const NotificationBell = () => {
     const handleNewNotification = (notif) => {
       setNotifications(prev => [notif, ...prev].slice(0, 50));
       setUnreadCount(prev => prev + 1);
-      playNotificationSound();
       if (notif.type === 'call') {
         showCallNotification(notif.body?.replace(' is calling you', '') || 'Someone');
       } else if (notif.type === 'message') {
