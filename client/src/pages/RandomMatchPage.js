@@ -198,9 +198,16 @@ const RandomMatchPage = () => {
   const endMatch = () => {
     const socket = getSocket();
     if (socket && roomId) {
-      if (isActiveForRoom(roomId)) {
-        closeCall();
+      // Ensure video call ends on both sides when user taps "End Chat".
+      // Relying only on `activeCall` state can desync if the UI hasn't mounted yet.
+      if (partner?._id) {
+        socket.emit('video_call_end', {
+          roomId,
+          from: user._id,
+          to: partner._id,
+        });
       }
+      closeCall();
       socket.emit('end_match', { roomId, userId: user._id });
       setStatus('idle');
       setPartner(null);

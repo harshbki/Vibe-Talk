@@ -14,6 +14,7 @@ export const useVideoCall = () => {
 export const VideoCallProvider = ({ children }) => {
   const { user } = useAuth();
   const [activeCall, setActiveCall] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const prevUserIdRef = useRef(null);
 
   const endCallOnServer = useCallback((call) => {
@@ -32,6 +33,7 @@ export const VideoCallProvider = ({ children }) => {
       if (current) endCallOnServer(current);
       return null;
     });
+    setIsFullscreen(false);
   }, [endCallOnServer]);
 
   const openCall = useCallback((partner, roomId, pendingIncoming = null) => {
@@ -80,16 +82,46 @@ export const VideoCallProvider = ({ children }) => {
       {children}
       {callActive && (
         <div
-          className="fixed top-16 left-0 right-0 z-[200] bg-base-100 border-b border-base-300 shadow-lg"
-          style={{ maxHeight: 'min(42vh, 360px)' }}
+          className={
+            isFullscreen
+              ? 'fixed inset-0 z-[250] bg-base-200/90 backdrop-blur'
+              : 'fixed top-16 left-0 right-0 z-[200] bg-base-100 border-b border-base-300 shadow-lg'
+          }
+          style={
+            isFullscreen
+              ? { height: '100vh' }
+              : { height: 'min(42vh, 360px)' }
+          }
         >
-          <div className="flex items-center justify-between px-3 py-1 bg-base-200/80 text-xs">
-            <span className="font-medium">📹 {activeCall.partner?.nickname}</span>
-            <span className="text-base-content/50 hidden sm:inline">
-              Chat stays below — browse freely
+          <div
+            className={
+              isFullscreen
+                ? 'flex items-center justify-between px-4 py-2 bg-base-100/80 backdrop-blur border-b border-base-300'
+                : 'flex items-center justify-between px-3 py-1 bg-base-200/80 text-xs border-b border-base-300'
+            }
+          >
+            <span className="font-medium">
+              📹 {activeCall.partner?.nickname}
             </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-xs btn-ghost"
+                onClick={() => setIsFullscreen((v) => !v)}
+              >
+                {isFullscreen ? '🗗 Exit' : '⛶ Full'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-xs btn-error btn-outline"
+                onClick={closeCall}
+              >
+                ✕
+              </button>
+            </div>
           </div>
-          <div className="overflow-y-auto" style={{ maxHeight: 'calc(min(42vh, 360px) - 28px)' }}>
+
+          <div className="flex-1 overflow-hidden">
             <VideoCall
               embedded
               partner={activeCall.partner}

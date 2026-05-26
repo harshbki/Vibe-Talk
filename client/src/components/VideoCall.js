@@ -568,7 +568,7 @@ const VideoCall = ({
   };
 
   const shellClass = embedded
-    ? 'flex flex-col items-center justify-center p-2 bg-base-200'
+    ? 'flex flex-col items-center justify-start p-2 bg-base-200 h-full w-full'
     : 'flex flex-col items-center justify-center min-h-[400px] p-6 bg-base-200 rounded-xl';
 
   return (
@@ -653,13 +653,20 @@ const VideoCall = ({
       )}
 
       {callStatus === 'connected' && (
-        <div className="w-full flex flex-col items-center gap-2">
+        <div className="w-full flex flex-col items-center gap-2 flex-1">
           <div
-            className={`relative w-full bg-black rounded-xl overflow-hidden ${
-              embedded ? 'aspect-video max-h-[28vh]' : 'max-w-3xl aspect-video'
-            }`}
+            className={
+              embedded
+                ? 'relative w-full h-full bg-black rounded-xl overflow-hidden'
+                : 'relative w-full bg-black rounded-xl overflow-hidden max-w-3xl aspect-video'
+            }
           >
-            <video ref={bindRemoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+            <video
+              ref={bindRemoteVideoRef}
+              autoPlay
+              playsInline
+              className="w-full h-full object-cover"
+            />
             <span className="absolute top-2 left-2 badge badge-neutral badge-sm">{partner?.nickname}</span>
             <div className="absolute bottom-3 right-3 w-24 sm:w-32 aspect-video bg-base-300 rounded-lg overflow-hidden border-2 border-base-100 shadow-lg">
               <video
