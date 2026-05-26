@@ -16,6 +16,7 @@
     "mongo:stop": "docker compose down",
     "mongo:win": "powershell -ExecutionPolicy Bypass -File scripts/start-mongodb.ps1",
     "check-local": "bash scripts/check-local.sh",
+    "test-mongo": "bash scripts/test-mongo-uri.sh",
     "fix-client": "bash scripts/fix-client-deps.sh",
     "start-dev": "bash scripts/start-dev.sh"
   },

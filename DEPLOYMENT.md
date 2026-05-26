@@ -23,25 +23,20 @@ After errors you may see **`Socket connected`** again — the client reconnected
 
 ---
 
-## GitHub vs your machine (important)
+## Deploy readiness (May 2026)
 
-What you see on [GitHub `main`](https://github.com/harshbki/Vibe-Talk) today (last green commit ~**Mar 23, 2026**):
+Latest `main` includes video call fixes, profile validation (name + DOB), message-sound toggle, and 100MB uploads.
 
-| On GitHub `main` | Only on your PC (not pushed yet) |
-|------------------|-----------------------------------|
-| Random match UI, camera upload | Video call socket fixes (`223254d7`) |
-| Gender edit, CI fixes | Random match status tweaks (`eebda79b`) |
-| | `client/src/utils/soundUtils.js` (ringing sounds) |
-| | Latest socket/video/error fixes (uncommitted) |
-
-**If you deploy from GitHub without pushing**, video calls and ringing sounds may be broken or old.  
-Push local `main` before deploying:
+Before deploy:
 
 ```bash
-git add -A
-git commit -m "fix: video routing, sounds, DO docs, error handling"
-git push origin main
+git pull origin main
+cd client && npm ci && npm run build   # must pass (same as GitHub Actions)
+npm run test-mongo                     # after Atlas MONGO_URI is in server/.env
+npm run check-local                    # local: Mongo + server + client
 ```
+
+**GitHub Actions:** If a run fails with `account is suspended`, fix the account at [support.github.com](https://support.github.com), then **Actions → Client build → Run workflow** (manual trigger).
 
 ### Files that were removed from the repo over time
 
