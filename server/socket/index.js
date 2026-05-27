@@ -223,21 +223,27 @@ const setupSocket = (io) => {
       });
     });
 
-    // End match
+    // End match — notify partner + end any active video call on both sides
     socket.on('end_match', (data) => {
-      const { roomId } = data;
+      const { roomId, userId } = data;
       const match = activeMatches.get(roomId);
-      if (match) {
-        io.to(roomId).emit('match_ended', {
-          message: 'Your partner has left the chat'
-        });
-        activeMatches.delete(roomId);
-        const room = io.sockets.adapter.rooms.get(roomId);
-        if (room) {
-          for (const socketId of room) {
-            const s = io.sockets.sockets.get(socketId);
-            if (s) s.leave(roomId);
-          }
+      if (!match) return;
+
+      const peerId =
+        String(match.user1Id) === String(userId) ? match.user2Id : match.user1Id;
+      const endedPayload = { message: 'Your partner has left the chat' };
+      const videoEndPayload = { roomId, from: userId };
+
+      io.to(roomId).emit('match_ended', endedPayload);
+      emitToUser(io, peerId, 'match_ended', endedPayload);
+      emitToUser(io, peerId, 'video_call_ended', videoEndPayload);
+
+      activeMatches.delete(roomId);
+      const room = io.sockets.adapter.rooms.get(roomId);
+      if (room) {
+        for (const socketId of room) {
+          const s = io.sockets.sockets.get(socketId);
+          if (s) s.leave(roomId);
         }
       }
     });
