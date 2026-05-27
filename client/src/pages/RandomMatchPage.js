@@ -174,6 +174,23 @@ const RandomMatchPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Partner ended match from another tab/page — global event from ChatContext
+  useEffect(() => {
+    const onPartnerEnded = (e) => {
+      setStatus('idle');
+      setPartner(null);
+      setRoomId(null);
+      setMessages([]);
+      setInputMessage('');
+      setShowEmojiPicker(false);
+      closeCall();
+      setActiveMatchChat(null);
+      if (e.detail?.message) alert(e.detail.message);
+    };
+    window.addEventListener('vibetalk:match_ended', onPartnerEnded);
+    return () => window.removeEventListener('vibetalk:match_ended', onPartnerEnded);
+  }, [closeCall, setActiveMatchChat]);
+
   const findMatch = () => {
     const socket = getSocket();
     if (socket && user) {

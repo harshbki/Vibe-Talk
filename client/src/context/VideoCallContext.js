@@ -64,6 +64,17 @@ export const VideoCallProvider = ({ children }) => {
 
   const handleEndFromComponent = useCallback(() => {
     setActiveCall(null);
+    setIsFullscreen(false);
+  }, []);
+
+  // Partner ended random match — close UI only (server already sent video_call_ended)
+  useEffect(() => {
+    const onMatchEnded = () => {
+      setActiveCall(null);
+      setIsFullscreen(false);
+    };
+    window.addEventListener('vibetalk:match_ended', onMatchEnded);
+    return () => window.removeEventListener('vibetalk:match_ended', onMatchEnded);
   }, []);
 
   const callActive = Boolean(activeCall && user);
