@@ -28,7 +28,6 @@ const VideoCall = ({
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
-  const remoteAudioRef = useRef(null);
   const peerConnection = useRef(null);
   const pendingIceCandidates = useRef([]);
   const remoteMediaStreamRef = useRef(null);
@@ -153,11 +152,6 @@ const VideoCall = ({
       el.srcObject = stream;
     }
     el.muted = muted;
-    if (!muted) {
-      // Some browsers require volume/defaultMuted to be explicitly set for remote audio.
-      el.volume = 1.0;
-      el.defaultMuted = false;
-    }
     el.play().catch((error) => {
       // Ignore AbortError when video element unmounts or interrupts its own play
       if (error.name !== 'AbortError') {
@@ -176,18 +170,12 @@ const VideoCall = ({
     attachStreamToVideo(el, remoteStream, false);
   };
 
-  const bindRemoteAudioRef = (el) => {
-    remoteAudioRef.current = el;
-    attachStreamToVideo(el, remoteStream, false);
-  };
-
   useEffect(() => {
     attachStreamToVideo(localVideoRef.current, localStream, true);
   }, [localStream, callStatus]);
 
   useEffect(() => {
     attachStreamToVideo(remoteVideoRef.current, remoteStream, false);
-    attachStreamToVideo(remoteAudioRef.current, remoteStream, false);
   }, [remoteStream, callStatus]);
 
   // Restore incoming-call UI when opened from a notification (socket event may have been missed).
@@ -196,37 +184,14 @@ const VideoCall = ({
     if (pendingIncomingCall.roomId !== roomId) return;
     if (callStatus !== 'idle') return;
 
-    // If user came from popup/notification, auto-accept so WebRTC handshake starts immediately.
-    (async () => {
-      try {
-        triggerAdOnInteraction();
-        setCallError(null);
-
-        if (!localStream) {
-          await ensureLocalMedia();
-        }
-
-        const socket = getSocket();
-        if (socket) {
-          socket.emit('call_accept', {
-            roomId: roomIdRef.current,
-            from: user._id,
-            to: pendingIncomingCall.from,
-          });
-        }
-
-        isCallerRef.current = false;
-        setIsCaller(false);
-        setIncomingCall(null);
-        setCallStatus('connecting');
-      } catch (error) {
-        console.error('Auto-accept call error:', error);
-        setCallError(error.message || 'Could not access camera/microphone.');
-        setCallStatus('idle');
-      } finally {
-        onPendingIncomingConsumed?.();
-      }
-    })();
+    setIncomingCall({
+      from: pendingIncomingCall.from,
+      fromNickname: partner?.nickname,
+      roomId: pendingIncomingCall.roomId
+    });
+    setCallStatus('incoming');
+    setIsCaller(false);
+    onPendingIncomingConsumed?.();
   }, [pendingIncomingCall, roomId, partner?.nickname, callStatus, onPendingIncomingConsumed]);
 
   const incrementCallCount = async () => {
@@ -286,17 +251,12 @@ const VideoCall = ({
       });
       setLocalStream(stream);
       const videoTrack = stream.getVideoTracks()[0];
-      const audioTrack = stream.getAudioTracks()[0];
       setIsVideoOff(videoTrack ? !videoTrack.enabled : false);
       if (peerConnection.current) {
-        const videoSender = peerConnection.current.getSenders().find((s) => s.track?.kind === 'video');
-        const audioSender = peerConnection.current.getSenders().find((s) => s.track?.kind === 'audio');
+        const sender = peerConnection.current.getSenders().find((s) => s.track?.kind === 'video');
         const newTrack = stream.getVideoTracks()[0];
-        if (videoSender && newTrack) {
-          await videoSender.replaceTrack(newTrack);
-        }
-        if (audioSender && audioTrack) {
-          await audioSender.replaceTrack(audioTrack);
+        if (sender && newTrack) {
+          await sender.replaceTrack(newTrack);
         }
       }
     } catch (error) {
@@ -477,9 +437,6 @@ const VideoCall = ({
     }
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
-    }
-    if (remoteAudioRef.current) {
-      remoteAudioRef.current.srcObject = null;
     }
     if (localStream) {
       localStream.getTracks().forEach(track => {
@@ -704,7 +661,6 @@ const VideoCall = ({
                 : 'relative w-full bg-black rounded-xl overflow-hidden max-w-3xl aspect-video'
             }
           >
-            <audio ref={bindRemoteAudioRef} autoPlay />
             <video
               ref={bindRemoteVideoRef}
               autoPlay
