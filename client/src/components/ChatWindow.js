@@ -7,7 +7,6 @@ import { getSocket } from '../socket';
 import MessageInput from './MessageInput';
 import { useVideoCall } from '../context/VideoCallContext';
 import { isProfileComplete } from '../utils/profileUtils';
-import { getPrivateRoomId } from '../utils/roomUtils';
 
 const ChatWindow = () => {
   const { selectedUser, messages, typing, markAsRead, sendSeen, deleteMessage } = useChat();
@@ -21,10 +20,11 @@ const ChatWindow = () => {
   const isTyping = selectedUser && typing[selectedUser._id];
   const messagesEndRef = useRef(null);
 
-  const roomId = useMemo(
-    () => getPrivateRoomId(user?._id, selectedUser?._id),
-    [selectedUser, user]
-  );
+  const roomId = useMemo(() => {
+    if (!selectedUser || !user) return null;
+    const ids = [user._id, selectedUser._id].sort();
+    return `private_${ids[0]}_${ids[1]}`;
+  }, [selectedUser, user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -88,13 +88,8 @@ const ChatWindow = () => {
     if (!socket || !roomId) return;
 
     const handleIncomingCall = (data) => {
-      if (!data?.roomId || data.from === user?._id) return;
-      if (data.roomId === roomId && selectedUser) {
-        openCall(selectedUser, roomId, {
-          roomId: data.roomId,
-          from: data.from,
-          accept: false,
-        });
+      if (data?.roomId === roomId && selectedUser) {
+        openCall(selectedUser, roomId);
       }
     };
 

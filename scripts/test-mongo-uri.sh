@@ -4,24 +4,11 @@
 # Or set MONGO_URI in server/.env and run from repo root.
 set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-if [ -f "$ROOT/server/.env" ] && [ -z "$MONGO_URI" ]; then
-  MONGO_URI="$(node -e "
-    const fs = require('fs');
-    const path = require('path');
-    const envPath = path.join('$ROOT', 'server', '.env');
-    const text = fs.readFileSync(envPath, 'utf8');
-    for (const line of text.split(/\\r?\\n/)) {
-      const m = line.match(/^\\s*MONGO_URI\\s*=\\s*(.+?)\\s*$/);
-      if (!m) continue;
-      let v = m[1].trim();
-      if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {
-        v = v.slice(1, -1);
-      }
-      process.stdout.write(v);
-      break;
-    }
-  ")"
-  export MONGO_URI
+if [ -f "$ROOT/server/.env" ]; then
+  # shellcheck disable=SC1091
+  set -a
+  source "$ROOT/server/.env"
+  set +a
 fi
 if [ -z "$MONGO_URI" ]; then
   echo "Set MONGO_URI (Atlas or local), e.g. in server/.env"

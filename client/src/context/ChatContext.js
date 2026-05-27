@@ -144,12 +144,6 @@ export const ChatProvider = ({ children }) => {
         setTyping(prev => ({ ...prev, [from]: false }));
       });
 
-      // Random match ended by partner (works even if RandomMatchPage unmounted)
-      socket.on('match_ended', (payload) => {
-        setActiveMatchChat(null);
-        window.dispatchEvent(new CustomEvent('vibetalk:match_ended', { detail: payload }));
-      });
-
       socket.on('message_error', ({ message }) => {
         if (message) {
           console.error('Message error:', message);
@@ -180,7 +174,6 @@ export const ChatProvider = ({ children }) => {
         socket.off('message_deleted');
         socket.off('user_typing');
         socket.off('user_stop_typing');
-        socket.off('match_ended');
         socket.off('message_error');
       }
     };
