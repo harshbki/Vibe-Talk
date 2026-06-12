@@ -24,6 +24,8 @@ jobs:
         env:
           CI: true
           GENERATE_SOURCEMAP: false
+          REACT_APP_API_URL: /api
+          REACT_APP_SOCKET_URL: http://localhost:8081
 
   server-check:
     runs-on: ubuntu-latest
