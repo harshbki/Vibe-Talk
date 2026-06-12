@@ -9,6 +9,9 @@ const getOrCreateChat = async (req, res, next) => {
     if (!userId1 || !userId2) {
       return res.status(400).json({ message: 'Both user IDs are required' });
     }
+    if (String(userId1) !== req.userId && String(userId2) !== req.userId) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
 
     // Find existing chat
     let chat = await Chat.findOne({
@@ -51,10 +54,14 @@ const getChatMessages = async (req, res) => {
 // Save a message
 const saveMessage = async (req, res) => {
   try {
-    const { chatId, senderId, text, image } = req.body;
+    const { chatId } = req.params;
+    const { senderId, text, image } = req.body;
 
-    if (!chatId || !senderId || !text) {
-      return res.status(400).json({ message: 'chatId, senderId, and text are required' });
+    if (!senderId || !text) {
+      return res.status(400).json({ message: 'senderId and text are required' });
+    }
+    if (String(senderId) !== req.userId) {
+      return res.status(403).json({ message: 'Forbidden' });
     }
 
     const message = await Message.create({
@@ -105,8 +112,8 @@ const deleteMessage = async (req, res, next) => {
     const { messageId } = req.params;
     const { userId } = req.body;
 
-    if (!userId) {
-      return res.status(400).json({ message: 'userId is required' });
+    if (!userId || String(userId) !== req.userId) {
+      return res.status(403).json({ message: 'Forbidden' });
     }
 
     const message = await Message.findById(messageId);

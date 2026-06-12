@@ -11,15 +11,17 @@ const {
   joinGroup,
   requestJoinGroup,
   approveJoinRequest,
-  rejectJoinRequest
+  rejectJoinRequest,
 } = require('../controllers/groupController');
 const { requireMongo } = require('../middleware');
+const { authenticate, requireSelfParam } = require('../middleware/auth');
 
 router.use(requireMongo);
+router.use(authenticate);
 
 router.post('/', createGroup);
 router.get('/discover', getAllPublicGroups);
-router.get('/user/:userId', getUserGroups);
+router.get('/user/:userId', requireSelfParam('userId'), getUserGroups);
 router.get('/:groupId', getGroupById);
 router.post('/:groupId/add-member', addMember);
 router.post('/:groupId/remove-member', removeMember);

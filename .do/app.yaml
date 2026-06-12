@@ -30,6 +30,18 @@ services:
       - key: JWT_SECRET
         scope: RUN_TIME
         type: SECRET
+      - key: JWT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: REACT_APP_TURN_URL
+        scope: BUILD_TIME
+        type: SECRET
+      - key: REACT_APP_TURN_USERNAME
+        scope: BUILD_TIME
+        type: SECRET
+      - key: REACT_APP_TURN_CREDENTIAL
+        scope: BUILD_TIME
+        type: SECRET
       - key: CLOUDINARY_CLOUD_NAME
         scope: RUN_TIME
         type: SECRET

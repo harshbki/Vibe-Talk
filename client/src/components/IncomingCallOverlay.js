@@ -30,6 +30,7 @@ const IncomingCallOverlay = () => {
     if (!incoming?.roomId) return true;
     if (callActive && isActiveForRoom(incoming.roomId)) return true;
     if (location.pathname === '/chat' && activePrivateRoomId === incoming.roomId) return true;
+    if (location.pathname === '/match' && String(incoming.roomId).startsWith('room_')) return true;
     return false;
   }, [incoming, callActive, isActiveForRoom, location.pathname, activePrivateRoomId]);
 

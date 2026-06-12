@@ -3,6 +3,9 @@ const router = express.Router();
 const multer = require('multer');
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const { requireMongo } = require('../middleware');
+const { authenticate, requireSelfParam } = require('../middleware/auth');
+const { toPublicUser, toSelfUser } = require('../utils/userSanitize');
 const {
   isCloudinaryConfigured,
   saveLocalFile,
@@ -11,47 +14,43 @@ const {
 } = require('../utils/mediaStorage');
 const { isProfileComplete, syncProfileCompleteFlag } = require('../utils/profileUtils');
 
-// Multer setup for memory storage
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'), false);
-    }
-  }
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed'), false);
+  },
 });
 
-// GET /api/profile/:userId - Get user profile
+router.use(requireMongo);
+
 router.get('/:userId', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.userId)) {
       return res.status(400).json({ message: 'Invalid user ID format' });
     }
     const user = await User.findById(req.params.userId).select('-__v');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ message: 'User not found' });
     syncProfileCompleteFlag(user);
     if (user.isModified()) await user.save();
-    res.json(user);
+    res.json(toPublicUser(user));
   } catch (error) {
     console.error('Get profile error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// PUT /api/profile/:userId - Update profile info
-router.put('/:userId', async (req, res) => {
+router.use(authenticate);
+
+router.put('/:userId', requireSelfParam('userId'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.userId)) {
       return res.status(400).json({ message: 'Invalid user ID format' });
     }
     const { fullName, bio, profilePicture, dateOfBirth, location, interests, gender } = req.body;
-    
+
     const updateData = {};
     if (fullName !== undefined) updateData.fullName = fullName;
     if (bio !== undefined) updateData.bio = bio;
@@ -60,7 +59,6 @@ router.put('/:userId', async (req, res) => {
     if (location !== undefined) updateData.location = location;
     if (interests !== undefined) updateData.interests = interests;
 
-    // Allow gender editing for profile users.
     if (gender !== undefined) {
       if (!['Male', 'Female'].includes(gender)) {
         return res.status(400).json({ message: 'Gender must be Male or Female' });
@@ -68,34 +66,31 @@ router.put('/:userId', async (req, res) => {
       updateData.gender = gender;
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.params.userId,
-      updateData,
-      { new: true, runValidators: true }
-    ).select('-__v');
+    const user = await User.findByIdAndUpdate(req.params.userId, updateData, {
+      new: true,
+      runValidators: true,
+    }).select('-__v');
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
     syncProfileCompleteFlag(user);
     await user.save();
-
-    res.json(user);
+    res.json(toSelfUser(user));
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// POST /api/profile/:userId/picture - Upload profile picture
-router.post('/:userId/picture', upload.single('file'), async (req, res) => {
+router.post('/:userId/picture', requireSelfParam('userId'), upload.single('file'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.userId)) {
       return res.status(400).json({ message: 'Invalid user ID format' });
     }
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file provided' });
+    if (!req.file) return res.status(400).json({ message: 'No file provided' });
+
+    if (process.env.NODE_ENV === 'production' && !isCloudinaryConfigured()) {
+      return res.status(503).json({ message: 'Cloudinary required in production' });
     }
 
     let pictureUrl;
@@ -107,13 +102,13 @@ router.post('/:userId/picture', upload.single('file'), async (req, res) => {
         const result = await uploadToCloudinary(req.file, {
           folder: 'vibetalk/profiles',
           resource_type: 'image',
-          transformation: [
-            { width: 400, height: 400, crop: 'fill', gravity: 'face' },
-          ],
+          transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
         });
         pictureUrl = result.secure_url;
       } catch (cloudinaryError) {
-        if (!shouldUseLocalFallback(cloudinaryError)) throw cloudinaryError;
+        if (process.env.NODE_ENV === 'production' || !shouldUseLocalFallback(cloudinaryError)) {
+          throw cloudinaryError;
+        }
         pictureUrl = saveLocalFile(req.file, req).url;
       }
     }
@@ -124,26 +119,19 @@ router.post('/:userId/picture', upload.single('file'), async (req, res) => {
       { new: true }
     ).select('-__v');
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
     syncProfileCompleteFlag(user);
     await user.save();
 
-    res.json({
-      success: true,
-      url: pictureUrl,
-      user,
-    });
+    res.json({ success: true, url: pictureUrl, user: toSelfUser(user) });
   } catch (error) {
     console.error('Upload picture error:', error);
     res.status(500).json({ message: 'Upload failed', error: error.message });
   }
 });
 
-// POST /api/profile/:userId/complete - First-time profile completion
-router.post('/:userId/complete', async (req, res, next) => {
+router.post('/:userId/complete', requireSelfParam('userId'), async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.userId)) {
       return res.status(400).json({ message: 'Invalid user ID format' });
@@ -172,17 +160,13 @@ router.post('/:userId/complete', async (req, res, next) => {
     if (location) updateData.location = location.trim();
     if (interests) updateData.interests = interests;
 
-    const user = await User.findByIdAndUpdate(
-      req.params.userId,
-      updateData,
-      { new: true, runValidators: true }
-    ).select('-__v');
+    const user = await User.findByIdAndUpdate(req.params.userId, updateData, {
+      new: true,
+      runValidators: true,
+    }).select('-__v');
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.json(user);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(toSelfUser(user));
   } catch (error) {
     next(error);
   }

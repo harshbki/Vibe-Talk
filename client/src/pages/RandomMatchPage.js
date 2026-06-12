@@ -136,7 +136,13 @@ const RandomMatchPage = () => {
 
     socket.on('call_incoming', (data) => {
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
-      if (partner) openCall(partner, roomIdRef.current);
+      if (!partner) return;
+      openCall(partner, roomIdRef.current, {
+        roomId: data.roomId,
+        from: data.from,
+        fromNickname: data.fromNickname,
+        accept: false,
+      });
     });
 
     socket.on('match_partner_typing', () => setIsPartnerTyping(true));

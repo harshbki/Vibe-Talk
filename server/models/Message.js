@@ -3,7 +3,11 @@ const mongoose = require('mongoose');
 const messageSchema = new mongoose.Schema({
   chat: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Chat'
+    ref: 'Chat',
+  },
+  group: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group',
   },
   sender: {
     type: mongoose.Schema.Types.ObjectId,
@@ -35,5 +39,6 @@ const messageSchema = new mongoose.Schema({
 });
 
 messageSchema.index({ chat: 1, timestamp: 1 });
+messageSchema.index({ group: 1, timestamp: 1 });
 
 module.exports = mongoose.model('Message', messageSchema);

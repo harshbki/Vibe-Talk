@@ -1,10 +1,17 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { guestLogin, profileLoginApi } from '../api';
+import { guestLogin, profileLoginApi, setAuthToken } from '../api';
 import { initSocket, disconnectSocket } from '../socket';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
+
+const persistSession = (userData) => {
+  const { token, ...user } = userData;
+  if (token) setAuthToken(token);
+  localStorage.setItem('vibeUser', JSON.stringify(user));
+  return user;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -13,6 +20,7 @@ export const AuthProvider = ({ children }) => {
       return savedUser ? JSON.parse(savedUser) : null;
     } catch {
       localStorage.removeItem('vibeUser');
+      localStorage.removeItem('vibeToken');
       return null;
     }
   });
@@ -21,7 +29,7 @@ export const AuthProvider = ({ children }) => {
   const [nicknameSuggestions, setNicknameSuggestions] = useState([]);
 
   useEffect(() => {
-    if (user) {
+    if (user?._id && localStorage.getItem('vibeToken')) {
       initSocket(user._id);
     }
   }, [user]);
@@ -32,10 +40,10 @@ export const AuthProvider = ({ children }) => {
     setNicknameSuggestions([]);
     try {
       const userData = await guestLogin(nickname, gender);
-      setUser(userData);
-      localStorage.setItem('vibeUser', JSON.stringify(userData));
-      initSocket(userData._id);
-      return userData;
+      const userOnly = persistSession(userData);
+      setUser(userOnly);
+      initSocket(userOnly._id);
+      return userOnly;
     } catch (err) {
       const status = err.response?.status;
       const data = err.response?.data;
@@ -54,6 +62,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('vibeUser');
+    setAuthToken(null);
     disconnectSocket();
   };
 
@@ -63,10 +72,10 @@ export const AuthProvider = ({ children }) => {
     setNicknameSuggestions([]);
     try {
       const userData = await profileLoginApi(nickname, fullName, dateOfBirth);
-      setUser(userData);
-      localStorage.setItem('vibeUser', JSON.stringify(userData));
-      initSocket(userData._id);
-      return userData;
+      const userOnly = persistSession(userData);
+      setUser(userOnly);
+      initSocket(userOnly._id);
+      return userOnly;
     } catch (err) {
       const data = err.response?.data;
       setError(data?.message || 'Profile login failed');
@@ -77,12 +86,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (userData) => {
-    setUser(userData);
-    localStorage.setItem('vibeUser', JSON.stringify(userData));
+    const { token, ...rest } = userData || {};
+    if (token) setAuthToken(token);
+    setUser(rest);
+    localStorage.setItem('vibeUser', JSON.stringify(rest));
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser: updateUser, login, profileLogin, logout, loading, error, nicknameSuggestions }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser: updateUser,
+        login,
+        profileLogin,
+        logout,
+        loading,
+        error,
+        nicknameSuggestions,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

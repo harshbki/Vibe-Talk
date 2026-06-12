@@ -1,15 +1,14 @@
 import { io } from 'socket.io-client';
+import { getAuthToken } from './api';
 
 function getSocketUrl() {
   const { hostname } = window.location;
-  // Codespace: connect through React proxy (same origin) since port 8081 isn't tunneled
   if (
     hostname.endsWith('.app.github.dev') ||
     hostname.endsWith('.codespaces.dev')
   ) {
     return window.location.origin;
   }
-  // Use env var if provided (for custom setups)
   if (process.env.REACT_APP_SOCKET_URL) return process.env.REACT_APP_SOCKET_URL;
   return 'http://localhost:8081';
 }
@@ -28,8 +27,14 @@ const SOCKET_OPTIONS = {
 };
 
 export const initSocket = (userId) => {
+  const token = getAuthToken();
+  if (!token) return null;
+
   if (!socket) {
-    socket = io(SOCKET_URL, SOCKET_OPTIONS);
+    socket = io(SOCKET_URL, {
+      ...SOCKET_OPTIONS,
+      auth: { token },
+    });
 
     socket.on('connect', () => {
       console.log('Socket connected');

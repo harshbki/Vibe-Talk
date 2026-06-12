@@ -15,7 +15,8 @@ const profileRoutes = require('./routes/profileRoutes');
 const groupRoutes = require('./routes/groupRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const setupSocket = require('./socket');
-const { authLimiter, requestLogger, errorHandler } = require('./middleware');
+const { authLimiter, apiLimiter, requestLogger, errorHandler } = require('./middleware');
+const helmet = require('helmet');
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
@@ -47,7 +48,7 @@ const allowLanDev =
   process.env.NODE_ENV !== 'production' && process.env.CORS_STRICT_LAN !== '1';
 
 const isAllowedOrigin = (origin) => {
-  if (!origin) return true;
+  if (!origin) return process.env.NODE_ENV !== 'production';
   if (allowedOrigins.includes(origin)) return true;
   if (origin.endsWith('.app.github.dev')) return true;
   if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
@@ -73,6 +74,8 @@ const io = new Server(server, {
 app.set('trust proxy', 1);
 
 // Middleware
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+app.use('/api', apiLimiter);
 app.use(cors({ origin: corsCallback }));
 app.use(express.json());
 app.use(requestLogger);
@@ -115,13 +118,14 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Serve uploaded files when Cloudinary is not configured / fails.
-// (Used as a fallback by uploadRoutes.js.)
+// Serve uploaded files in development only (production uses Cloudinary).
 const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+if (process.env.NODE_ENV !== 'production') {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use('/uploads', express.static(uploadsDir));
 }
-app.use('/uploads', express.static(uploadsDir));
 
 // Serve React build when present (run `npm run build` in client first)
 const clientBuild = path.join(__dirname, '..', 'client', 'build');

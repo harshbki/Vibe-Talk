@@ -9,7 +9,7 @@ Real-time MERN chat app: guest login, direct messages, groups, **random match**,
 
 ## Features
 
-- Guest + profile login (JWT)
+- Guest + profile login (**JWT** token returned, stored client-side)
 - Socket.IO messaging, typing, delivered/seen
 - Random match queue (any gender)
 - Image/video upload (Cloudinary or local `/uploads`)

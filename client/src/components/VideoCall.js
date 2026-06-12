@@ -4,6 +4,7 @@ import { getSocket } from '../socket';
 import { showAdBeforeCall, triggerAdOnInteraction } from '../utils/adUtils';
 import { playRingingSound, stopRingingSound, vibrate } from '../utils/soundUtils';
 import { showCallNotification } from '../utils/notificationUtils';
+import { getIceServers } from '../utils/iceServers';
 import api from '../api';
 
 const VideoCall = ({
@@ -28,6 +29,7 @@ const VideoCall = ({
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const remoteAudioRef = useRef(null);
   const peerConnection = useRef(null);
   const pendingIceCandidates = useRef([]);
   const remoteMediaStreamRef = useRef(null);
@@ -47,12 +49,7 @@ const VideoCall = ({
     partnerIdRef.current = partner?._id;
   }, [partner?._id]);
 
-  const ICE_SERVERS = {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
-    ]
-  };
+  const ICE_SERVERS = getIceServers();
 
   useEffect(() => {
     const socket = getSocket();
@@ -82,8 +79,9 @@ const VideoCall = ({
       }
     };
 
-    const handleCallRejected = () => {
-      stopRingingSound(); // Stop ringing when call rejected
+    const handleCallRejected = (data) => {
+      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      stopRingingSound();
       cleanupCall();
       setIncomingCall(null);
       setCallStatus('idle');
@@ -103,8 +101,9 @@ const VideoCall = ({
       handleIceCandidate(data);
     };
 
-    const handleVideoCallEnded = () => {
-      stopRingingSound(); // Stop ringing when call ends
+    const handleVideoCallEnded = (data) => {
+      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      stopRingingSound();
       cleanupCall();
       setCallStatus('idle');
       setIncomingCall(null);
@@ -130,21 +129,7 @@ const VideoCall = ({
     };
   }, [onEndCall, partner?._id, roomId, user?._id]);
 
-  useEffect(() => {
-    return () => {
-      if (['connected', 'connecting', 'calling', 'incoming'].includes(callStatusRef.current)) {
-        const socket = getSocket();
-        if (socket && user?._id) {
-          socket.emit('video_call_end', {
-            roomId: roomIdRef.current,
-            from: user._id,
-            to: partnerIdRef.current,
-          });
-        }
-      }
-      cleanupCall();
-    };
-  }, [user?._id]);
+  useEffect(() => () => cleanupCall(), []);
 
   const attachStreamToVideo = (el, stream, muted = false) => {
     if (!el || !stream) return;
@@ -152,6 +137,10 @@ const VideoCall = ({
       el.srcObject = stream;
     }
     el.muted = muted;
+    if (!muted) {
+      el.volume = 1.0;
+      el.defaultMuted = false;
+    }
     el.play().catch((error) => {
       // Ignore AbortError when video element unmounts or interrupts its own play
       if (error.name !== 'AbortError') {
@@ -170,24 +159,63 @@ const VideoCall = ({
     attachStreamToVideo(el, remoteStream, false);
   };
 
+  const bindRemoteAudioRef = (el) => {
+    remoteAudioRef.current = el;
+    attachStreamToVideo(el, remoteStream, false);
+  };
+
   useEffect(() => {
     attachStreamToVideo(localVideoRef.current, localStream, true);
   }, [localStream, callStatus]);
 
   useEffect(() => {
     attachStreamToVideo(remoteVideoRef.current, remoteStream, false);
+    attachStreamToVideo(remoteAudioRef.current, remoteStream, false);
   }, [remoteStream, callStatus]);
 
-  // Restore incoming-call UI when opened from a notification (socket event may have been missed).
   useEffect(() => {
-    if (!pendingIncomingCall?.accept || !roomId) return;
+    if (!pendingIncomingCall || !roomId) return;
     if (pendingIncomingCall.roomId !== roomId) return;
     if (callStatus !== 'idle') return;
 
+    if (pendingIncomingCall.accept) {
+      (async () => {
+        try {
+          triggerAdOnInteraction();
+          setCallError(null);
+          if (!localStream) await ensureLocalMedia();
+          const socket = getSocket();
+          if (socket) {
+            socket.emit('call_accept', {
+              roomId: roomIdRef.current,
+              from: user._id,
+              to: pendingIncomingCall.from,
+            });
+          }
+          isCallerRef.current = false;
+          setIsCaller(false);
+          setIncomingCall(null);
+          setCallStatus('connecting');
+        } catch (error) {
+          console.error('Auto-accept call error:', error);
+          setCallError(error.message || 'Could not access camera/microphone.');
+          setCallStatus('incoming');
+          setIncomingCall({
+            from: pendingIncomingCall.from,
+            fromNickname: pendingIncomingCall.fromNickname || partner?.nickname,
+            roomId: pendingIncomingCall.roomId,
+          });
+        } finally {
+          onPendingIncomingConsumed?.();
+        }
+      })();
+      return;
+    }
+
     setIncomingCall({
       from: pendingIncomingCall.from,
-      fromNickname: partner?.nickname,
-      roomId: pendingIncomingCall.roomId
+      fromNickname: pendingIncomingCall.fromNickname || partner?.nickname,
+      roomId: pendingIncomingCall.roomId,
     });
     setCallStatus('incoming');
     setIsCaller(false);
@@ -251,13 +279,14 @@ const VideoCall = ({
       });
       setLocalStream(stream);
       const videoTrack = stream.getVideoTracks()[0];
+      const audioTrack = stream.getAudioTracks()[0];
       setIsVideoOff(videoTrack ? !videoTrack.enabled : false);
       if (peerConnection.current) {
-        const sender = peerConnection.current.getSenders().find((s) => s.track?.kind === 'video');
+        const videoSender = peerConnection.current.getSenders().find((s) => s.track?.kind === 'video');
+        const audioSender = peerConnection.current.getSenders().find((s) => s.track?.kind === 'audio');
         const newTrack = stream.getVideoTracks()[0];
-        if (sender && newTrack) {
-          await sender.replaceTrack(newTrack);
-        }
+        if (videoSender && newTrack) await videoSender.replaceTrack(newTrack);
+        if (audioSender && audioTrack) await audioSender.replaceTrack(audioTrack);
       }
     } catch (error) {
       console.error('Flip camera error:', error);
@@ -285,6 +314,7 @@ const VideoCall = ({
       const stream = remoteMediaStreamRef.current;
       setRemoteStream(stream);
       attachStreamToVideo(remoteVideoRef.current, stream, false);
+      attachStreamToVideo(remoteAudioRef.current, stream, false);
       setCallStatus('connected');
     };
 
@@ -438,6 +468,9 @@ const VideoCall = ({
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
     }
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = null;
+    }
     if (localStream) {
       localStream.getTracks().forEach(track => {
         try {
@@ -516,8 +549,7 @@ const VideoCall = ({
       console.error('Error accepting call:', error);
       stopRingingSound();
       setCallError(error.message || 'Could not access camera/microphone. Please check browser permissions.');
-      setCallStatus('idle');
-      rejectIncomingCall();
+      setCallStatus('incoming');
     }
   };
 
@@ -661,6 +693,7 @@ const VideoCall = ({
                 : 'relative w-full bg-black rounded-xl overflow-hidden max-w-3xl aspect-video'
             }
           >
+            <audio ref={bindRemoteAudioRef} autoPlay />
             <video
               ref={bindRemoteVideoRef}
               autoPlay

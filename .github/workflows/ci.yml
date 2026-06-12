@@ -1,4 +1,4 @@
-name: Client build
+name: CI
 
 on:
   push:
@@ -8,26 +8,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  client-build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install dependencies
+      - name: Install client dependencies
         working-directory: client
-        run: |
-          npm --version
-          node --version
-          npm ci --no-audit --no-fund
-
-      - name: Build
+        run: npm ci --no-audit --no-fund
+      - name: Build client
         working-directory: client
         run: npm run build
         env:
           CI: true
           GENERATE_SOURCEMAP: false
+
+  server-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci --no-audit --no-fund
+      - name: Syntax check server entry
+        run: node --check server/server.js

@@ -71,13 +71,31 @@ const resolveCallPeer = (roomId, userId, explicitTo) => {
   return getMatchPeer(roomId, userId) || getPrivateRoomPeer(roomId, userId);
 };
 
+const { verifyToken } = require('../utils/jwt');
+
+const isSelf = (socket, userId) =>
+  socket.userId && userId && String(socket.userId) === String(userId);
+
 const setupSocket = (io) => {
+  io.use((socket, next) => {
+    try {
+      const token = socket.handshake.auth?.token;
+      if (!token) return next(new Error('Authentication required'));
+      const { userId } = verifyToken(token);
+      socket.userId = String(userId);
+      next();
+    } catch {
+      next(new Error('Invalid token'));
+    }
+  });
+
   io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     // User joins with their userId
     socket.on('user_online', async (userId) => {
       try {
+        if (!isSelf(socket, userId)) return;
         const user = await User.findById(userId);
         if (!user) return;
 
@@ -102,8 +120,9 @@ const setupSocket = (io) => {
 
     // Random match finding - TRULY RANDOM (anyone can match with anyone)
     socket.on('find_match', async (data) => {
-      const { userId, gender, nickname } = data;
-      
+      const userId = socket.userId;
+      const { gender, nickname } = data;
+      if (!userId || !isSelf(socket, userId)) return;
       // Remove from queue if already waiting
       removeFromQueues(userId);
       
@@ -184,6 +203,7 @@ const setupSocket = (io) => {
 
     // Cancel search
     socket.on('cancel_search', (userId) => {
+      if (!isSelf(socket, userId)) return;
       removeFromQueues(userId);
       socket.emit('search_cancelled');
       console.log(`User ${userId} cancelled search`);
@@ -192,6 +212,7 @@ const setupSocket = (io) => {
     // Send message in match room (temporary — not saved to DB)
     socket.on('match_message', (data) => {
       const { roomId, tempId, message, from, fromNickname } = data;
+      if (!isSelf(socket, from)) return;
       const msgId = `match_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       const timestamp = new Date();
 
@@ -226,6 +247,7 @@ const setupSocket = (io) => {
     // End match — notify partner + end any active video call on both sides
     socket.on('end_match', (data) => {
       const { roomId, userId } = data;
+      if (!isSelf(socket, userId)) return;
       const match = activeMatches.get(roomId);
       if (!match) return;
 
@@ -251,6 +273,7 @@ const setupSocket = (io) => {
     // Handle messages (persist to DB)
     socket.on('send_message', async (data) => {
       const { to, message, from } = data;
+      if (!isSelf(socket, from)) return;
       const payload = typeof message === 'string' ? { text: message } : (message || {});
 
       let savedMsg = null;
@@ -400,6 +423,7 @@ const setupSocket = (io) => {
     // Start video call request
     socket.on('call_request', async (data) => {
       const { roomId, from, fromNickname, to } = data;
+      if (!isSelf(socket, from)) return;
       socket.join(roomId);
 
       socket.to(roomId).emit('call_incoming', { roomId, from, fromNickname });
@@ -434,6 +458,7 @@ const setupSocket = (io) => {
     // Accept video call
     socket.on('call_accept', (data) => {
       const { roomId, from, to } = data;
+      if (!isSelf(socket, from)) return;
       socket.join(roomId);
       const payload = { roomId, from };
       // Only notify the caller — broadcasting to the room made the callee create a second offer (WebRTC glare).
@@ -447,8 +472,8 @@ const setupSocket = (io) => {
     // Reject video call
     socket.on('call_reject', (data) => {
       const { roomId, from, to } = data;
+      if (!isSelf(socket, from)) return;
       const payload = { roomId, from };
-      socket.to(roomId).emit('call_rejected', payload);
       const callerId = resolveCallPeer(roomId, from, to);
       if (callerId) {
         emitToUser(io, callerId, 'call_rejected', payload);
@@ -459,6 +484,7 @@ const setupSocket = (io) => {
     // WebRTC offer
     socket.on('video_offer', (data) => {
       const { roomId, offer, from, to } = data;
+      if (!isSelf(socket, from)) return;
       relayToPeer(socket, io, {
         roomId,
         to,
@@ -471,6 +497,7 @@ const setupSocket = (io) => {
     // WebRTC answer
     socket.on('video_answer', (data) => {
       const { roomId, answer, from, to } = data;
+      if (!isSelf(socket, from)) return;
       relayToPeer(socket, io, {
         roomId,
         to,
@@ -483,6 +510,7 @@ const setupSocket = (io) => {
     // ICE candidate
     socket.on('ice_candidate', (data) => {
       const { roomId, candidate, from, to } = data;
+      if (!isSelf(socket, from)) return;
       relayToPeer(socket, io, {
         roomId,
         to,
@@ -494,6 +522,7 @@ const setupSocket = (io) => {
     // End video call
     socket.on('video_call_end', (data) => {
       const { roomId, from, to } = data;
+      if (!isSelf(socket, from)) return;
       const payload = { roomId, from };
       io.to(roomId).emit('video_call_ended', payload);
       const peerId = resolveCallPeer(roomId, from, to);
@@ -517,15 +546,16 @@ const setupSocket = (io) => {
     // Group message
     socket.on('group_message', async (data) => {
       const { groupId, message, from, fromNickname } = data;
+      if (!isSelf(socket, from)) return;
       const payload = typeof message === 'string' ? { text: message } : (message || {});
       const timestamp = new Date();
 
       try {
         await Message.create({
-          chat: groupId,
+          group: groupId,
           sender: from,
           text: payload.text || '',
-          image: payload.mediaUrl || null
+          image: payload.mediaUrl || null,
         });
       } catch (error) {
         console.error('Error persisting group message:', error);

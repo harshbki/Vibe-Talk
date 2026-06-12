@@ -3,11 +3,12 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Notification = require('../models/Notification');
 const { requireMongo } = require('../middleware');
+const { authenticate, requireSelfParam } = require('../middleware/auth');
 
 router.use(requireMongo);
+router.use(authenticate);
 
-// GET /api/notifications/:userId - Get user notifications
-router.get('/:userId', async (req, res, next) => {
+router.get('/:userId', requireSelfParam('userId'), async (req, res, next) => {
   try {
     const notifications = await Notification.find({ user: req.params.userId })
       .sort({ createdAt: -1 })
@@ -18,12 +19,11 @@ router.get('/:userId', async (req, res, next) => {
   }
 });
 
-// GET /api/notifications/:userId/unread-count - Get unread count
-router.get('/:userId/unread-count', async (req, res, next) => {
+router.get('/:userId/unread-count', requireSelfParam('userId'), async (req, res, next) => {
   try {
     const count = await Notification.countDocuments({
       user: req.params.userId,
-      read: false
+      read: false,
     });
     res.json({ count });
   } catch (error) {
@@ -31,54 +31,48 @@ router.get('/:userId/unread-count', async (req, res, next) => {
   }
 });
 
-// PUT /api/notifications/:id/read - Mark notification as read
 router.put('/:id/read', async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ message: 'Invalid notification ID format' });
     }
-    const notification = await Notification.findByIdAndUpdate(
-      req.params.id,
-      { read: true },
-      { new: true }
-    );
-    if (!notification) {
-      return res.status(404).json({ message: 'Notification not found' });
+    const notification = await Notification.findById(req.params.id);
+    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    if (String(notification.user) !== req.userId) {
+      return res.status(403).json({ message: 'Forbidden' });
     }
+    notification.read = true;
+    await notification.save();
     res.json(notification);
   } catch (error) {
     next(error);
   }
 });
 
-// PUT /api/notifications/:userId/read-all - Mark all notifications as read
-router.put('/:userId/read-all', async (req, res, next) => {
+router.put('/:userId/read-all', requireSelfParam('userId'), async (req, res, next) => {
   try {
-    await Notification.updateMany(
-      { user: req.params.userId, read: false },
-      { read: true }
-    );
+    await Notification.updateMany({ user: req.params.userId, read: false }, { read: true });
     res.json({ message: 'All notifications marked as read' });
   } catch (error) {
     next(error);
   }
 });
 
-// DELETE /api/notifications/:id - Delete one notification
 router.delete('/:id', async (req, res, next) => {
   try {
-    const notification = await Notification.findByIdAndDelete(req.params.id);
-    if (!notification) {
-      return res.status(404).json({ message: 'Notification not found' });
+    const notification = await Notification.findById(req.params.id);
+    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    if (String(notification.user) !== req.userId) {
+      return res.status(403).json({ message: 'Forbidden' });
     }
+    await notification.deleteOne();
     res.json({ message: 'Notification deleted', id: req.params.id });
   } catch (error) {
     next(error);
   }
 });
 
-// DELETE /api/notifications/user/:userId/all - Delete all notifications for a user
-router.delete('/user/:userId/all', async (req, res, next) => {
+router.delete('/user/:userId/all', requireSelfParam('userId'), async (req, res, next) => {
   try {
     const result = await Notification.deleteMany({ user: req.params.userId });
     res.json({ message: 'All notifications deleted', deletedCount: result.deletedCount });

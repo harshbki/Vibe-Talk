@@ -2,23 +2,43 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
+export const getAuthToken = () => localStorage.getItem('vibeToken');
+
+export const setAuthToken = (token) => {
+  if (token) localStorage.setItem('vibeToken', token);
+  else localStorage.removeItem('vibeToken');
+};
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+  },
+});
+
+api.interceptors.request.use((config) => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
+  return config;
 });
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message
-      || (error.message === 'Network Error'
+    const message =
+      error.response?.data?.message ||
+      (error.message === 'Network Error'
         ? 'Cannot reach API (start server on port 8081)'
         : error.message);
     console.error('API error:', error.config?.url, message);
     if (!error.response) {
       error.friendlyMessage = message;
+    }
+    if (error.response?.status === 401) {
+      localStorage.removeItem('vibeToken');
+      localStorage.removeItem('vibeUser');
     }
     return Promise.reject(error);
   }
@@ -58,13 +78,12 @@ export const uploadMedia = async (file) => {
   formData.append('file', file);
 
   const response = await api.post('/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 
   return response.data;
 };
 
-// Profile API
 export const getProfile = async (userId) => {
   const response = await api.get(`/profile/${userId}`);
   return response.data;
@@ -84,12 +103,11 @@ export const uploadProfilePicture = async (userId, file) => {
   const formData = new FormData();
   formData.append('file', file);
   const response = await api.post(`/profile/${userId}/picture`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
 };
 
-// Settings API
 export const updateUserSettings = async (userId, data) => {
   const response = await api.put('/users/update', { userId, ...data });
   return response.data;
@@ -100,7 +118,6 @@ export const deleteAccount = async (userId) => {
   return response.data;
 };
 
-// Notification API
 export const getNotifications = async (userId) => {
   const response = await api.get(`/notifications/${userId}`);
   return response.data;
@@ -131,7 +148,6 @@ export const deleteAllNotifications = async (userId) => {
   return response.data;
 };
 
-// Group API
 export const createGroup = async (name, adminId, memberIds, isPrivate = false) => {
   const response = await api.post('/groups', { name, adminId, memberIds, isPrivate });
   return response.data;
@@ -187,7 +203,6 @@ export const rejectJoinRequestApi = async (groupId, userId, requesterId) => {
   return response.data;
 };
 
-// Chat API
 export const getOrCreateChat = async (userId1, userId2) => {
   const response = await api.post('/chat', { userId1, userId2 });
   return response.data;
