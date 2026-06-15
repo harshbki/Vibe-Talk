@@ -10,11 +10,12 @@ const requireMongo = (req, res, next) => {
   });
 };
 
-// Rate limiter for API requests
+// Rate limiter for API requests (skip health — Render + cron ping this often)
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: { message: 'Too many requests, please try again later.' }
+  message: { message: 'Too many requests, please try again later.' },
+  skip: (req) => req.path === '/health' || req.originalUrl.startsWith('/api/health'),
 });
 
 // Rate limiter for auth endpoints

@@ -27,6 +27,9 @@ const allowedOrigins = [
   'http://127.0.0.1:3000',
 ].filter(Boolean);
 
+const isRenderHost = (hostname) =>
+  hostname.endsWith('.onrender.com') || hostname.endsWith('.render.com');
+
 /** Same Wi‑Fi / LAN (React HOST=0.0.0.0 → open via http://192.168.x.x:8080) */
 const isPrivateLanOrigin = (origin) => {
   try {
@@ -52,6 +55,11 @@ const isAllowedOrigin = (origin) => {
   if (allowedOrigins.includes(origin)) return true;
   if (origin.endsWith('.app.github.dev')) return true;
   if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+  try {
+    if (isRenderHost(new URL(origin).hostname)) return true;
+  } catch {
+    /* ignore malformed origin */
+  }
   if (allowLanDev && isPrivateLanOrigin(origin)) return true;
   return false;
 };
@@ -75,12 +83,11 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
-app.use('/api', apiLimiter);
 app.use(cors({ origin: corsCallback }));
 app.use(express.json());
 app.use(requestLogger);
 
-// Lightweight health (no DB required)
+// Lightweight health (no DB required) — before /api rate limiter (Render pings this)
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');
   const mongoState = mongoose.connection.readyState;
@@ -92,22 +99,31 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Root route
-app.get('/', (req, res) => {
-  res.json({
-    name: 'Vibe Talk API',
-    version: '1.0.0',
-    status: 'running',
-    endpoints: {
-      auth: '/api/auth/guest (POST)',
-      users: '/api/users (GET)',
-      chat: '/api/chat (GET/POST)',
-      upload: '/api/upload (POST)',
-      profile: '/api/profile/:userId (GET/PUT), /api/profile/:userId/picture (POST)',
-      health: '/api/chat/health (GET)'
-    }
+app.use('/api', apiLimiter);
+
+const clientBuild = path.join(__dirname, '..', 'client', 'build');
+const clientIndex = path.join(clientBuild, 'index.html');
+const hasClientBuild = fs.existsSync(clientIndex);
+
+// API summary when React build is missing (local dev without `npm run build`)
+if (!hasClientBuild) {
+  app.get('/', (req, res) => {
+    res.json({
+      name: 'Vibe Talk API',
+      version: '1.0.0',
+      status: 'running',
+      hint: 'Run npm run build in client/ (or npm run build from repo root) to serve the React app here.',
+      endpoints: {
+        auth: '/api/auth/guest (POST)',
+        users: '/api/users (GET)',
+        chat: '/api/chat (GET/POST)',
+        upload: '/api/upload (POST)',
+        profile: '/api/profile/:userId (GET/PUT), /api/profile/:userId/picture (POST)',
+        health: '/api/health (GET)',
+      },
+    });
   });
-});
+}
 
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
@@ -127,15 +143,18 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/uploads', express.static(uploadsDir));
 }
 
-// Serve React build when present (run `npm run build` in client first)
-const clientBuild = path.join(__dirname, '..', 'client', 'build');
-const clientIndex = path.join(clientBuild, 'index.html');
-if (fs.existsSync(clientIndex)) {
+// Serve React build when present (Render: npm run install-all && npm run build)
+if (hasClientBuild) {
   app.use(express.static(clientBuild));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
     res.sendFile(clientIndex);
   });
+  console.log(`Serving React app from ${clientBuild}`);
+} else {
+  console.warn(
+    '[client/build] not found — only API routes are active. Run `npm run build` before deploy.'
+  );
 }
 
 // Error handler (must be last)

@@ -2,14 +2,16 @@ import { io } from 'socket.io-client';
 import { getAuthToken } from './api';
 
 function getSocketUrl() {
-  const { hostname } = window.location;
+  if (process.env.REACT_APP_SOCKET_URL) return process.env.REACT_APP_SOCKET_URL;
+  const { hostname, origin } = window.location;
   if (
     hostname.endsWith('.app.github.dev') ||
-    hostname.endsWith('.codespaces.dev')
+    hostname.endsWith('.codespaces.dev') ||
+    hostname.endsWith('.onrender.com') ||
+    process.env.NODE_ENV === 'production'
   ) {
-    return window.location.origin;
+    return origin;
   }
-  if (process.env.REACT_APP_SOCKET_URL) return process.env.REACT_APP_SOCKET_URL;
   return 'http://localhost:8081';
 }
 

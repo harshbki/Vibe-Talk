@@ -7,7 +7,7 @@
     "start": "node server/server.js",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
-    "build": "cd client && npm install && npm run build",
+    "build": "cd client && npm install && CI=false npm run build && test -f build/index.html",
     "install-all": "cd server && npm install && cd ../client && npm install",
     "dev": "cd server && npm run dev",
     "dev:all": "concurrently -n server,client -c blue,magenta \"npm run dev --prefix server\" \"npm run start --prefix client\"",
