@@ -13,6 +13,7 @@ import CreateGroupPage from './pages/CreateGroupPage';
 import GroupChatPage from './pages/GroupChatPage';
 import UserProfilePage from './pages/UserProfilePage';
 import Navbar from './components/Navbar';
+import MobileBottomNav from './components/MobileBottomNav';
 import IncomingCallOverlay from './components/IncomingCallOverlay';
 import DmToast from './components/DmToast';
 import { VideoCallProvider, useVideoCall } from './context/VideoCallContext';
@@ -35,7 +36,12 @@ const PrivateLayout = ({ children }) => {
   return (
     <>
       <Navbar />
-      <div className={callActive ? 'pt-[min(42vh,360px)]' : undefined}>{children}</div>
+      <div
+        className={`flex-1 min-h-0 pb-[4.5rem] lg:pb-0 ${callActive ? 'pt-[min(42vh,360px)]' : ''}`}
+      >
+        {children}
+      </div>
+      <MobileBottomNav />
     </>
   );
 };

@@ -156,7 +156,8 @@ const VideoCall = ({
 
   const bindRemoteVideoRef = (el) => {
     remoteVideoRef.current = el;
-    attachStreamToVideo(el, remoteStream, false);
+    // Video element is display-only — audio plays through <audio> to avoid echo/double sound
+    attachStreamToVideo(el, remoteStream, true);
   };
 
   const bindRemoteAudioRef = (el) => {
@@ -169,7 +170,7 @@ const VideoCall = ({
   }, [localStream, callStatus]);
 
   useEffect(() => {
-    attachStreamToVideo(remoteVideoRef.current, remoteStream, false);
+    attachStreamToVideo(remoteVideoRef.current, remoteStream, true);
     attachStreamToVideo(remoteAudioRef.current, remoteStream, false);
   }, [remoteStream, callStatus]);
 
@@ -246,9 +247,10 @@ const VideoCall = ({
           height: { ideal: 720 },
         },
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
+          echoCancellation: { ideal: true },
+          noiseSuppression: { ideal: true },
+          autoGainControl: { ideal: true },
+          channelCount: { ideal: 1 },
         },
       });
       setLocalStream(stream);
@@ -272,9 +274,10 @@ const VideoCall = ({
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: next },
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
+          echoCancellation: { ideal: true },
+          noiseSuppression: { ideal: true },
+          autoGainControl: { ideal: true },
+          channelCount: { ideal: 1 },
         },
       });
       setLocalStream(stream);
@@ -313,7 +316,7 @@ const VideoCall = ({
       }
       const stream = remoteMediaStreamRef.current;
       setRemoteStream(stream);
-      attachStreamToVideo(remoteVideoRef.current, stream, false);
+      attachStreamToVideo(remoteVideoRef.current, stream, true);
       attachStreamToVideo(remoteAudioRef.current, stream, false);
       setCallStatus('connected');
     };
@@ -693,11 +696,12 @@ const VideoCall = ({
                 : 'relative w-full bg-black rounded-xl overflow-hidden max-w-3xl aspect-video'
             }
           >
-            <audio ref={bindRemoteAudioRef} autoPlay />
+            <audio ref={bindRemoteAudioRef} autoPlay playsInline />
             <video
               ref={bindRemoteVideoRef}
               autoPlay
               playsInline
+              muted
               className="w-full h-full object-cover"
             />
             <span className="absolute top-2 left-2 badge badge-neutral badge-sm">{partner?.nickname}</span>

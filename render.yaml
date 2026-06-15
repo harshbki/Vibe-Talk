@@ -1,0 +1,44 @@
+# Render Blueprint — free tier, no credit card required
+# Dashboard → New → Blueprint → connect repo, or import manually
+services:
+  - type: web
+    name: vibetalk
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm run install-all && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: MAX_UPLOAD_MB
+        value: "100"
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: REACT_APP_API_URL
+        sync: false
+      - key: REACT_APP_SOCKET_URL
+        sync: false
+      - key: REACT_APP_ADSENSE_CLIENT_ID
+        sync: false
+      - key: REACT_APP_ADSENSE_SLOT_CHAT_SIDEBAR
+        value: "3628542402"
+      - key: REACT_APP_ADSENSE_SLOT_RANDOM_MATCH_INLINE
+        value: "3628542402"
+      - key: REACT_APP_ADSENSE_SLOT_GROUP_CHAT_TOP
+        value: "3628542402"
+      - key: REACT_APP_MONETAG_ZONE_ID
+        value: "250054"

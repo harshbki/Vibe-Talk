@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 const ADSENSE_CLIENT_ID = process.env.REACT_APP_ADSENSE_CLIENT_ID || 'ca-pub-5149550826483446';
-const MONETAG_ZONE = process.env.REACT_APP_MONETAG_ZONE_ID || 'd965e1389aae19ff5ef25da9cdc7aff3';
+const MONETAG_ZONE = process.env.REACT_APP_MONETAG_ZONE_ID || '250054';
+const MONETAG_SCRIPT = 'https://quge5.com/88/tag.min.js';
 
 // Map placement keys to AdSense slot IDs (from client/.env)
 const SLOT_MAP = {
@@ -29,8 +30,9 @@ const MonetagBanner = ({ placement }) => {
     loaded.current = true;
     try {
       const script = document.createElement('script');
-      script.src = `https://iclickcdn.com/tag.min.js`;
+      script.src = MONETAG_SCRIPT;
       script.setAttribute('data-zone', MONETAG_ZONE);
+      script.setAttribute('data-cfasync', 'false');
       script.async = true;
       containerRef.current.appendChild(script);
     } catch (e) {

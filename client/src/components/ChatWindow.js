@@ -119,15 +119,21 @@ const ChatWindow = () => {
 
   if (user && !isProfileComplete(user) && !selectedUser) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-base-200/50 to-base-200/30">
-        <div className="text-center space-y-3 p-8 max-w-sm">
-          <div className="text-5xl">💬</div>
-          <h3 className="text-xl font-bold">Guest Chat</h3>
-          <p className="text-sm text-base-content/60">
-            Select a conversation from the sidebar to reply when a profile user messages you.
-            Complete your profile to start new direct chats.
-          </p>
-          <a href="/profile" className="btn btn-primary btn-sm">Complete Profile</a>
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-primary/5 via-base-200/40 to-secondary/5 p-4 sm:p-8">
+        <div className="card bg-base-100 shadow-xl border border-base-200/80 w-full max-w-md">
+          <div className="card-body items-center text-center gap-4 p-6 sm:p-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-3xl">
+              💬
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold">Guest Chat</h3>
+            <p className="text-sm text-base-content/60 leading-relaxed">
+              Select a conversation from the sidebar to reply when a profile user messages you.
+              Complete your profile to start new direct chats.
+            </p>
+            <Link to="/profile" className="btn btn-primary btn-sm w-full sm:w-auto">
+              Complete Profile
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -180,11 +186,22 @@ const ChatWindow = () => {
 
   if (!selectedUser) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-base-200/50 to-base-200/30">
-        <div className="text-center space-y-4 animate-fade-in-up p-8">
-          <div className="text-7xl opacity-80">💬</div>
-          <h3 className="text-xl font-bold">Start a conversation</h3>
-          <p className="text-base-content/50 text-sm max-w-xs mx-auto">Pick someone from the online users list, or head to <a href="/users" className="text-primary font-medium">Users</a> to find people.</p>
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-primary/5 via-base-200/40 to-secondary/5 p-4 sm:p-8">
+        <div className="card bg-base-100 shadow-xl border border-base-200/80 w-full max-w-md animate-fade-in-up">
+          <div className="card-body items-center text-center gap-4 p-6 sm:p-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-3xl">
+              💬
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold">Start a conversation</h3>
+            <p className="text-base-content/50 text-sm leading-relaxed">
+              Pick someone from <Link to="/users" className="text-primary font-semibold">Users</Link> or tap
+              <span className="font-semibold text-primary"> Match</span> to meet someone new.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Link to="/users" className="btn btn-primary btn-sm">Browse Users</Link>
+              <Link to="/match" className="btn btn-outline btn-primary btn-sm">Find Match</Link>
+            </div>
+          </div>
         </div>
       </div>
     );

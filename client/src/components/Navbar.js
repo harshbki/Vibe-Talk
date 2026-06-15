@@ -62,8 +62,8 @@ const Navbar = () => {
   return (
     <div className="navbar bg-base-100/95 backdrop-blur-lg border-b border-base-200 sticky top-0 z-50 px-4 shadow-sm">
       <div className="navbar-start">
-        <Link to="/chat" className="flex items-center gap-2 text-lg font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-          💬 <span className="hidden sm:inline">Vibe Talk</span>
+        <Link to="/chat" className="flex items-center gap-2 text-base sm:text-lg font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+          💬 <span>Vibe Talk</span>
         </Link>
       </div>
 

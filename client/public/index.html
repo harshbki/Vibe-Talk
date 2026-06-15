@@ -5,53 +5,20 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0ea5a0" />
-    <meta name="monetag" content="d965e1389aae19ff5ef25da9cdc7aff3" />
+    <meta name="monetag" content="250054" />
     <meta name="description" content="Vibe Talk - Random Chat & Video Call App" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>Vibe Talk</title>
 
-    <!-- 
-      Ad Network Scripts (Monetag + Adsterra)
-      Replace zone IDs with your real ones from:
-      - Monetag: https://monetag.com 
-      - Adsterra: https://adsterra.com
-    -->
-
-    <!-- Monetag scripts (enabled only when REACT_APP_ENABLE_ADS=true) -->
-    <script type="text/javascript">
-      (function(){
-        var enableAds = '%REACT_APP_ENABLE_ADS%' === 'true';
-        if (!enableAds) return;
-        var zoneId = 'd965e1389aae19ff5ef25da9cdc7aff3';
-        var popunder = document.createElement('script');
-        popunder.src = 'https://iclickcdn.com/tag.min.js';
-        popunder.setAttribute('data-zone', zoneId);
-        (document.body || document.documentElement).appendChild(popunder);
-        var inpage = document.createElement('script');
-        inpage.src = 'https://grsjorede.net/400/' + zoneId;
-        (document.body || document.documentElement).appendChild(inpage);
-      })();
-    </script>
-
-    <!-- Adsterra Social Bar Script (replace ADSTERRA_ZONE_ID with yours) -->
-    <!-- <script type='text/javascript' src='//pl24406498.profitablecpmrate.com/ADSTERRA_ZONE_ID/invoke.js'></script> -->
-
-    <!-- Monetag Interstitial config -->
-    <script type="text/javascript">
-      if ('%REACT_APP_ENABLE_ADS%' === 'true') {
-        var monetag_interstitial_zone = 'd965e1389aae19ff5ef25da9cdc7aff3';
-      }
-    </script>
-
-    <!-- Google AdSense -->
+    <!-- Google AdSense (vibetalk.me) -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5149550826483446" crossorigin="anonymous"></script>
+
+    <!-- Monetag (zone 250054) -->
+    <script src="https://quge5.com/88/tag.min.js" data-zone="250054" async data-cfasync="false"></script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-
-    <!-- Adsterra Native Banner Container (for UsersList page) -->
-    <div id="adsterra-native-banner"></div>
   </body>
 </html>

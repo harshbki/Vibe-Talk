@@ -7,7 +7,7 @@ import UserList from './UserList';
 import AdBanner from './AdBanner';
 import { isProfileComplete } from '../utils/profileUtils';
 
-const Sidebar = () => {
+const Sidebar = ({ onChatSelect }) => {
   const { onlineUsers, messages, selectedUser, setSelectedUser, activeMatchChat } = useChat();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -98,7 +98,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-72 min-w-[280px] border-r border-base-300 bg-base-100 flex flex-col h-full">
+    <div className="w-full lg:w-72 lg:min-w-[280px] border-r border-base-300 bg-base-100 flex flex-col h-full">
       <div className="p-3 border-b border-base-300 space-y-2">
         <div className="join w-full">
           <button
@@ -199,7 +199,10 @@ const Sidebar = () => {
                   className={`flex items-start gap-2 rounded-lg p-2 w-full ${
                     selectedUser?._id === item.peerId ? 'bg-primary/10 text-primary' : 'hover:bg-base-200'
                   }`}
-                  onClick={() => setSelectedUser({ _id: item.peerId, nickname: item.nickname, gender: item.gender })}
+                  onClick={() => {
+                    setSelectedUser({ _id: item.peerId, nickname: item.nickname, gender: item.gender });
+                    onChatSelect?.();
+                  }}
                 >
                   <div className="avatar placeholder mt-0.5">
                     <div className={`w-9 rounded-full ${item.gender === 'Male' ? 'bg-primary/20 text-primary' : 'bg-secondary/20 text-secondary'}`}>
