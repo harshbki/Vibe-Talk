@@ -9,6 +9,7 @@ import { isChatSoundEnabled, playNotificationSound } from '../utils/soundUtils';
 import { showMatchNotification } from '../utils/notificationUtils';
 import { useVideoCall } from '../context/VideoCallContext';
 import AdBanner from '../components/AdBanner';
+import PartnerLeftModal from '../components/PartnerLeftModal';
 import { uploadMedia } from '../api';
 
 const RandomMatchPage = () => {
@@ -25,10 +26,42 @@ const RandomMatchPage = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
+  const [partnerLeftModal, setPartnerLeftModal] = useState(null);
   const messagesEndRef = useRef(null);
   const typingTimeout = useRef(null);
   const fileInputRef = useRef(null);
   const roomIdRef = useRef(null);
+  const selfLeftRef = useRef(false);
+
+  const resetMatchState = () => {
+    setPartner(null);
+    setRoomId(null);
+    setMessages([]);
+    setInputMessage('');
+    setShowEmojiPicker(false);
+    setIsPartnerTyping(false);
+    setActiveMatchChat(null);
+  };
+
+  const goIdle = () => {
+    closeCall();
+    resetMatchState();
+    setStatus('idle');
+    setPartnerLeftModal(null);
+  };
+
+  const startSearch = () => {
+    const socket = getSocket();
+    if (!socket || !user) return;
+    showPopunder();
+    socket.emit('find_match', {
+      userId: user._id,
+      gender: user.gender,
+      nickname: user.nickname,
+    });
+    setStatus('searching');
+    setPartnerLeftModal(null);
+  };
 
   useEffect(() => {
     roomIdRef.current = roomId;
@@ -149,15 +182,16 @@ const RandomMatchPage = () => {
     socket.on('match_partner_stop_typing', () => setIsPartnerTyping(false));
 
     socket.on('match_ended', (data) => {
-      setStatus('idle');
-      setPartner(null);
-      setRoomId(null);
-      setMessages([]);
-      setInputMessage('');
-      setShowEmojiPicker(false);
       closeCall();
-      setActiveMatchChat(null);
-      alert(data.message);
+      resetMatchState();
+      if (selfLeftRef.current) {
+        selfLeftRef.current = false;
+        return;
+      }
+      setStatus('idle');
+      setPartnerLeftModal({
+        message: data.message || 'Your partner has left the chat',
+      });
     });
 
     socket.on('search_cancelled', () => setStatus('idle'));
@@ -183,31 +217,23 @@ const RandomMatchPage = () => {
   // Partner ended match from another tab/page — global event from ChatContext
   useEffect(() => {
     const onPartnerEnded = (e) => {
-      setStatus('idle');
-      setPartner(null);
-      setRoomId(null);
-      setMessages([]);
-      setInputMessage('');
-      setShowEmojiPicker(false);
       closeCall();
-      setActiveMatchChat(null);
-      if (e.detail?.message) alert(e.detail.message);
+      resetMatchState();
+      if (selfLeftRef.current) {
+        selfLeftRef.current = false;
+        return;
+      }
+      setStatus('idle');
+      setPartnerLeftModal({
+        message: e.detail?.message || 'Your partner has left the chat',
+      });
     };
     window.addEventListener('vibetalk:match_ended', onPartnerEnded);
     return () => window.removeEventListener('vibetalk:match_ended', onPartnerEnded);
   }, [closeCall, setActiveMatchChat]);
 
   const findMatch = () => {
-    const socket = getSocket();
-    if (socket && user) {
-      showPopunder();
-      socket.emit('find_match', {
-        userId: user._id,
-        gender: user.gender,
-        nickname: user.nickname
-      });
-      setStatus('searching');
-    }
+    startSearch();
   };
 
   const cancelSearch = () => {
@@ -221,8 +247,23 @@ const RandomMatchPage = () => {
   const endMatch = () => {
     const socket = getSocket();
     if (socket && roomId) {
-      // Ensure video call ends on both sides when user taps "End Chat".
-      // Relying only on `activeCall` state can desync if the UI hasn't mounted yet.
+      selfLeftRef.current = true;
+      if (partner?._id) {
+        socket.emit('video_call_end', {
+          roomId,
+          from: user._id,
+          to: partner._id,
+        });
+      }
+      socket.emit('end_match', { roomId, userId: user._id });
+    }
+    goIdle();
+  };
+
+  const nextMatch = () => {
+    const socket = getSocket();
+    if (socket && roomId && user) {
+      selfLeftRef.current = true;
       if (partner?._id) {
         socket.emit('video_call_end', {
           roomId,
@@ -232,14 +273,11 @@ const RandomMatchPage = () => {
       }
       closeCall();
       socket.emit('end_match', { roomId, userId: user._id });
-      setStatus('idle');
-      setPartner(null);
-      setRoomId(null);
-      setMessages([]);
-      setInputMessage('');
-      setShowEmojiPicker(false);
-      setActiveMatchChat(null);
+      resetMatchState();
+      startSearch();
+      return;
     }
+    startSearch();
   };
 
   const sendMessage = (e) => {
@@ -391,8 +429,15 @@ const RandomMatchPage = () => {
   // Idle state
   if (status === 'idle') {
     return (
-      <div className="min-h-[calc(100vh-64px)] bg-base-200/50">
-        <div className="flex items-center justify-center p-4 min-h-[calc(100vh-64px)]">
+      <>
+        <PartnerLeftModal
+          open={!!partnerLeftModal}
+          message={partnerLeftModal?.message}
+          onEndChat={() => setPartnerLeftModal(null)}
+          onNext={() => nextMatch()}
+        />
+        <div className="min-h-[calc(100dvh-4rem-4.5rem)] lg:min-h-[calc(100dvh-4rem)] bg-base-200/50">
+        <div className="flex items-center justify-center p-4 min-h-full">
           <div className="card w-full max-w-md bg-base-100 shadow-xl animate-scale-in">
             <div className="card-body items-center text-center gap-5">
               <h1 className="text-3xl font-extrabold">🎲 Random Match</h1>
@@ -417,14 +462,15 @@ const RandomMatchPage = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </>
     );
   }
 
   // Searching state
   if (status === 'searching') {
     return (
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-base-200/50 p-4">
+      <div className="min-h-[calc(100dvh-4rem-4.5rem)] lg:min-h-[calc(100dvh-4rem)] flex items-center justify-center bg-base-200/50 p-4">
         <div className="card w-full max-w-md bg-base-100 shadow-xl">
           <div className="card-body items-center text-center gap-6">
             <div className="relative">
@@ -452,9 +498,14 @@ const RandomMatchPage = () => {
 
   // Matched state
   return (
-  
-  
-  <div className="flex flex-col h-[calc(100vh-64px)] bg-base-100">
+    <>
+      <PartnerLeftModal
+        open={!!partnerLeftModal}
+        message={partnerLeftModal?.message}
+        onEndChat={() => goIdle()}
+        onNext={() => nextMatch()}
+      />
+      <div className="flex flex-col h-[calc(100dvh-4rem-4.5rem)] lg:h-[calc(100dvh-4rem)] bg-base-100">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-base-300 bg-base-100">
         <div className="flex items-center gap-3">
@@ -470,20 +521,23 @@ const RandomMatchPage = () => {
             </span>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2 flex-wrap justify-end">
           <button
             type="button"
-            className={`btn btn-sm ${isActiveForRoom(roomId) ? 'btn-error' : 'btn-primary'} gap-1`}
+            className={`btn btn-xs sm:btn-sm ${isActiveForRoom(roomId) ? 'btn-error' : 'btn-primary'} gap-1`}
             onClick={() => {
               if (!partner || !roomId) return;
               if (isActiveForRoom(roomId)) closeCall();
               else startCall(partner, roomId);
             }}
           >
-            📹 {isActiveForRoom(roomId) ? 'End video' : 'Video'}
+            📹 <span className="hidden xs:inline">{isActiveForRoom(roomId) ? 'End video' : 'Video'}</span>
           </button>
-          <button className="btn btn-sm btn-error btn-outline" onClick={endMatch}>
-            End Chat
+          <button type="button" className="btn btn-xs sm:btn-sm btn-secondary gap-1" onClick={nextMatch}>
+            ⏭ <span className="hidden sm:inline">Next</span>
+          </button>
+          <button type="button" className="btn btn-xs sm:btn-sm btn-error btn-outline" onClick={endMatch}>
+            End
           </button>
         </div>
       </div>
@@ -573,6 +627,7 @@ const RandomMatchPage = () => {
       </form>
       </div>
     </div>
+    </>
   );
 };
 

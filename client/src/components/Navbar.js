@@ -16,6 +16,10 @@ const Navbar = () => {
       ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
       : t;
     document.documentElement.setAttribute('data-theme', resolved);
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) {
+      themeMeta.setAttribute('content', resolved === 'dark' ? '#151929' : '#6366f1');
+    }
   };
 
   useEffect(() => {
