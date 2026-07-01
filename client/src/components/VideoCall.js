@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getSocket } from '../socket';
-import { showAdBeforeCall, triggerAdOnInteraction } from '../utils/adUtils';
+import { showAdBeforeCall } from '../utils/adUtils';
 import { playRingingSound, stopRingingSound, vibrate } from '../utils/soundUtils';
 import { showCallNotification } from '../utils/notificationUtils';
 import { getIceServers } from '../utils/iceServers';
@@ -182,7 +182,6 @@ const VideoCall = ({
     if (pendingIncomingCall.accept) {
       (async () => {
         try {
-          triggerAdOnInteraction();
           setCallError(null);
           if (!localStream) await ensureLocalMedia();
           const socket = getSocket();
@@ -532,7 +531,6 @@ const VideoCall = ({
     try {
       stopRingingSound();
       setCallError(null);
-      triggerAdOnInteraction();
       
       // Get media permission first
       if (!localStream) {
@@ -590,7 +588,6 @@ const VideoCall = ({
       setCallError(null);
       // Get media permission FIRST before calling
       await ensureLocalMedia();
-      triggerAdOnInteraction();
       if ((user?.freeCallsUsed ?? 0) < 1) {
         requestCall();
       } else {

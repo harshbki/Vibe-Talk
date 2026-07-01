@@ -1,5 +1,4 @@
 # Render Blueprint — free tier, no credit card required
-# Dashboard → New → Blueprint → connect repo, or import manually
 services:
   - type: web
     name: vibetalk
@@ -29,16 +28,18 @@ services:
       - key: CLIENT_URL
         sync: false
       - key: REACT_APP_API_URL
-        sync: false
+        value: /api
       - key: REACT_APP_SOCKET_URL
         sync: false
       - key: REACT_APP_ADSENSE_CLIENT_ID
-        sync: false
+        value: ca-pub-5149550826483446
       - key: REACT_APP_ADSENSE_SLOT_CHAT_SIDEBAR
-        value: "3628542402"
+        value: "3906615674"
       - key: REACT_APP_ADSENSE_SLOT_RANDOM_MATCH_INLINE
         value: "3628542402"
       - key: REACT_APP_ADSENSE_SLOT_GROUP_CHAT_TOP
-        value: "3628542402"
-      - key: REACT_APP_MONETAG_ZONE_ID
-        value: "250054"
+        value: "6888002231"
+      - key: REACT_APP_ADSENSE_SLOT_USERS_LIST_BOTTOM
+        value: "6352156478"
+      - key: REACT_APP_ADSENSE_SLOT_PROFILE_BOTTOM
+        value: "8184534352"

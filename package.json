@@ -18,6 +18,7 @@
     "check-local": "bash scripts/check-local.sh",
     "test-mongo": "bash scripts/test-mongo-uri.sh",
     "fix-client": "bash scripts/fix-client-deps.sh",
+    "cleanup-test-users": "node scripts/cleanup-test-users.js",
     "start-dev": "bash scripts/start-dev.sh"
   },
   "repository": {

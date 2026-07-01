@@ -481,7 +481,7 @@ const ProfilePage = () => {
       </div>
 
       {/* Ad Banner */}
-      <AdBanner slot="profile-bottom" format="auto" className="mt-4 max-w-lg mx-auto rounded-xl" />
+      <AdBanner slot="profile-bottom" format="autorelaxed" className="mt-4 max-w-lg mx-auto rounded-xl" />
 
       {/* Toast */}
       {toast && (

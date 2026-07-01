@@ -4,7 +4,6 @@ import EmojiPicker from 'emoji-picker-react';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { getSocket } from '../socket';
-import { showPopunder } from '../utils/adUtils';
 import { isChatSoundEnabled, playNotificationSound } from '../utils/soundUtils';
 import { showMatchNotification } from '../utils/notificationUtils';
 import { useVideoCall } from '../context/VideoCallContext';
@@ -53,7 +52,6 @@ const RandomMatchPage = () => {
   const startSearch = () => {
     const socket = getSocket();
     if (!socket || !user) return;
-    showPopunder();
     socket.emit('find_match', {
       userId: user._id,
       gender: user.gender,
