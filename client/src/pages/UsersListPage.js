@@ -6,6 +6,25 @@ import { getUsers } from '../api';
 import AdBanner from '../components/AdBanner';
 import ProfilePromptModal from '../components/ProfilePromptModal';
 
+const FilterSelect = ({ label, value, onChange, options }) => (
+  <label className="form-control w-full sm:w-auto min-w-[9.5rem]">
+    <span className="label-text text-[10px] font-semibold uppercase tracking-wide text-base-content/50 mb-1">
+      {label}
+    </span>
+    <select
+      className="select select-bordered select-sm w-full bg-base-100"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  </label>
+);
+
 const UsersListPage = () => {
   const [users, setUsers] = useState([]);
   const [genderFilter, setGenderFilter] = useState('all');
@@ -38,11 +57,12 @@ const UsersListPage = () => {
     setLoading(true);
     try {
       const data = await getUsers(apiGender, user._id);
-      const usersWithOnlineStatus = data.map((u) => ({
-        ...u,
-        isOnline: onlineUsers.some((ou) => ou._id === u._id),
-      }));
-      setUsers(usersWithOnlineStatus);
+      setUsers(
+        data.map((u) => ({
+          ...u,
+          isOnline: onlineUsers.some((ou) => ou._id === u._id),
+        }))
+      );
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -71,58 +91,36 @@ const UsersListPage = () => {
     navigate('/chat');
   };
 
-  const FilterGroup = ({ label, value, options, onChange }) => (
-    <div className="flex flex-col gap-1">
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-base-content/50 px-1">
-        {label}
-      </span>
-      <div className="join">
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            className={`join-item btn btn-xs sm:btn-sm ${
-              value === opt.value ? 'btn-primary' : 'btn-ghost border border-base-300'
-            }`}
-            onClick={() => onChange(opt.value)}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-[calc(100dvh-4rem-4.5rem)] lg:min-h-[calc(100dvh-4rem)] bg-base-200/50">
       <div className="max-w-5xl mx-auto space-y-5 p-4 md:p-6">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <h1 className="text-2xl font-extrabold">Find Users</h1>
           {user?.isFullAccount ? (
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-              <FilterGroup
-                label="Gender"
-                value={genderFilter}
-                onChange={setGenderFilter}
-                options={[
-                  { value: 'all', label: 'All' },
-                  { value: 'Male', label: '👨 Male' },
-                  { value: 'Female', label: '👩 Female' },
-                ]}
-              />
-              <FilterGroup
+            <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:justify-end">
+              <FilterSelect
                 label="Visibility"
                 value={visibilityFilter}
                 onChange={setVisibilityFilter}
                 options={[
                   { value: 'all', label: 'All' },
-                  { value: 'online', label: '● Online' },
-                  { value: 'offline', label: '○ Offline' },
+                  { value: 'online', label: 'Online' },
+                  { value: 'offline', label: 'Offline' },
+                ]}
+              />
+              <FilterSelect
+                label="Gender"
+                value={genderFilter}
+                onChange={setGenderFilter}
+                options={[
+                  { value: 'all', label: 'All' },
+                  { value: 'Male', label: 'Male' },
+                  { value: 'Female', label: 'Female' },
                 ]}
               />
             </div>
           ) : (
-            <div className="badge badge-warning badge-outline gap-1 w-fit">
+            <div className="badge badge-warning badge-outline gap-1 w-fit sm:ml-auto">
               🔒 Create profile to filter &amp; DM
             </div>
           )}

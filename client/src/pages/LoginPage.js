@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+const FEATURES = [
+  { icon: '💬', title: 'Free Chat', desc: 'Talk to strangers online without registration hassles.' },
+  { icon: '🎲', title: 'Random Match', desc: 'Meet new people instantly with one tap.' },
+  { icon: '📹', title: 'Video Calls', desc: 'Face-to-face conversations with real users worldwide.' },
+  { icon: '🏘️', title: 'Group Rooms', desc: 'Join or create groups around shared interests.' },
+  { icon: '🔒', title: 'Safe & Clean', desc: 'Spam-free community with profile controls.' },
+  { icon: '📱', title: 'Mobile Ready', desc: 'Works smoothly on phone, tablet, and desktop.' },
+];
 
 const LoginPage = () => {
   const [nickname, setNickname] = useState('');
   const [gender, setGender] = useState('');
-  const [mode, setMode] = useState('guest'); // 'guest' or 'profile'
+  const [mode, setMode] = useState('guest');
   const [fullName, setFullName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const { login, profileLogin, loading, error, nicknameSuggestions } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = 'Vibe Talk — Free Random Chat, Video Call & Meet Strangers Online';
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,159 +46,205 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-base-200 to-secondary/5 p-4">
-      {/* Floating decorative dots */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-[10%] w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-[15%] w-40 h-40 bg-secondary/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-accent/5 rounded-full blur-3xl -translate-x-1/2" />
-      </div>
-
-      <div className="card w-full max-w-md bg-base-100/80 backdrop-blur-xl shadow-2xl border border-base-300/50 animate-scale-in relative z-10">
-        <div className="h-1.5 bg-gradient-to-r from-primary via-secondary to-primary rounded-t-2xl" />
-        <div className="card-body items-center text-center gap-6 p-8">
-          {/* Logo */}
-          <div className="space-y-2">
-            <div className="text-5xl">💬</div>
-            <h1 className="text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Vibe Talk
-            </h1>
-            <p className="text-base-content/50 text-sm">
-              {mode === 'guest' ? 'Chat anonymously with people around you' : 'Welcome back! Login with your profile'}
-            </p>
+    <div className="min-h-screen bg-base-100">
+      <header className="border-b border-base-200 bg-base-100/90 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            💬 Vibe Talk
           </div>
+          <a href="#start" className="btn btn-primary btn-sm">Start Chatting →</a>
+        </div>
+      </header>
 
-          {/* Mode tabs */}
-          <div className="join w-full">
-            <button
-              type="button"
-              className={`join-item btn btn-sm flex-1 ${mode === 'guest' ? 'btn-primary' : 'btn-ghost border border-base-300'}`}
-              onClick={() => setMode('guest')}
-            >
-              🆕 New User
-            </button>
-            <button
-              type="button"
-              className={`join-item btn btn-sm flex-1 ${mode === 'profile' ? 'btn-primary' : 'btn-ghost border border-base-300'}`}
-              onClick={() => setMode('profile')}
-            >
-              🔑 Profile Login
-            </button>
-          </div>
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-10 left-[8%] w-56 h-56 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-[10%] w-64 h-64 bg-secondary/10 rounded-full blur-3xl" />
+        </div>
 
-          <form onSubmit={handleSubmit} className="w-full space-y-5">
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text font-semibold">Nickname</span>
-              </label>
-              <input
-                type="text"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder="e.g. CoolCat99"
-                maxLength={20}
-                required
-                className="input input-bordered w-full focus:outline-none focus:input-primary bg-base-200/50"
-              />
+        <div className="max-w-6xl mx-auto px-4 py-10 lg:py-16 grid lg:grid-cols-2 gap-10 lg:gap-14 items-center relative">
+          <div className="space-y-6 animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 badge badge-primary badge-outline">
+              ✨ Free · No download · Instant chat
             </div>
+            <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
+              Meet strangers.
+              <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Make friends online.
+              </span>
+            </h1>
+            <p className="text-base-content/70 text-lg leading-relaxed max-w-xl">
+              Vibe Talk is a free random chat and video call platform to talk with strangers,
+              find matches, join groups, and start conversations in seconds — like top chat sites,
+              but cleaner and mobile-friendly.
+            </p>
+            <ul className="grid sm:grid-cols-2 gap-3 text-sm">
+              <li className="flex items-center gap-2">✅ Talk to strangers without signup</li>
+              <li className="flex items-center gap-2">✅ Random match &amp; video calls</li>
+              <li className="flex items-center gap-2">✅ Female-friendly community</li>
+              <li className="flex items-center gap-2">✅ Works on mobile &amp; desktop</li>
+            </ul>
+          </div>
 
-            {mode === 'guest' ? (
-              <div className="form-control w-full">
-                <label className="label">
-                  <span className="label-text font-semibold">I am a...</span>
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <label
-                    className={`btn ${gender === 'Male' ? 'btn-primary shadow-md shadow-primary/25' : 'btn-outline btn-ghost border-base-300'} gap-2 h-14 text-base transition-all`}
-                  >
-                    <input type="radio" name="gender" value="Male" checked={gender === 'Male'} onChange={(e) => setGender(e.target.value)} className="hidden" />
-                    <span className="text-xl">👨</span> Male
-                  </label>
-                  <label
-                    className={`btn ${gender === 'Female' ? 'btn-secondary shadow-md shadow-secondary/25' : 'btn-outline btn-ghost border-base-300'} gap-2 h-14 text-base transition-all`}
-                  >
-                    <input type="radio" name="gender" value="Female" checked={gender === 'Female'} onChange={(e) => setGender(e.target.value)} className="hidden" />
-                    <span className="text-xl">👩</span> Female
-                  </label>
-                </div>
+          <div id="start" className="card bg-base-100 shadow-2xl border border-base-200 animate-scale-in">
+            <div className="h-1.5 bg-gradient-to-r from-primary via-secondary to-primary rounded-t-2xl" />
+            <div className="card-body gap-5 p-6 sm:p-8">
+              <div className="text-center space-y-1">
+                <h2 className="text-2xl font-bold">Start Chatting Now</h2>
+                <p className="text-sm text-base-content/60">
+                  {mode === 'guest' ? 'Pick a nickname and jump in' : 'Login with your profile'}
+                </p>
               </div>
-            ) : (
-              <>
-                <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text font-semibold">Full Name <span className="text-error">*</span></span>
-                  </label>
+
+              <div className="join w-full">
+                <button
+                  type="button"
+                  className={`join-item btn btn-sm flex-1 ${mode === 'guest' ? 'btn-primary' : 'btn-ghost border border-base-300'}`}
+                  onClick={() => setMode('guest')}
+                >
+                  🆕 Guest
+                </button>
+                <button
+                  type="button"
+                  className={`join-item btn btn-sm flex-1 ${mode === 'profile' ? 'btn-primary' : 'btn-ghost border border-base-300'}`}
+                  onClick={() => setMode('profile')}
+                >
+                  🔑 Profile
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <label className="form-control w-full">
+                  <span className="label-text font-semibold">Nickname</span>
                   <input
                     type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Your full name"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    placeholder="e.g. CoolCat99"
+                    maxLength={20}
                     required
-                    className="input input-bordered w-full focus:outline-none focus:input-primary bg-base-200/50"
+                    className="input input-bordered w-full focus:input-primary"
                   />
-                </div>
-                <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text font-semibold">Date of Birth <span className="text-error">*</span></span>
-                  </label>
-                  <input
-                    type="date"
-                    value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
-                    required
-                    className="input input-bordered w-full focus:outline-none focus:input-primary bg-base-200/50"
-                  />
-                </div>
-              </>
-            )}
+                </label>
 
-            {error && (
-              <div className="alert alert-error text-sm py-2">
-                <span>{error}</span>
-              </div>
-            )}
+                {mode === 'guest' ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {['Male', 'Female'].map((g) => (
+                      <label
+                        key={g}
+                        className={`btn h-12 ${gender === g ? (g === 'Male' ? 'btn-primary' : 'btn-secondary') : 'btn-outline btn-ghost border-base-300'}`}
+                      >
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={g}
+                          checked={gender === g}
+                          onChange={(e) => setGender(e.target.value)}
+                          className="hidden"
+                        />
+                        {g === 'Male' ? '👨 Male' : '👩 Female'}
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <label className="form-control w-full">
+                      <span className="label-text font-semibold">Full Name</span>
+                      <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        required
+                        className="input input-bordered w-full focus:input-primary"
+                      />
+                    </label>
+                    <label className="form-control w-full">
+                      <span className="label-text font-semibold">Date of Birth</span>
+                      <input
+                        type="date"
+                        value={dateOfBirth}
+                        onChange={(e) => setDateOfBirth(e.target.value)}
+                        required
+                        className="input input-bordered w-full focus:input-primary"
+                      />
+                    </label>
+                  </>
+                )}
 
-            {nicknameSuggestions.length > 0 && (
-              <div className="bg-base-200 rounded-xl p-3 space-y-2">
-                <p className="text-xs font-semibold text-base-content/60">Try one of these:</p>
-                <div className="flex flex-wrap gap-2">
-                  {nicknameSuggestions.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      className="btn btn-xs btn-outline btn-primary"
-                      onClick={() => setNickname(s)}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+                {error && (
+                  <div className="alert alert-error text-sm py-2">
+                    <span>{error}</span>
+                  </div>
+                )}
 
-            <button
-              type="submit"
-              className="btn btn-primary w-full text-base font-bold h-12 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
-              disabled={loading || !nickname.trim() || (mode === 'guest' ? !gender : (!fullName.trim() || !dateOfBirth))}
-            >
-              {loading ? <span className="loading loading-spinner loading-sm" /> : null}
-              {loading ? 'Logging in...' : mode === 'guest' ? 'Join Chat →' : '🔑 Login →'}
-            </button>
-          </form>
+                {nicknameSuggestions.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {nicknameSuggestions.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className="btn btn-xs btn-outline btn-primary"
+                        onClick={() => setNickname(s)}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-          <div className="flex items-center gap-4 w-full opacity-40">
-            <div className="flex-1 border-t border-base-300" />
-            <span className="text-xs">{mode === 'guest' ? 'no registration needed' : 'login with your profile details'}</span>
-            <div className="flex-1 border-t border-base-300" />
-          </div>
-
-          <div className="flex gap-6 text-xs text-base-content/40">
-            <span>💬 Chat</span>
-            <span>🎲 Random Match</span>
-            <span>📹 Video Calls</span>
+                <button
+                  type="submit"
+                  className="btn btn-primary w-full h-12 text-base font-bold shadow-lg shadow-primary/20"
+                  disabled={
+                    loading ||
+                    !nickname.trim() ||
+                    (mode === 'guest' ? !gender : !fullName.trim() || !dateOfBirth)
+                  }
+                >
+                  {loading ? <span className="loading loading-spinner loading-sm" /> : null}
+                  {loading ? 'Joining...' : 'Start Chatting →'}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section className="bg-base-200/40 border-y border-base-200">
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          <h2 className="text-2xl font-bold text-center mb-8">Why people choose Vibe Talk</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="card bg-base-100 border border-base-200 shadow-sm">
+                <div className="card-body p-5">
+                  <div className="text-2xl mb-2">{f.icon}</div>
+                  <h3 className="font-bold">{f.title}</h3>
+                  <p className="text-sm text-base-content/65">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-4 py-12 text-sm text-base-content/70 leading-relaxed space-y-4">
+        <h2 className="text-xl font-bold text-base-content">Free online chat rooms &amp; random stranger meetup</h2>
+        <p>
+          Vibe Talk helps you talk to strangers online, make friends, and enjoy random video chat without complicated
+          signup. Whether you want a quick conversation, a random match, or a group discussion, our platform is built
+          for real-time connection on mobile and desktop.
+        </p>
+        <p>
+          Join thousands exploring free chat, anonymous guest access, profile-based messaging, and safe community
+          features. Start now — no app download required.
+        </p>
+      </section>
+
+      <footer className="border-t border-base-200 bg-base-200/30">
+        <div className="max-w-6xl mx-auto px-4 py-6 text-center text-xs text-base-content/50">
+          © {new Date().getFullYear()} Vibe Talk · Free random chat &amp; video calls · vibetalk.me
+        </div>
+      </footer>
     </div>
   );
 };

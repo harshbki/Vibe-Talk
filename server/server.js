@@ -14,6 +14,7 @@ const userRoutes = require('./routes/userRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const groupRoutes = require('./routes/groupRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const setupSocket = require('./socket');
 const { authLimiter, apiLimiter, requestLogger, errorHandler } = require('./middleware');
 const helmet = require('helmet');
@@ -133,6 +134,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Serve uploaded files in development only (production uses Cloudinary).
 const uploadsDir = path.join(__dirname, 'uploads');
