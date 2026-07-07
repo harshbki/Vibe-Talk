@@ -14,7 +14,12 @@
     <meta property="og:title" content="Vibe Talk — Free Random Chat &amp; Video Call" />
     <meta property="og:description" content="Talk to strangers, random match, video chat &amp; group rooms — free on vibetalk.me" />
     <meta property="og:site_name" content="Vibe Talk" />
+    <meta property="og:image" content="https://vibetalk.me/images/hero-landing.jpg" />
+    <meta property="og:image:width" content="1920" />
+    <meta property="og:image:height" content="1280" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://vibetalk.me/images/hero-landing.jpg" />
+    <link rel="preload" as="image" href="%PUBLIC_URL%/images/hero-landing.jpg" fetchpriority="high" />
     <meta name="twitter:title" content="Vibe Talk — Free Random Chat &amp; Video Call" />
     <meta name="twitter:description" content="Meet strangers online with free chat, random match &amp; video calls." />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
@@ -51,5 +56,19 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+
+    <!-- Monetag In-Page Push (IPP) — zone 11224657, all pages -->
+    <script>
+      (function (s) {
+        s.dataset.zone = '11224657';
+        s.src = 'https://nap5k.com/tag.min.js';
+        s.async = true;
+        s.setAttribute('data-cfasync', 'false');
+      })(
+        (document.body || document.documentElement).appendChild(
+          document.createElement('script')
+        )
+      );
+    </script>
   </body>
 </html>

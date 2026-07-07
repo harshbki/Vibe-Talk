@@ -3,22 +3,24 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PublicLayout from '../components/PublicLayout';
 
-const HERO_BG =
-  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1920&q=80';
+const HERO_IMG = `${process.env.PUBLIC_URL || ''}/images/hero-landing.jpg`;
 
 const GROUP_TOPICS = [
-  { icon: '✈️', title: 'Travel', desc: 'Need ideas on traveling?', cta: 'Join Now' },
-  { icon: '🎵', title: 'Music', desc: 'Meet other music enthusiasts.', cta: 'Join Now' },
-  { icon: '🎮', title: 'Games', desc: 'Find peers for gaming.', cta: 'Join Now' },
-  { icon: '🎬', title: 'Movies', desc: 'Best movie recommendations.', cta: 'Join Now' },
-  { icon: '🍕', title: 'Foodie', desc: 'Share recipes with foodies.', cta: 'Join Now' },
-  { icon: '🎌', title: 'Anime', desc: 'Discuss anime you must watch.', cta: 'Join Now' },
-  { icon: '🔬', title: 'Science', desc: "What's new in science.", cta: 'Join Now' },
-  { icon: '📰', title: 'News', desc: 'Discuss current events.', cta: 'Join Now' },
-  { icon: '⚽', title: 'Sports', desc: 'Your favorite athletes & teams.', cta: 'Join Now' },
-  { icon: '🆕', title: 'Fresh Groups', desc: 'Newly created by users.', cta: 'Join Now' },
-  { icon: '⭐', title: 'Promoted', desc: 'Community promoted groups.', cta: 'Join Now' },
-  { icon: '💚', title: 'Wellness', desc: 'Supportive mental health chat.', cta: 'Join Now' },
+  { icon: '✈️', title: 'Travel', desc: 'Need ideas on traveling?' },
+  { icon: '🚗', title: 'Cars', desc: 'Discuss your favorite cars.' },
+  { icon: '🏅', title: 'Olympics', desc: 'Discuss current Olympic games.' },
+  { icon: '🆕', title: 'Fresh Groups', desc: 'Newly created by users.' },
+  { icon: '⭐', title: 'Promoted', desc: 'Community promoted groups.' },
+  { icon: '🎵', title: 'Music', desc: 'Meet other music enthusiasts.' },
+  { icon: '😂', title: 'Meme Sharing', desc: 'Share and collect new memes.' },
+  { icon: '🎌', title: 'Anime', desc: 'Anime recommendations you must watch.' },
+  { icon: '🎮', title: 'Games', desc: 'Find gaming buddies.' },
+  { icon: '🍕', title: 'Foodie', desc: 'Share personal recipes.' },
+  { icon: '🎬', title: 'Movies', desc: 'Best movie recommendations.' },
+  { icon: '🔬', title: 'Science', desc: "What's new in science." },
+  { icon: '📰', title: 'News', desc: 'Discuss current events.' },
+  { icon: '⚽', title: 'Sports', desc: 'Athletes & favorite teams.' },
+  { icon: '💚', title: 'Wellness', desc: 'Mental health support chat.' },
 ];
 
 const LONG_FEATURES = [
@@ -40,7 +42,17 @@ const LONG_FEATURES = [
   {
     icon: '🆓',
     title: 'Free groups & chat',
-    text: 'Basic chat, random match, and groups are 100% free. We use ads (Google AdSense, Monetag) to keep the service running.',
+    text: 'Basic chat, random match, and groups are completely free. We use ads (Google AdSense, Monetag) to keep the service running.',
+  },
+  {
+    icon: '💯',
+    title: '100% free online chat',
+    text: 'Random video chat, voice messages, and group chat are free on our platform. Talk to strangers to learn English, make friends, or simply have a cam-to-cam conversation online.',
+  },
+  {
+    icon: '🔐',
+    title: 'Private one-to-one chat',
+    text: 'Direct messages give you a private chatting environment. Message users from the Users list or after Random Match — one-to-one, at your pace.',
   },
   {
     icon: '🏘️',
@@ -60,8 +72,21 @@ const LONG_FEATURES = [
   {
     icon: '🅾️',
     title: 'Omegle alternative',
-    text: 'Inspired by Omegle and ChatHub — random chat without captcha hassle, video calls in browser, and groups by interest when you want more than 1-on-1.',
+    text: 'Inspired by Omegle and ChatHub — random chat without captcha hassle, video calls in browser, and groups by interest. Works on mobile and VPN-friendly hosting.',
   },
+];
+
+const SEO_INTRO =
+  'Vibe Talk is a stranger meeting platform — talk without login, without app, without bots & without spam. Random match, video calls, direct messages, and interest-based Groups (not chat rooms). Female-friendly, clean community for making friends online — not dating. We have groups for music lovers, gamers, anime fans, foodies, and more. Be social & responsible on vibetalk.me.';
+
+const SEO_MORE =
+  ' Do not flirt with strangers on this site. Whether you want to chat with someone to learn English, talk with foreigners, make friends online, or simply have a webcam chat — Vibe Talk gives you a free browser chat for that purpose. No download, no phone number, no bots. Try our Omegle alternative with random match, video calls, and interest groups today.';
+
+const FOOTER_SEO_LINKS = [
+  { to: '/#start', label: 'Vibe Talk Random Chat' },
+  { to: '/about#groups', label: 'Interest Groups' },
+  { to: '/articles', label: 'Chat Tips & Articles' },
+  { to: '/about', label: 'About Us' },
 ];
 
 const LoginPage = () => {
@@ -70,6 +95,8 @@ const LoginPage = () => {
   const [mode, setMode] = useState('guest');
   const [fullName, setFullName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
+  const [heroOk, setHeroOk] = useState(true);
+  const [readMore, setReadMore] = useState(false);
   const { login, profileLogin, loading, error, nicknameSuggestions } = useAuth();
   const navigate = useNavigate();
 
@@ -109,24 +136,30 @@ const LoginPage = () => {
   const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
-    <PublicLayout hideFooter>
-      {/* Hero — meetyou.me style: photo + pink/purple overlay */}
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+    <PublicLayout hideFooter heroHeader>
+      {/* Hero — local photo + pink/purple overlay (meetyou.me style) */}
+      <section className="relative min-h-[min(88vh,820px)] flex items-center overflow-hidden bg-gradient-to-br from-pink-600 via-fuchsia-600 to-violet-800">
+        {heroOk && (
+          <img
+            src={HERO_IMG}
+            alt=""
+            aria-hidden
+            fetchPriority="high"
+            decoding="async"
+            onError={() => setHeroOk(false)}
+            className="absolute inset-0 w-full h-full object-cover object-center scale-105"
+          />
+        )}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
-          style={{ backgroundImage: `url(${HERO_BG})` }}
+          className="absolute inset-0 bg-gradient-to-r from-pink-600/88 via-fuchsia-600/82 to-violet-800/78"
           aria-hidden
         />
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-pink-600/90 via-fuchsia-600/85 to-violet-800/80"
-          aria-hidden
-        />
-        <div className="relative max-w-6xl mx-auto px-4 py-20 sm:py-28 w-full">
+        <div className="relative max-w-6xl mx-auto px-4 py-16 sm:py-24 w-full">
           <div className="max-w-xl text-white">
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] mb-5 drop-shadow-sm">
+            <p className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] mb-5 drop-shadow-md">
               Start making new friends
-            </h1>
-            <p className="text-lg sm:text-xl text-white/95 mb-10 font-light leading-relaxed">
+            </p>
+            <p className="text-lg sm:text-xl text-white/95 mb-10 font-light leading-relaxed drop-shadow">
               Start spending your spare time making friends.
             </p>
             <a
@@ -139,30 +172,42 @@ const LoginPage = () => {
         </div>
       </section>
 
-      {/* SEO headline block — like meetyou below fold */}
+      {/* SEO headline — read more like meetyou */}
       <section className="bg-base-100 border-b border-base-200">
-        <div className="max-w-4xl mx-auto px-4 py-10 text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-base-content leading-snug">
+        <div className="max-w-4xl mx-auto px-4 py-10">
+          <h1 className="text-xl sm:text-2xl font-bold text-base-content leading-snug text-center">
             No. 1 Spam Free Platform for online chat, meetup. No Registration.
-          </h2>
-          <p className="mt-4 text-sm sm:text-base text-base-content/70 leading-relaxed text-left sm:text-center">
-            Vibe Talk is a stranger meeting platform — talk without login, without app, without bots
-            &amp; without spam. Random match, video calls, direct messages, and interest-based{' '}
-            <strong>Groups</strong> (not chat rooms). Female-friendly, clean community for making
-            friends online — not dating. Be social &amp; responsible on vibetalk.me.
+          </h1>
+          <p className="mt-4 text-sm sm:text-base text-base-content/70 leading-relaxed">
+            {SEO_INTRO}
+            {readMore && SEO_MORE}
+          </p>
+          {!readMore && (
+            <button
+              type="button"
+              onClick={() => setReadMore(true)}
+              className="mt-3 text-sm text-primary font-semibold hover:underline"
+            >
+              Read more
+            </button>
+          )}
+          <p className="mt-4 text-xs text-base-content/45">
+            <Link to="/admin/articles" className="hover:text-primary">
+              ✍️ Admin
+            </Link>
           </p>
         </div>
       </section>
 
-      {/* Login */}
+      {/* Login form */}
       <section id="start" className="bg-base-100 scroll-mt-20">
         <div className="max-w-6xl mx-auto px-4 py-12 lg:py-16 grid lg:grid-cols-2 gap-10 items-start">
           <div className="space-y-4 order-2 lg:order-1">
-            <h3 className="text-xl font-bold">About the chat</h3>
+            <h2 className="text-xl font-bold">About the chat</h2>
             <p className="text-base-content/70 leading-relaxed text-sm">
-              You can start directly with <strong>Start Chatting</strong> or explore Groups after
-              login. Guest chat needs only a nickname; full profile unlocks user filters, DMs, and
-              group creation.
+              Key features of our chat — start directly with <strong>Start Chatting</strong> or choose
+              from Groups below after login. Guest chat needs only a nickname; full profile unlocks
+              filters, DMs, and group creation.
             </p>
             <ul className="text-sm space-y-2 text-base-content/80">
               <li>✅ Guest chat — no registration</li>
@@ -283,26 +328,25 @@ const LoginPage = () => {
         </div>
       </section>
 
-      {/* Group categories — meetyou "Join Now" grid */}
+      {/* 15 group categories */}
       <section className="bg-base-200/40 border-y border-base-200 py-14">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-center mb-2">Explore Groups</h2>
           <p className="text-center text-sm text-base-content/60 mb-10 max-w-2xl mx-auto">
-            Key features of our chat — choose a topic, then join after login. We use Groups, not old-style
-            chat rooms.
+            Choose a topic below, then join after login. We use Groups — not old-style chat rooms.
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
             {GROUP_TOPICS.map((g) => (
               <a
                 key={g.title}
                 href="#start"
                 className="group card bg-base-100 border border-base-200 hover:border-pink-400/60 hover:shadow-md transition-all"
               >
-                <div className="card-body p-4 sm:p-5">
-                  <span className="text-2xl sm:text-3xl">{g.icon}</span>
-                  <h3 className="font-bold text-sm sm:text-base group-hover:text-primary">{g.title}</h3>
-                  <p className="text-[11px] sm:text-xs text-base-content/55 leading-snug">{g.desc}</p>
-                  <span className="text-xs font-semibold text-primary mt-1">{g.cta} →</span>
+                <div className="card-body p-4">
+                  <span className="text-2xl">{g.icon}</span>
+                  <h3 className="font-bold text-sm group-hover:text-primary leading-tight">{g.title}</h3>
+                  <p className="text-[10px] sm:text-xs text-base-content/55 leading-snug">{g.desc}</p>
+                  <span className="text-xs font-semibold text-primary mt-1">Join Now →</span>
                 </div>
               </a>
             ))}
@@ -310,24 +354,26 @@ const LoginPage = () => {
         </div>
       </section>
 
-      {/* Long SEO sections — meetyou style */}
+      {/* Long SEO blocks */}
       <section className="py-14 bg-base-100">
         <div className="max-w-3xl mx-auto px-4 space-y-10">
           {LONG_FEATURES.map((f) => (
-            <div key={f.title} className="flex gap-4">
-              <span className="text-3xl shrink-0 leading-none">{f.icon}</span>
+            <article key={f.title} className="flex gap-4">
+              <span className="text-3xl shrink-0 leading-none" aria-hidden>
+                {f.icon}
+              </span>
               <div>
                 <h3 className="font-bold text-base sm:text-lg mb-2">{f.title}</h3>
                 <p className="text-sm text-base-content/70 leading-relaxed">{f.text}</p>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </section>
 
-      {/* Footer links + scroll top */}
-      <footer className="border-t border-base-200 bg-base-200/50">
-        <div className="max-w-6xl mx-auto px-4 py-8 text-center space-y-4">
+      {/* Footer + SEO link cluster */}
+      <footer className="border-t border-base-200 bg-base-200/50 pb-20 sm:pb-8">
+        <div className="max-w-6xl mx-auto px-4 py-8 text-center space-y-5">
           <p className="text-xs text-base-content/50">© Vibe Talk · vibetalk.me</p>
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-base-content/65">
             <Link to="/about" className="hover:text-primary">
@@ -343,6 +389,17 @@ const LoginPage = () => {
               Articles
             </Link>
           </div>
+          <p className="text-xs text-base-content/45 max-w-xl mx-auto leading-relaxed">
+            Not satisfied with general chat? Try these on Vibe Talk:{' '}
+            {FOOTER_SEO_LINKS.map((l, i) => (
+              <span key={l.to}>
+                {i > 0 && ' · '}
+                <Link to={l.to} className="text-primary hover:underline">
+                  {l.label}
+                </Link>
+              </span>
+            ))}
+          </p>
           <button
             type="button"
             onClick={scrollTop}
