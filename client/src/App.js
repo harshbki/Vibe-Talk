@@ -12,6 +12,12 @@ import GroupsListPage from './pages/GroupsListPage';
 import CreateGroupPage from './pages/CreateGroupPage';
 import GroupChatPage from './pages/GroupChatPage';
 import UserProfilePage from './pages/UserProfilePage';
+import AboutPage from './pages/AboutPage';
+import PrivacyPage from './pages/PrivacyPage';
+import LegalPage from './pages/LegalPage';
+import ArticlesPage from './pages/ArticlesPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
+import AdminArticlesPage from './pages/AdminArticlesPage';
 import Navbar from './components/Navbar';
 import MobileBottomNav from './components/MobileBottomNav';
 import IncomingCallOverlay from './components/IncomingCallOverlay';
@@ -19,6 +25,9 @@ import DmToast from './components/DmToast';
 import { VideoCallProvider, useVideoCall } from './context/VideoCallContext';
 import { initializeAds } from './utils/adUtils';
 import { initSounds } from './utils/soundUtils';
+import { initAnalytics } from './utils/analytics';
+import CookieConsent from './components/CookieConsent';
+import PageViewTracker from './components/PageViewTracker';
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
@@ -50,6 +59,7 @@ function App() {
   useEffect(() => {
     initializeAds();
     initSounds();
+    initAnalytics();
   }, []);
 
   return (
@@ -57,11 +67,19 @@ function App() {
       <ChatProvider>
         <VideoCallProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <PageViewTracker />
+          <CookieConsent />
           <div className="min-h-screen flex flex-col bg-base-100 text-base-content">
             <IncomingCallOverlay />
             <DmToast />
             <Routes>
               <Route path="/" element={<PublicRoute><LoginPage /></PublicRoute>} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/legal" element={<LegalPage />} />
+              <Route path="/articles" element={<ArticlesPage />} />
+              <Route path="/articles/:slug" element={<ArticleDetailPage />} />
+              <Route path="/admin/articles" element={<AdminArticlesPage />} />
               <Route path="/chat" element={<PrivateRoute><PrivateLayout><ChatPage /></PrivateLayout></PrivateRoute>} />
               <Route path="/users" element={<PrivateRoute><PrivateLayout><UsersListPage /></PrivateLayout></PrivateRoute>} />
               <Route path="/match" element={<PrivateRoute><PrivateLayout><RandomMatchPage /></PrivateLayout></PrivateRoute>} />

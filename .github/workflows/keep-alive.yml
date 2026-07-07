@@ -1,0 +1,23 @@
+# Keeps Render free tier awake (15 min idle sleep). No credit card needed.
+# After deploy: GitHub repo → Settings → Secrets → RENDER_APP_URL
+# Value example: https://vibetalk-xxxx.onrender.com  (no trailing slash)
+name: Render keep-alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: |
+          if [ -z "${{ secrets.RENDER_APP_URL }}" ]; then
+            echo "Skip: set RENDER_APP_URL in repo Secrets after Render deploy"
+            exit 0
+          fi
+          curl -sf "${{ secrets.RENDER_APP_URL }}/api/health" | head -c 500
+          echo ""
+          echo "Ping OK at $(date -u)"

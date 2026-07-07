@@ -223,4 +223,21 @@ export const deleteMessageApi = async (messageId, userId) => {
   return response.data;
 };
 
+export const getArticles = async () => {
+  const response = await api.get('/articles');
+  return response.data;
+};
+
+export const getArticleBySlug = async (slug) => {
+  const response = await api.get(`/articles/${slug}`);
+  return response.data;
+};
+
+export const createArticle = async (payload, adminSecret) => {
+  const response = await api.post('/articles', payload, {
+    headers: { 'x-admin-secret': adminSecret },
+  });
+  return response.data;
+};
+
 export default api;

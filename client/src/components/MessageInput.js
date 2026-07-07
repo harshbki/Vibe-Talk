@@ -71,7 +71,7 @@ const MessageInput = () => {
           <EmojiPicker onEmojiClick={handleEmojiClick} />
         </div>
       )}
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 p-3 border-t border-base-300 bg-base-100">
+      <form onSubmit={handleSubmit} className="flex items-end gap-2 p-2 border-t border-base-300 bg-base-100">
         <button
           type="button"
           className="btn btn-ghost btn-sm btn-circle text-lg"

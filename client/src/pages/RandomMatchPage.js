@@ -585,7 +585,7 @@ const RandomMatchPage = () => {
             <EmojiPicker onEmojiClick={handleEmojiClick} />
           </div>
         )}
-      <form onSubmit={sendMessage} className="flex items-center gap-2 p-3 border-t border-base-300 bg-base-100">
+      <form onSubmit={sendMessage} className="flex items-end gap-2 p-2 border-t border-base-300 bg-base-100">
         <button
           type="button"
           className="btn btn-ghost btn-sm btn-circle text-lg"
