@@ -208,7 +208,7 @@ const ChatWindow = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-base-100 h-full">
+    <div className="flex-1 flex flex-col bg-base-100 min-h-0">
       {/* Header — WhatsApp-style profile */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-base-300 bg-base-100">
         <Link to={`/user/${selectedUser._id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
@@ -254,7 +254,7 @@ const ChatWindow = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-base-200/30">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-base-200/30 min-h-0">
         {chatMessages.map((msg, index) => {
           const isMine = msg.from === user._id;
           return (

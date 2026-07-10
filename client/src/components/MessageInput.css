@@ -6,6 +6,7 @@
   border-top: 1px solid var(--border);
   align-items: center;
   position: relative;
+  flex-shrink: 0 !important;
 }
 
 .emoji-picker-wrapper {
