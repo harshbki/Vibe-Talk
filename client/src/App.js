@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ChatProvider } from './context/ChatContext';
-import LoginPage from './pages/LoginPage';
+import LandingPage from './pages/LandingPage';
+import StartChatPage from './pages/StartChatPage';
 import ChatPage from './pages/ChatPage';
 import UsersListPage from './pages/UsersListPage';
 import RandomMatchPage from './pages/RandomMatchPage';
@@ -15,6 +16,10 @@ import UserProfilePage from './pages/UserProfilePage';
 import AboutPage from './pages/AboutPage';
 import PrivacyPage from './pages/PrivacyPage';
 import LegalPage from './pages/LegalPage';
+import SafetyPage from './pages/SafetyPage';
+import CommunityGuidelinesPage from './pages/CommunityGuidelinesPage';
+import CookiesPage from './pages/CookiesPage';
+import ContactPage from './pages/ContactPage';
 import ArticlesPage from './pages/ArticlesPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import AdminArticlesPage from './pages/AdminArticlesPage';
@@ -31,7 +36,7 @@ import PageViewTracker from './components/PageViewTracker';
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/" replace />;
+  if (!user) return <Navigate to="/start" replace />;
   return children;
 };
 
@@ -46,7 +51,7 @@ const PrivateLayout = ({ children }) => {
     <>
       <Navbar />
       <div
-        className={`flex-1 min-h-0 pb-[4.5rem] lg:pb-0 ${callActive ? 'pt-[min(42vh,360px)]' : ''}`}
+        className={`flex-1 min-h-0 flex flex-col pb-[4.5rem] lg:pb-0 ${callActive ? 'pt-[min(42vh,360px)]' : ''}`}
       >
         {children}
       </div>
@@ -73,10 +78,16 @@ function App() {
             <IncomingCallOverlay />
             <DmToast />
             <Routes>
-              <Route path="/" element={<PublicRoute><LoginPage /></PublicRoute>} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/start" element={<PublicRoute><StartChatPage /></PublicRoute>} />
+              <Route path="/login" element={<Navigate to="/start" replace />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/legal" element={<LegalPage />} />
+              <Route path="/safety" element={<SafetyPage />} />
+              <Route path="/community-guidelines" element={<CommunityGuidelinesPage />} />
+              <Route path="/cookies" element={<CookiesPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/articles" element={<ArticlesPage />} />
               <Route path="/articles/:slug" element={<ArticleDetailPage />} />
               <Route path="/admin/articles" element={<AdminArticlesPage />} />

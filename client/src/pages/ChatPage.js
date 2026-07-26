@@ -6,7 +6,7 @@ const ChatPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-4rem-4.5rem)] lg:h-[calc(100dvh-4rem)] lg:pb-0">
+    <div className="flex flex-1 min-h-0 flex-col">
       <div className="lg:hidden flex items-center px-3 py-2 border-b border-base-200 bg-base-100">
         <button
           type="button"

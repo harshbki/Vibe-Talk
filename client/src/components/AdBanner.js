@@ -9,6 +9,8 @@ const SLOT_DEFAULTS = {
   'group-chat-top': '6888002231',
   'users-list-bottom': '6352156478',
   'profile-bottom': '8184534352',
+  'public-inline': '6352156478',
+  'public-sidebar': '3628542402',
 };
 
 const SLOT_MAP = {
@@ -17,6 +19,8 @@ const SLOT_MAP = {
   'group-chat-top': process.env.REACT_APP_ADSENSE_SLOT_GROUP_CHAT_TOP,
   'profile-bottom': process.env.REACT_APP_ADSENSE_SLOT_PROFILE_BOTTOM,
   'random-match-inline': process.env.REACT_APP_ADSENSE_SLOT_RANDOM_MATCH_INLINE,
+  'public-inline': process.env.REACT_APP_ADSENSE_SLOT_USERS_LIST_BOTTOM,
+  'public-sidebar': process.env.REACT_APP_ADSENSE_SLOT_RANDOM_MATCH_INLINE,
 };
 
 const resolveSlot = (slot) => SLOT_MAP[slot] || SLOT_DEFAULTS[slot] || null;
