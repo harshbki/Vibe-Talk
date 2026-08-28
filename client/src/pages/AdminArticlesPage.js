@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
 import { createArticle } from '../api';
+import { useSeoMeta } from '../utils/seo';
 
 const AdminArticlesPage = () => {
   const [secret, setSecret] = useState(() => sessionStorage.getItem('vtAdminSecret') || '');
@@ -10,6 +11,13 @@ const AdminArticlesPage = () => {
   const [body, setBody] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useSeoMeta({
+    title: 'Admin Articles — Vibe Talk',
+    description: 'Vibe Talk internal admin page for publishing articles.',
+    canonicalPath: '/admin/articles',
+    robots: 'noindex,nofollow',
+  });
 
   const saveSecret = () => {
     sessionStorage.setItem('vtAdminSecret', secret);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PublicLayout from '../components/PublicLayout';
+import { useSeoMeta } from '../utils/seo';
 
 const HERO_IMG = `${process.env.PUBLIC_URL || ''}/images/hero-landing.jpg`;
 
@@ -77,10 +78,10 @@ const LONG_FEATURES = [
 ];
 
 const SEO_INTRO =
-  'Vibe Talk is a stranger meeting platform — talk without login, without app, without bots & without spam. Random match, video calls, direct messages, and interest-based Groups (not chat rooms). Female-friendly, clean community for making friends online — not dating. We have groups for music lovers, gamers, anime fans, foodies, and more. Be social & responsible on vibetalk.me.';
+  'Vibe Talk is a stranger chat platform where you can start with a nickname, use random match, join interest-based groups, and make new connections online. We focus on respectful conversations, community moderation, and clear reporting options so users can chat more safely.';
 
 const SEO_MORE =
-  ' Do not flirt with strangers on this site. Whether you want to chat with someone to learn English, talk with foreigners, make friends online, or simply have a webcam chat — Vibe Talk gives you a free browser chat for that purpose. No download, no phone number, no bots. Try our Omegle alternative with random match, video calls, and interest groups today.';
+  ' Whether you want to practice language skills, meet people from other countries, or join topic-based groups, Vibe Talk works directly in your browser with no app download. You can block and report abusive behavior, then move to the next match when needed.';
 
 const FOOTER_SEO_LINKS = [
   { to: '/#start', label: 'Vibe Talk Random Chat' },
@@ -100,16 +101,15 @@ const LoginPage = () => {
   const { login, profileLogin, loading, error, nicknameSuggestions } = useAuth();
   const navigate = useNavigate();
 
+  useSeoMeta({
+    title: 'Vibe Talk — Free Random Chat, Video Call & Meet New People Online',
+    description:
+      'Start free random chat on Vibe Talk. Use guest login, random match, video calls, and interest-based groups to meet new people online.',
+    canonicalPath: '/',
+  });
+
   useEffect(() => {
-    document.title =
-      'Vibe Talk — Free Random Chat, Video Call & Meet Strangers Online | vibetalk.me';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute(
-        'content',
-        'Vibe Talk — spam-free random chat, talk to strangers, video call & groups. No registration. Female-friendly Omegle alternative on vibetalk.me'
-      );
-    }
+    document.documentElement.lang = 'en';
   }, []);
 
   const handleSubmit = async (e) => {
@@ -176,7 +176,7 @@ const LoginPage = () => {
       <section className="bg-base-100 border-b border-base-200">
         <div className="max-w-4xl mx-auto px-4 py-10">
           <h1 className="text-xl sm:text-2xl font-bold text-base-content leading-snug text-center">
-            No. 1 Spam Free Platform for online chat, meetup. No Registration.
+            Meet new people with random chat, video calls, and interest groups.
           </h1>
           <p className="mt-4 text-sm sm:text-base text-base-content/70 leading-relaxed">
             {SEO_INTRO}

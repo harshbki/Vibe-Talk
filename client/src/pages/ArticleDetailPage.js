@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
 import { getArticleBySlug } from '../api';
+import { useSeoMeta } from '../utils/seo';
 
 const ArticleDetailPage = () => {
   const { slug } = useParams();
@@ -9,16 +10,30 @@ const ArticleDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  useSeoMeta({
+    title: article ? `${article.title} — Vibe Talk` : 'Article — Vibe Talk',
+    description:
+      article?.excerpt ||
+      'Read this Vibe Talk article for practical tips on safer and better online conversations.',
+    canonicalPath: `/articles/${slug}`,
+  });
+
   useEffect(() => {
-    setLoading(true);
-    setError(false);
-    getArticleBySlug(slug)
-      .then((data) => {
+    const fetchArticle = async () => {
+      setLoading(true);
+      setError(false);
+      try {
+        const data = await getArticleBySlug(slug);
         setArticle(data);
-        document.title = `${data.title} — Vibe Talk`;
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      } catch (fetchError) {
+        console.error('Fetch article error:', fetchError);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticle();
   }, [slug]);
 
   return (

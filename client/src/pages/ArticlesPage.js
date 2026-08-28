@@ -2,17 +2,33 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
 import { getArticles } from '../api';
+import { useSeoMeta } from '../utils/seo';
 
 const ArticlesPage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  useSeoMeta({
+    title: 'Articles — Vibe Talk Blog & Chat Tips',
+    description:
+      'Read Vibe Talk articles about online chat safety, conversation tips, and making better connections online.',
+    canonicalPath: '/articles',
+  });
+
   useEffect(() => {
-    document.title = 'Articles — Vibe Talk Blog & Tips';
-    getArticles()
-      .then(setArticles)
-      .catch(() => setArticles([]))
-      .finally(() => setLoading(false));
+    const fetchArticles = async () => {
+      try {
+        const data = await getArticles();
+        setArticles(data);
+      } catch (error) {
+        console.error('Fetch articles error:', error);
+        setArticles([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
   }, []);
 
   return (

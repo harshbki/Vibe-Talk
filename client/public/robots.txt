@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /chat
+Disallow: /users
+Disallow: /match
+Disallow: /groups
+Disallow: /group/
+Disallow: /profile
+Disallow: /settings
+Disallow: /user/
+Disallow: /api/
 
 Sitemap: https://vibetalk.me/sitemap.xml

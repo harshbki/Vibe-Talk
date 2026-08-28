@@ -1,10 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import PublicLayout from '../components/PublicLayout';
+import { useSeoMeta } from '../utils/seo';
 
 const PrivacyPage = () => {
-  useEffect(() => {
-    document.title = 'Privacy Policy — Vibe Talk';
-  }, []);
+  useSeoMeta({
+    title: 'Privacy Policy — Vibe Talk',
+    description:
+      'Read the Vibe Talk privacy policy, including what data is collected, how it is used, and user privacy controls.',
+    canonicalPath: '/privacy',
+  });
 
   return (
     <PublicLayout>

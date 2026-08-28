@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
+import { useSeoMeta } from '../utils/seo';
 
 const GROUP_TOPICS = [
   { icon: '✈️', title: 'Travel', desc: 'Need ideas on traveling?' },
@@ -21,9 +22,12 @@ const GROUP_TOPICS = [
 ];
 
 const AboutPage = () => {
-  useEffect(() => {
-    document.title = 'About Vibe Talk — Free Random Chat & Groups';
-  }, []);
+  useSeoMeta({
+    title: 'About Vibe Talk — Random Chat, Groups, and Community',
+    description:
+      'Learn what Vibe Talk is, how random chat and groups work, and how we support safer online conversations.',
+    canonicalPath: '/about',
+  });
 
   return (
     <PublicLayout>

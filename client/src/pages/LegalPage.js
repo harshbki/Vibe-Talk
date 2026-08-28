@@ -1,10 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import PublicLayout from '../components/PublicLayout';
+import { useSeoMeta } from '../utils/seo';
 
 const LegalPage = () => {
-  useEffect(() => {
-    document.title = 'Terms & Legal — Vibe Talk';
-  }, []);
+  useSeoMeta({
+    title: 'Terms & Legal — Vibe Talk',
+    description:
+      'Review Vibe Talk terms, acceptable-use rules, and legal information for using the platform responsibly.',
+    canonicalPath: '/legal',
+  });
 
   return (
     <PublicLayout>
