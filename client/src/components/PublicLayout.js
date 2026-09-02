@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 const NAV_LINKS = [
   { to: '/', label: 'Online Chat' },
   { to: '/about', label: 'About' },
+  { to: '/safety', label: 'Safety' },
   { to: '/privacy', label: 'Privacy' },
   { to: '/articles', label: 'Articles' },
   { to: '/legal', label: 'Legal' },
@@ -127,6 +128,7 @@ const PublicLayout = ({ children, hideFooter = false, heroHeader = false }) => {
               <ul className="space-y-1 text-base-content/70">
                 <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
                 <li><Link to="/legal" className="hover:text-primary">Terms &amp; Legal</Link></li>
+                <li><Link to="/safety" className="hover:text-primary">Safety Center</Link></li>
                 <li><Link to="/about" className="hover:text-primary">About Us</Link></li>
               </ul>
             </div>

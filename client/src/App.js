@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ChatProvider } from './context/ChatContext';
 import LoginPage from './pages/LoginPage';
@@ -15,6 +15,7 @@ import UserProfilePage from './pages/UserProfilePage';
 import AboutPage from './pages/AboutPage';
 import PrivacyPage from './pages/PrivacyPage';
 import LegalPage from './pages/LegalPage';
+import SafetyPage from './pages/SafetyPage';
 import ArticlesPage from './pages/ArticlesPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import AdminArticlesPage from './pages/AdminArticlesPage';
@@ -28,6 +29,7 @@ import { initSounds } from './utils/soundUtils';
 import { initAnalytics } from './utils/analytics';
 import CookieConsent from './components/CookieConsent';
 import PageViewTracker from './components/PageViewTracker';
+import { useSeoMeta } from './utils/seo';
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
@@ -42,8 +44,34 @@ const PublicRoute = ({ children }) => {
 
 const PrivateLayout = ({ children }) => {
   const { callActive } = useVideoCall();
+
+  const PrivateSeoMeta = () => {
+    const location = useLocation();
+    const path = location.pathname;
+
+    let title = 'Vibe Talk App';
+    if (path === '/chat') title = 'Chat — Vibe Talk';
+    else if (path === '/users') title = 'Users — Vibe Talk';
+    else if (path === '/match') title = 'Random Match — Vibe Talk';
+    else if (path === '/profile') title = 'Profile — Vibe Talk';
+    else if (path === '/settings') title = 'Settings — Vibe Talk';
+    else if (path.startsWith('/groups')) title = 'Groups — Vibe Talk';
+    else if (path.startsWith('/group/')) title = 'Group Chat — Vibe Talk';
+    else if (path.startsWith('/user/')) title = 'User Profile — Vibe Talk';
+
+    useSeoMeta({
+      title,
+      description: 'Private Vibe Talk user area.',
+      canonicalPath: path,
+      robots: 'noindex,nofollow',
+    });
+
+    return null;
+  };
+
   return (
     <>
+      <PrivateSeoMeta />
       <Navbar />
       <div
         className={`flex-1 min-h-0 pb-[4.5rem] lg:pb-0 ${callActive ? 'pt-[min(42vh,360px)]' : ''}`}
@@ -77,6 +105,7 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/legal" element={<LegalPage />} />
+              <Route path="/safety" element={<SafetyPage />} />
               <Route path="/articles" element={<ArticlesPage />} />
               <Route path="/articles/:slug" element={<ArticleDetailPage />} />
               <Route path="/admin/articles" element={<AdminArticlesPage />} />
