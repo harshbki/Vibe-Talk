@@ -3,11 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 
 const NAV_LINKS = [
   { to: '/', label: 'Online Chat' },
+  { to: '/random-chat', label: 'Random Chat' },
+  { to: '/video-chat', label: 'Video Chat' },
   { to: '/about', label: 'About' },
   { to: '/safety', label: 'Safety' },
-  { to: '/privacy', label: 'Privacy' },
+  { to: '/chat-tips', label: 'Chat Tips' },
   { to: '/articles', label: 'Articles' },
-  { to: '/legal', label: 'Legal' },
 ];
 
 const PublicLayout = ({ children, hideFooter = false, heroHeader = false }) => {
@@ -119,7 +120,12 @@ const PublicLayout = ({ children, hideFooter = false, heroHeader = false }) => {
               <p className="font-semibold mb-2">Explore</p>
               <ul className="space-y-1 text-base-content/70">
                 <li><Link to="/" className="hover:text-primary">Online Chat</Link></li>
+                <li><Link to="/random-chat" className="hover:text-primary">Random Chat</Link></li>
+                <li><Link to="/video-chat" className="hover:text-primary">Video Chat</Link></li>
+                <li><Link to="/talk-to-strangers" className="hover:text-primary">Talk to Strangers</Link></li>
                 <li><Link to="/about#groups" className="hover:text-primary">Groups</Link></li>
+                <li><Link to="/omegle-alternative" className="hover:text-primary">Omegle Alternative</Link></li>
+                <li><Link to="/chat-tips" className="hover:text-primary">Chat Tips</Link></li>
                 <li><Link to="/articles" className="hover:text-primary">Articles</Link></li>
               </ul>
             </div>

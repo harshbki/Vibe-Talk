@@ -19,6 +19,11 @@ import SafetyPage from './pages/SafetyPage';
 import ArticlesPage from './pages/ArticlesPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import AdminArticlesPage from './pages/AdminArticlesPage';
+import RandomChatPage from './pages/RandomChatPage';
+import VideoChatPage from './pages/VideoChatPage';
+import TalkToStrangersPage from './pages/TalkToStrangersPage';
+import OmegleAlternativePage from './pages/OmegleAlternativePage';
+import ChatTipsPage from './pages/ChatTipsPage';
 import Navbar from './components/Navbar';
 import MobileBottomNav from './components/MobileBottomNav';
 import IncomingCallOverlay from './components/IncomingCallOverlay';
@@ -106,6 +111,11 @@ function App() {
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/legal" element={<LegalPage />} />
               <Route path="/safety" element={<SafetyPage />} />
+              <Route path="/random-chat" element={<RandomChatPage />} />
+              <Route path="/video-chat" element={<VideoChatPage />} />
+              <Route path="/talk-to-strangers" element={<TalkToStrangersPage />} />
+              <Route path="/omegle-alternative" element={<OmegleAlternativePage />} />
+              <Route path="/chat-tips" element={<ChatTipsPage />} />
               <Route path="/articles" element={<ArticlesPage />} />
               <Route path="/articles/:slug" element={<ArticleDetailPage />} />
               <Route path="/admin/articles" element={<AdminArticlesPage />} />

@@ -84,10 +84,12 @@ const SEO_MORE =
   ' Whether you want to practice language skills, meet people from other countries, or join topic-based groups, Vibe Talk works directly in your browser with no app download. You can block and report abusive behavior, then move to the next match when needed.';
 
 const FOOTER_SEO_LINKS = [
-  { to: '/#start', label: 'Vibe Talk Random Chat' },
-  { to: '/about#groups', label: 'Interest Groups' },
-  { to: '/articles', label: 'Chat Tips & Articles' },
-  { to: '/about', label: 'About Us' },
+  { to: '/random-chat', label: 'Random Chat' },
+  { to: '/video-chat', label: 'Video Chat' },
+  { to: '/talk-to-strangers', label: 'Talk to Strangers' },
+  { to: '/omegle-alternative', label: 'Omegle Alternative' },
+  { to: '/chat-tips', label: 'Online Chat Tips' },
+  { to: '/safety', label: 'Safety Center' },
 ];
 
 const LoginPage = () => {
