@@ -106,6 +106,109 @@ app.use('/api', apiLimiter);
 const clientBuild = path.join(__dirname, '..', 'client', 'build');
 const clientIndex = path.join(clientBuild, 'index.html');
 const hasClientBuild = fs.existsSync(clientIndex);
+const clientIndexHtml = hasClientBuild ? fs.readFileSync(clientIndex, 'utf8') : null;
+const PUBLIC_PAGE_METADATA = {
+  '/': {
+    title: 'Vibe Talk — Free Random Chat, Video Call & Meet Strangers Online',
+    description:
+      'Vibe Talk is a free browser-based platform for random chat, text chat, video calls, groups, and meeting new people online.',
+  },
+  '/about': {
+    title: 'About Vibe Talk — Free Random Chat & Groups',
+    description:
+      'Learn how Vibe Talk helps people meet new friends through guest chat, random matching, video calls, direct messages, and interest-based groups.',
+  },
+  '/privacy': {
+    title: 'Privacy Policy — Vibe Talk',
+    description: 'Read how Vibe Talk handles account, chat, media, and website information.',
+  },
+  '/legal': {
+    title: 'Terms & Conditions — Vibe Talk',
+    description: 'Read the terms for using Vibe Talk chat, groups, profiles, and video features.',
+  },
+  '/safety': {
+    title: 'Safety Center — Vibe Talk',
+    description: 'Practical safety guidance for chatting with strangers and using video chat on Vibe Talk.',
+  },
+  '/community-guidelines': {
+    title: 'Community Guidelines — Vibe Talk',
+    description: 'Review Vibe Talk guidelines for respectful, friendly, and safe conversations.',
+  },
+  '/cookies': {
+    title: 'Cookies Policy — Vibe Talk',
+    description: 'Learn how Vibe Talk uses cookies and similar technologies.',
+  },
+  '/contact': {
+    title: 'Contact Vibe Talk',
+    description: 'Find contact details for Vibe Talk support and safety questions.',
+  },
+  '/articles': {
+    title: 'Articles & Chat Tips — Vibe Talk',
+    description: 'Read practical guides about online conversation, meeting people, and safer chat.',
+  },
+  '/start': {
+    title: 'Join Chat — Vibe Talk',
+    description: 'Pick a nickname and start chatting on Vibe Talk without creating an account.',
+  },
+  '/login': {
+    title: 'Join Chat — Vibe Talk',
+    description: 'Start a Vibe Talk guest chat with a nickname.',
+  },
+  '/admin/articles': {
+    title: 'Article Administration — Vibe Talk',
+    description: 'Manage Vibe Talk articles.',
+  },
+  '/chat': {
+    title: 'Chat — Vibe Talk',
+    description: 'Private Vibe Talk chat.',
+  },
+  '/users': {
+    title: 'Find Users — Vibe Talk',
+    description: 'Find users on Vibe Talk.',
+  },
+  '/match': {
+    title: 'Random Match — Vibe Talk',
+    description: 'Find a random chat partner on Vibe Talk.',
+  },
+  '/profile': {
+    title: 'Profile — Vibe Talk',
+    description: 'Manage your Vibe Talk profile.',
+  },
+  '/settings': {
+    title: 'Settings — Vibe Talk',
+    description: 'Manage your Vibe Talk settings.',
+  },
+  '/groups': {
+    title: 'Groups — Vibe Talk',
+    description: 'Explore Vibe Talk groups.',
+  },
+};
+
+const escapeHtml = (value) =>
+  value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
+  const canonicalPath = req.path === '/' ? '/' : req.path;
+  const canonicalUrl = `https://vibetalk.me${canonicalPath}`;
+  let html = clientIndexHtml
+    .replace(/<title>.*?<\/title>/, `<title>${escapeHtml(metadata.title)}</title>`)
+    .replace(
+      /<meta name="description" content="[^"]*"\s*\/>/,
+      `<meta name="description" content="${escapeHtml(metadata.description)}" />`
+    )
+    .replace(/<meta name="robots" content="[^"]*"\s*\/>/, `<meta name="robots" content="${robots}" />`)
+    .replace(/<link rel="canonical" href="[^"]*"\s*\/>/, `<link rel="canonical" href="${canonicalUrl}" />`)
+    .replace(/<meta property="og:url" content="[^"]*"\s*\/>/, `<meta property="og:url" content="${canonicalUrl}" />`)
+    .replace(/<meta property="og:title" content="[^"]*"\s*\/>/, `<meta property="og:title" content="${escapeHtml(metadata.title)}" />`)
+    .replace(/<meta property="og:description" content="[^"]*"\s*\/>/, `<meta property="og:description" content="${escapeHtml(metadata.description)}" />`)
+    .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/, `<meta name="twitter:title" content="${escapeHtml(metadata.title)}" />`)
+    .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/, `<meta name="twitter:description" content="${escapeHtml(metadata.description)}" />`);
+
+  if (robots !== 'index, follow') {
+    res.set('X-Robots-Tag', robots);
+  }
+  return res.type('html').send(html);
+};
 
 // API summary when React build is missing (local dev without `npm run build`)
 if (!hasClientBuild) {
@@ -152,7 +255,63 @@ if (hasClientBuild) {
   app.use(express.static(clientBuild));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
-    res.sendFile(clientIndex);
+    const publicClientRoutes = [
+      '/',
+      '/start',
+      '/login',
+      '/about',
+      '/privacy',
+      '/legal',
+      '/safety',
+      '/community-guidelines',
+      '/cookies',
+      '/contact',
+      '/articles',
+      '/admin/articles',
+    ];
+    const isPublicRoute = publicClientRoutes.includes(req.path);
+    const isArticleRoute = req.path.startsWith('/articles/') && !path.extname(req.path);
+    const isPrivateRoute = [
+      '/chat',
+      '/users',
+      '/match',
+      '/profile',
+      '/settings',
+      '/groups',
+      '/group/',
+      '/user/',
+    ].some((route) => req.path === route || req.path.startsWith(route));
+    const isNonIndexableRoute =
+      isPrivateRoute ||
+      ['/start', '/login', '/admin/articles'].includes(req.path);
+
+    if (isPublicRoute || isArticleRoute || isPrivateRoute) {
+      if (isNonIndexableRoute) {
+        res.set('X-Robots-Tag', 'noindex, nofollow');
+      }
+      const metadata = PUBLIC_PAGE_METADATA[req.path] ||
+        (isArticleRoute
+          ? {
+              title: 'Article — Vibe Talk',
+              description: 'Read practical guides about online conversation, meeting people, and safer chat.',
+            }
+          : {
+              title: 'Vibe Talk',
+              description: 'Vibe Talk chat and community app.',
+            });
+      return renderClientPage(
+        req,
+        res,
+        metadata,
+        isNonIndexableRoute ? 'noindex, nofollow' : 'index, follow'
+      );
+    }
+
+    if (path.extname(req.path)) {
+      return res.status(404).type('text').send('Not found');
+    }
+
+    return res.status(404).send('Not found');
   });
   console.log(`Serving React app from ${clientBuild}`);
 } else {

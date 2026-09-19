@@ -20,17 +20,6 @@ const LandingPage = () => {
     if (window.location.hash === '#start') {
       navigate('/start', { replace: true });
     }
-    document.title =
-      'Vibe Talk — Free Random Chat, Video Call & Meet Strangers Online | vibetalk.me';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute(
-        'content',
-        'Vibe Talk — spam-free random chat, talk to strangers, video call & groups. No registration. Female-friendly Omegle alternative on vibetalk.me'
-      );
-    }
-    const robots = document.querySelector('meta[name="robots"]');
-    if (robots) robots.setAttribute('content', 'index, follow');
   }, [navigate]);
 
   const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });

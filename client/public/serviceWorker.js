@@ -13,8 +13,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: '/logo192.png',
-    badge: '/logo192.png',
+    icon: '/favicon.svg',
+    badge: '/favicon.svg',
     tag: data.tag || 'vibetalk-notification',
     renotify: true,
     data: data.url || '/'

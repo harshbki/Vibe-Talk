@@ -33,6 +33,7 @@ import { initSounds } from './utils/soundUtils';
 import { initAnalytics } from './utils/analytics';
 import CookieConsent from './components/CookieConsent';
 import PageViewTracker from './components/PageViewTracker';
+import SeoManager from './components/SeoManager';
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
@@ -73,6 +74,7 @@ function App() {
         <VideoCallProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <PageViewTracker />
+          <SeoManager />
           <CookieConsent />
           <div className="min-h-screen flex flex-col bg-base-100 text-base-content">
             <IncomingCallOverlay />

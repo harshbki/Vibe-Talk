@@ -45,8 +45,8 @@ export const showMessageNotification = (senderName, messagePreview, tag) => {
   const title = `${senderName} sent a message`;
   const options = {
     body: messagePreview || 'New message',
-    icon: '/logo192.png',
-    badge: '/logo192.png',
+    icon: '/favicon.svg',
+    badge: '/favicon.svg',
     tag: tag || `msg-${senderName}`,
     renotify: true
   };
@@ -72,8 +72,8 @@ export const showCallNotification = (callerName) => {
   const title = 'Incoming video call 📹';
   const options = {
     body: `${callerName} is calling you`,
-    icon: '/logo192.png',
-    badge: '/logo192.png',
+    icon: '/favicon.svg',
+    badge: '/favicon.svg',
     tag: 'call-notification',
     renotify: true,
     requireInteraction: true
@@ -93,8 +93,8 @@ export const showMatchNotification = (partnerName) => {
   const title = "It's a Match! 🎉";
   const options = {
     body: `You matched with ${partnerName}`,
-    icon: '/logo192.png',
-    badge: '/logo192.png',
+    icon: '/favicon.svg',
+    badge: '/favicon.svg',
     tag: 'match-notification',
     renotify: true
   };

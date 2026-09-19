@@ -3,6 +3,25 @@ import { Link, useParams } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
 import { getArticleBySlug } from '../api';
 
+const setArticleMeta = (article, slug) => {
+  const canonical = document.head.querySelector('link[rel="canonical"]');
+  const description = article.excerpt || `Read ${article.title} on Vibe Talk.`;
+  document.title = `${article.title} — Vibe Talk`;
+  if (canonical) canonical.setAttribute('href', `https://vibetalk.me/articles/${slug}`);
+  const descriptionMeta = document.head.querySelector('meta[name="description"]');
+  if (descriptionMeta) descriptionMeta.setAttribute('content', description);
+  const ogUrl = document.head.querySelector('meta[property="og:url"]');
+  if (ogUrl) ogUrl.setAttribute('content', `https://vibetalk.me/articles/${slug}`);
+  const ogTitle = document.head.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.setAttribute('content', `${article.title} — Vibe Talk`);
+  const ogDescription = document.head.querySelector('meta[property="og:description"]');
+  if (ogDescription) ogDescription.setAttribute('content', description);
+  const twitterTitle = document.head.querySelector('meta[name="twitter:title"]');
+  if (twitterTitle) twitterTitle.setAttribute('content', `${article.title} — Vibe Talk`);
+  const twitterDescription = document.head.querySelector('meta[name="twitter:description"]');
+  if (twitterDescription) twitterDescription.setAttribute('content', description);
+};
+
 const ArticleDetailPage = () => {
   const { slug } = useParams();
   const [article, setArticle] = useState(null);
@@ -10,15 +29,30 @@ const ArticleDetailPage = () => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    let active = true;
+
     setLoading(true);
     setError(false);
-    getArticleBySlug(slug)
-      .then((data) => {
+    const loadArticle = async () => {
+      try {
+        const data = await getArticleBySlug(slug);
+        if (!active) return;
         setArticle(data);
-        document.title = `${data.title} — Vibe Talk`;
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+        setArticleMeta(data, slug);
+      } catch (requestError) {
+        if (active) {
+          console.error('Article load error:', requestError);
+          setError(true);
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    loadArticle();
+    return () => {
+      active = false;
+    };
   }, [slug]);
 
   return (
