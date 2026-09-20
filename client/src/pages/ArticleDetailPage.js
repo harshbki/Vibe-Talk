@@ -22,6 +22,12 @@ const setArticleMeta = (article, slug) => {
   if (twitterDescription) twitterDescription.setAttribute('content', description);
 };
 
+const setArticleNotFoundMeta = () => {
+  document.title = 'Article Not Found — Vibe Talk';
+  const robots = document.head.querySelector('meta[name="robots"]');
+  if (robots) robots.setAttribute('content', 'noindex, nofollow');
+};
+
 const ArticleDetailPage = () => {
   const { slug } = useParams();
   const [article, setArticle] = useState(null);
@@ -42,6 +48,7 @@ const ArticleDetailPage = () => {
       } catch (requestError) {
         if (active) {
           console.error('Article load error:', requestError);
+          setArticleNotFoundMeta();
           setError(true);
         }
       } finally {

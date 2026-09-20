@@ -44,9 +44,9 @@ const LandingPage = () => {
         />
         <div className="relative max-w-6xl mx-auto px-4 py-16 sm:py-24 w-full">
           <div className="max-w-xl text-white">
-            <p className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] mb-5 drop-shadow-md">
-              Start making new friends
-            </p>
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] mb-5 drop-shadow-md">
+              Free Random Chat, Video Call &amp; Meet Strangers Online
+            </h1>
             <p className="text-lg sm:text-xl text-white/95 mb-10 font-light leading-relaxed drop-shadow">
               Start spending your spare time making friends.
             </p>
@@ -62,9 +62,9 @@ const LandingPage = () => {
 
       <section className="bg-base-100 border-b border-base-200">
         <div className="max-w-4xl mx-auto px-4 py-10">
-          <h1 className="text-xl sm:text-2xl font-bold text-base-content leading-snug text-center">
-            No. 1 Spam Free Platform for online chat, meetup. No Registration.
-          </h1>
+          <h2 className="text-xl sm:text-2xl font-bold text-base-content leading-snug text-center">
+            Meet new people online with free chat and no registration.
+          </h2>
           <p className="mt-4 text-sm sm:text-base text-base-content/70 leading-relaxed">
             {SEO_INTRO}
             {readMore && SEO_MORE}
