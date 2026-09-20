@@ -253,7 +253,7 @@ if (process.env.NODE_ENV !== 'production') {
 // Serve React build when present (Render: npm run install-all && npm run build)
 if (hasClientBuild) {
   app.use(express.static(clientBuild));
-  app.get('*', (req, res, next) => {
+  app.get('*', async (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
     const publicClientRoutes = [
       '/',
@@ -291,10 +291,26 @@ if (hasClientBuild) {
       }
       const metadata = PUBLIC_PAGE_METADATA[req.path] ||
         (isArticleRoute
-          ? {
-              title: 'Article — Vibe Talk',
-              description: 'Read practical guides about online conversation, meeting people, and safer chat.',
-            }
+          ? await (async () => {
+              try {
+                const mongoose = require('mongoose');
+                if (mongoose.connection.readyState === 1) {
+                  const Article = require('./models/Article');
+                  const slug = req.path.replace('/articles/', '');
+                  const article = await Article.findOne({ slug, published: true }).select('title excerpt').lean();
+                  if (article) {
+                    return {
+                      title: article.title + ' — Vibe Talk',
+                      description: article.excerpt || ('Read ' + article.title + ' on Vibe Talk.'),
+                    };
+                  }
+                }
+              } catch (e) { /* fall through to default */ }
+              return {
+                title: 'Article — Vibe Talk',
+                description: 'Read practical guides about online conversation, meeting people, and safer chat.',
+              };
+            })()
           : {
               title: 'Vibe Talk',
               description: 'Vibe Talk chat and community app.',
