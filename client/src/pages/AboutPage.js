@@ -18,21 +18,36 @@ const AboutPage = () => {
       />
       <div className="max-w-3xl mx-auto px-4 py-10 sm:py-14 space-y-8">
         <section className="prose prose-sm max-w-none text-base-content/80 leading-relaxed">
+          <h1 className="text-2xl font-bold text-base-content mb-4">About Vibe Talk</h1>
           <p>
-            <strong>Vibe Talk</strong> (vibetalk.me) helps people make friends online through guest chat,
-            random match, direct messages, video calls, and topic-based <strong>Groups</strong> — without
-            complicated registration.
+            <strong>Vibe Talk</strong> (vibetalk.me) is a free browser-based platform for random chat, text chat, video calls, groups, and meeting new people online. We help users make friends through guest chat, random match, direct messages, video calls, and topic-based <strong>Groups</strong> — without complicated registration.
           </p>
           <p>
-            We are not a dating site. Our community guidelines focus on respectful conversation, safety,
-            and a clean experience for everyone — especially women who want a friendly place to chat.
+            Unlike dating sites, Vibe Talk focuses on respectful conversation, genuine friendship, and a clean experience for everyone. Our community guidelines prioritize safety and harassment-free interaction — especially for women seeking a friendly place to chat.
           </p>
-          <h2 className="text-lg font-bold text-base-content pt-2">What makes us different</h2>
+          <h2 className="text-lg font-bold text-base-content pt-4">How Vibe Talk Works</h2>
+          <p>
+            Start chatting in seconds with guest access — just choose a nickname. No phone number, email, or registration required. When you're ready, create a full profile to unlock direct messages, advanced filters, and group creation features.
+          </p>
+          <h2 className="text-lg font-bold text-base-content pt-4">Key Features</h2>
           <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Groups, not chat rooms</strong> — join communities by interest</li>
-            <li><strong>Guest access</strong> — nickname only to start</li>
-            <li><strong>Random match + video</strong> — meet strangers in one tap</li>
-            <li><strong>Browser-based</strong> — no app download required</li>
+            <li><strong>Random Match</strong> — One-tap connection with strangers worldwide for text and video chat</li>
+            <li><strong>Video Calls</strong> — Browser-based video chat without app download</li>
+            <li><strong>Direct Messages</strong> — Private one-to-one conversations with people you meet</li>
+            <li><strong>Groups</strong> — Interest-based communities (music, gaming, anime, travel, wellness, and more)</li>
+            <li><strong>Guest Access</strong> — Start chatting immediately with just a nickname</li>
+            <li><strong>Mobile Friendly</strong> — Works on Android, iPhone, desktop, and tablet</li>
+            <li><strong>Free to Use</strong> — Basic features completely free with no hidden charges</li>
+          </ul>
+          <h2 className="text-lg font-bold text-base-content pt-4">Our Community Values</h2>
+          <p>
+            Vibe Talk is built for friendly conversation, not dating or harassment. We believe in:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li><strong>Respect</strong> — Treat everyone with dignity and kindness</li>
+            <li><strong>Safety</strong> — Tools and guidelines to protect users</li>
+            <li><strong>Authenticity</strong> — Real conversations, not bots or spam</li>
+            <li><strong>Inclusivity</strong> — Welcoming community for all backgrounds</li>
           </ul>
         </section>
 
