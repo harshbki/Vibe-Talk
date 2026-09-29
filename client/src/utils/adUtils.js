@@ -21,16 +21,10 @@ const injectVignetteScript = () => {
   vignetteInjected = true;
 };
 
-/** Before 2nd+ video call — Monetag Vignette Banner (overlay, closable). */
+/** Before 2nd+ video call — DISABLED for AdSense compliance */
 export const showAdBeforeCall = (callback) => {
-  try {
-    injectVignetteScript();
-    setTimeout(() => {
-      if (typeof callback === 'function') callback();
-    }, 600);
-  } catch {
-    if (typeof callback === 'function') callback();
-  }
+  // DISABLED: Monetag vignette conflicts with Google AdSense policy
+  if (typeof callback === 'function') callback();
 };
 
 export const initializeAds = () => {
