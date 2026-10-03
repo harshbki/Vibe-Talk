@@ -136,6 +136,51 @@ Vibe Talk supports friendly random chat, text conversations, video chat, and int
 
 Good conversation is built through listening, patience, and mutual interest. If the connection is not comfortable for either person, leave politely and try another conversation. This keeps online chat safer and more welcoming for everyone.`,
   },
+  {
+_id: 'free-random-chat-guide',
+slug: 'free-random-chat-online',
+title: 'Free Random Chat Online: What to Expect',
+excerpt:
+  'A clear guide to free random chat online, including random matching, privacy choices, and ways to keep a conversation friendly.',
+createdAt: '2026-10-03T00:00:00.000Z',
+body: `Free random chat can be a simple way to meet someone new without planning a conversation in advance. You can start with a short greeting, discover a shared interest, and decide whether the chat is worth continuing. The other person should always have the same freedom to leave or choose a different conversation.
+
+Before you begin, choose a nickname and avoid sharing your phone number, address, passwords, financial details, or identity documents. Free does not mean that you need to give up your privacy. Keep early conversations on the platform and be careful with links or requests to move somewhere else.
+
+Vibe Talk offers browser-based random chat, text chat, video calls, direct messages, and interest-based groups. You can use it on a phone, tablet, laptop, or desktop. Start with text if you prefer, and only use your camera or microphone when you feel comfortable.
+
+Use the report, block, leave, or next-chat controls when a conversation becomes abusive, threatening, spammy, or uncomfortable. A safer random chat experience depends on clear platform controls and users who respect consent and boundaries.`,
+  },
+  {
+_id: 'video-chat-with-strangers-guide',
+slug: 'video-chat-with-strangers-safely',
+title: 'Video Chat With Strangers: A Safer Beginner Guide',
+excerpt:
+  'Learn how to prepare for video chat with strangers, protect your background and privacy, and leave a call comfortably.',
+createdAt: '2026-10-03T00:00:00.000Z',
+body: `Video chat with strangers can feel more personal than text chat, so it helps to prepare before turning on the camera. Check your lighting, microphone, internet connection, and camera preview. Make sure the background does not show a house number, document, school or work detail, private screen, or other identifying information.
+
+You do not have to start with video. A short text conversation can help you decide whether you want to continue. You can mute yourself, turn the camera off, or leave at any time. Someone asking you to reveal more than you want is a reason to end the call, not a reason to change your boundaries.
+
+Do not record, screenshot, or share another person’s image without permission. Never send intimate images to a stranger, send money because of an urgent story, or open a login link from an unknown person. Use the available block and report tools when a call becomes unsafe.
+
+Vibe Talk supports browser video chat alongside random text chat and groups. The goal is a respectful way to meet new people, not a promise that every match will be suitable. Take the conversation at your own pace and keep control of your personal information.`,
+  },
+  {
+_id: 'online-chat-rooms-guide',
+slug: 'online-chat-rooms-and-interest-groups',
+title: 'Online Chat Rooms and Interest Groups: Find Your Community',
+excerpt:
+  'Understand the difference between online chat rooms and interest-based groups, and learn how to join conversations respectfully.',
+createdAt: '2026-10-03T00:00:00.000Z',
+body: `Online chat rooms and interest groups give people a shared topic for starting a conversation. A music, gaming, travel, food, study, or language group can feel easier to join than a completely open conversation because everyone has a reason to be there.
+
+Read the group description and community guidelines before posting. Introduce yourself briefly, stay on topic, and make room for people who have not spoken yet. Avoid spam, personal attacks, repeated promotions, and sharing another member’s private information.
+
+A shared interest is not proof that someone is trustworthy. Keep personal contact details private, do not send money, and be cautious when someone quickly asks for photos or a move to another app. If a group no longer feels comfortable, you can leave and report behavior that violates the rules.
+
+Vibe Talk uses interest-based groups together with random chat, direct messages, and video chat. This lets you choose between meeting one new person and joining a community conversation while keeping your privacy and boundaries in your control.`,
+  },
 ];
 
 export default publicArticles;

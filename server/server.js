@@ -186,6 +186,21 @@ const PUBLIC_PAGE_METADATA = {
     description:
       'Practical advice for friendly online conversations with women, including consent, privacy, boundaries, and respectful chat.',
   },
+  '/articles/free-random-chat-online': {
+    title: 'Free Random Chat Online: What to Expect — Vibe Talk',
+    description:
+      'A practical guide to free random chat online, privacy choices, random matching, and respectful conversations.',
+  },
+  '/articles/video-chat-with-strangers-safely': {
+    title: 'Video Chat With Strangers: A Safer Beginner Guide — Vibe Talk',
+    description:
+      'Learn how to prepare for video chat with strangers, protect your privacy, and leave a call comfortably.',
+  },
+  '/articles/online-chat-rooms-and-interest-groups': {
+    title: 'Online Chat Rooms and Interest Groups — Vibe Talk',
+    description:
+      'Learn how online chat rooms and interest groups work and how to join conversations safely and respectfully.',
+  },
   '/start': {
     title: 'Join Chat — Vibe Talk',
     description: 'Pick a nickname and start chatting on Vibe Talk without creating an account.',
