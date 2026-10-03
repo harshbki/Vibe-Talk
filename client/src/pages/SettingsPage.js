@@ -113,7 +113,7 @@ const SettingsPage = () => {
         )}
 
         {/* Tabs */}
-        <div className="grid grid-cols-2 sm:flex bg-base-100 p-1 gap-1 rounded-box">
+        <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] sm:flex bg-base-100 p-1 gap-1 rounded-box">
           {TABS.map(tab => (
             <button
               key={tab}
