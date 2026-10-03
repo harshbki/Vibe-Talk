@@ -181,6 +181,27 @@ A shared interest is not proof that someone is trustworthy. Keep personal contac
 
 Vibe Talk uses interest-based groups together with random chat, direct messages, and video chat. This lets you choose between meeting one new person and joining a community conversation while keeping your privacy and boundaries in your control.`,
   },
+  {
+    _id: 'what-is-vibetalk',
+    slug: 'what-is-vibetalk',
+    title: 'What Is Vibe Talk? A Guide to Random Chat, Video Calls, and Groups',
+    excerpt:
+      'Learn what Vibe Talk is, how its random chat, video calls, direct messages, and interest-based groups work, and how to use the platform safely.',
+    createdAt: '2026-10-03T00:00:00.000Z',
+    body: `Vibe Talk is a browser-based social chat platform for meeting new people through text chat, random matching, video calls, direct messages, and interest-based groups. It is designed for people who want to start a conversation online without needing a complicated app installation. You can open Vibe Talk on a phone, tablet, laptop, or desktop and choose the type of conversation that suits you.
+
+Random chat is one of the simplest ways to begin. You can start with a short text conversation and decide whether the other person is someone you want to keep talking to. Random Match helps you discover a new conversation, while groups give you a shared topic such as music, gaming, travel, food, study, or another interest. You do not have to continue every match, and you can leave a conversation when it no longer feels right.
+
+Vibe Talk also supports browser video chat for people who prefer a more personal conversation. You can choose when to enable your camera or microphone, and you can stay with text chat if that feels more comfortable. Before a video call, check your camera preview and background so you do not accidentally show private documents, screens, addresses, or other identifying information.
+
+Direct messages are useful when you want to continue a connection privately, while groups are useful when you would rather join a community conversation. Each format has a different pace. A private message can be more focused, and a group can make it easier to find people who already share an interest. Treat both spaces respectfully and follow the community guidelines.
+
+Privacy and consent should guide every conversation. Start with a nickname or limited profile information, and do not share passwords, financial details, identity documents, private phone numbers, or your home address with a stranger. You can decline a request, turn off video, stop replying, leave a chat, or use block and report controls whenever you feel uncomfortable.
+
+Vibe Talk is not a promise that every match will be suitable, genuine, or available at a particular time. As with any online platform, people should take time to build trust and avoid sending money or opening suspicious links. A positive experience comes from choosing conversations carefully, respecting boundaries, and using the platform controls when behavior violates the rules.
+
+In short, Vibe Talk gives you several ways to meet people online: random text chat for a quick introduction, video chat for face-to-face conversation, direct messages for a continuing connection, and groups for shared interests. Start with the format you prefer, keep control of your information, and move on from any conversation that does not feel safe or respectful.`,
+  },
 ];
 
 export default publicArticles;

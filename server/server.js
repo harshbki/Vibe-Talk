@@ -201,6 +201,11 @@ const PUBLIC_PAGE_METADATA = {
     description:
       'Learn how online chat rooms and interest groups work and how to join conversations safely and respectfully.',
   },
+  '/articles/what-is-vibetalk': {
+    title: 'What Is Vibe Talk? Random Chat, Video Calls, and Groups',
+    description:
+      'Learn what Vibe Talk is, how random chat, video calls, direct messages, and interest-based groups work, and how to use the platform safely.',
+  },
   '/start': {
     title: 'Join Chat — Vibe Talk',
     description: 'Pick a nickname and start chatting on Vibe Talk without creating an account.',
