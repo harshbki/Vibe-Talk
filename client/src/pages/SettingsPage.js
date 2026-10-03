@@ -117,7 +117,7 @@ const SettingsPage = () => {
           {TABS.map(tab => (
             <button
               key={tab}
-              className={`tab tab-sm min-w-0 h-auto min-h-10 px-2 text-xs sm:text-sm leading-tight ${
+              className={`tab tab-sm min-w-0 h-auto min-h-10 px-2 text-xs sm:text-sm leading-tight flex flex-col sm:flex-row items-center justify-center gap-0.5 whitespace-normal text-center ${
                 activeTab === tab ? 'tab-active' : ''
               }`}
               onClick={() => setActiveTab(tab)}
