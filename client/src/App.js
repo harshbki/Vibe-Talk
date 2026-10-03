@@ -76,7 +76,7 @@ function App() {
           <PageViewTracker />
           <SeoManager />
           <CookieConsent />
-          <div className="min-h-screen flex flex-col bg-base-100 text-base-content">
+          <div className="min-h-screen h-screen flex flex-col bg-base-100 text-base-content">
             <IncomingCallOverlay />
             <DmToast />
             <Routes>

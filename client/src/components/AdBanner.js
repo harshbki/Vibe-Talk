@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const ADSENSE_CLIENT_ID = process.env.REACT_APP_ADSENSE_CLIENT_ID || 'ca-pub-5149550826483446';
 
@@ -23,6 +24,18 @@ const SLOT_MAP = {
   'public-sidebar': process.env.REACT_APP_ADSENSE_SLOT_RANDOM_MATCH_INLINE,
 };
 
+const PUBLIC_AD_PATHS = new Set([
+  '/',
+  '/about',
+  '/privacy',
+  '/legal',
+  '/safety',
+  '/community-guidelines',
+  '/cookies',
+  '/contact',
+  '/articles',
+]);
+
 const resolveSlot = (slot) => SLOT_MAP[slot] || SLOT_DEFAULTS[slot] || null;
 
 const isLocalhost = () => {
@@ -31,14 +44,17 @@ const isLocalhost = () => {
 };
 
 const AdBanner = ({ slot = '', format = 'auto', className = '' }) => {
+  const location = useLocation();
   const adRef = useRef(null);
   const pushed = useRef(false);
   const [failed, setFailed] = useState(false);
   const resolvedSlot = resolveSlot(slot);
   const local = isLocalhost();
+  const isPublicContentPage =
+    PUBLIC_AD_PATHS.has(location.pathname) || location.pathname.startsWith('/articles/');
 
   useEffect(() => {
-    if (pushed.current || !resolvedSlot || failed) return;
+    if (pushed.current || !resolvedSlot || failed || !isPublicContentPage) return;
     try {
       if (window.adsbygoogle && adRef.current) {
         window.adsbygoogle.push({});
@@ -47,9 +63,9 @@ const AdBanner = ({ slot = '', format = 'auto', className = '' }) => {
     } catch {
       setFailed(true);
     }
-  }, [resolvedSlot, failed]);
+  }, [resolvedSlot, failed, isPublicContentPage]);
 
-  if (!resolvedSlot) return null;
+  if (!resolvedSlot || !isPublicContentPage) return null;
 
   if (local) {
     return (
@@ -70,7 +86,7 @@ const AdBanner = ({ slot = '', format = 'auto', className = '' }) => {
       <ins
         ref={adRef}
         className="adsbygoogle"
-        style={{ display: 'block' }}
+        style={{ display: 'block', width: '100%', maxWidth: '100%', minWidth: 0 }}
         data-ad-client={ADSENSE_CLIENT_ID}
         data-ad-slot={resolvedSlot}
         data-ad-format={format}

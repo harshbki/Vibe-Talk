@@ -1,25 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
-Disallow: /start
-Disallow: /chat
-Disallow: /users
-Disallow: /match
-Disallow: /groups
-Disallow: /profile
-Disallow: /settings
-Disallow: /user/
-
-User-agent: Googlebot
-Allow: /
-Disallow: /admin/
-Disallow: /start
-Disallow: /chat
-Disallow: /users
-Disallow: /match
-Disallow: /groups
-Disallow: /profile
-Disallow: /settings
-Disallow: /user/
 
 Sitemap: https://vibetalk.me/sitemap.xml

@@ -113,11 +113,13 @@ const SettingsPage = () => {
         )}
 
         {/* Tabs */}
-        <div className="tabs tabs-boxed bg-base-100 p-1">
+        <div className="grid grid-cols-2 sm:flex tabs-boxed bg-base-100 p-1 gap-1">
           {TABS.map(tab => (
             <button
               key={tab}
-              className={`tab tab-sm flex-1 ${activeTab === tab ? 'tab-active' : ''}`}
+              className={`tab tab-sm min-w-0 h-auto min-h-10 px-2 text-xs sm:text-sm leading-tight ${
+                activeTab === tab ? 'tab-active' : ''
+              }`}
               onClick={() => setActiveTab(tab)}
             >
               {tab === 'Account' && '👤 '}

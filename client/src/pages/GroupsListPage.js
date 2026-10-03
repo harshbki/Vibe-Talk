@@ -77,7 +77,7 @@ const GroupsListPage = () => {
   return (
     <div className="min-h-[calc(100vh-64px)] bg-base-200/50">
       <div className="max-w-3xl mx-auto space-y-5 p-4 md:p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h1 className="text-2xl font-extrabold">🏘️ Groups</h1>
           <Link to="/groups/create" className="btn btn-primary btn-sm gap-1">
             + New Group
@@ -110,10 +110,10 @@ const GroupsListPage = () => {
             <div className="space-y-3">
               {groups.map((group) => (
                 <Link to={`/group/${group._id}`} key={group._id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="card-body flex-row items-center justify-between p-4">
-                    <div>
+                  <div className="card-body flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4">
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold">{group.name}</h3>
+                        <h3 className="font-bold truncate">{group.name}</h3>
                         {group.isPrivate && <span className="badge badge-ghost badge-xs">🔒 Private</span>}
                       </div>
                       <p className="text-xs text-base-content/50">
@@ -138,22 +138,22 @@ const GroupsListPage = () => {
             <div className="space-y-3">
               {discoverableGroups.map((group) => (
                 <div key={group._id} className="card bg-base-100 shadow-sm">
-                  <div className="card-body flex-row items-center justify-between p-4">
-                    <div>
+                  <div className="card-body flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4">
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold">{group.name}</h3>
+                        <h3 className="font-bold truncate">{group.name}</h3>
                         {group.isPrivate && <span className="badge badge-ghost badge-xs">🔒 Private</span>}
                       </div>
                       <p className="text-xs text-base-content/50">
                         Admin: {group.admin?.nickname} · {group.members?.length || 0} members
                       </p>
                     </div>
-                    <div>
+                    <div className="w-full sm:w-auto">
                       {group.hasRequested ? (
                         <span className="badge badge-warning badge-outline badge-sm">⏳ Requested</span>
                       ) : group.isPrivate ? (
                         <button
-                          className="btn btn-outline btn-primary btn-sm"
+                          className="btn btn-outline btn-primary btn-sm w-full sm:w-auto"
                           onClick={() => handleRequestJoin(group._id)}
                           disabled={actionLoading === group._id}
                         >
@@ -161,7 +161,7 @@ const GroupsListPage = () => {
                         </button>
                       ) : (
                         <button
-                          className="btn btn-primary btn-sm"
+                          className="btn btn-primary btn-sm w-full sm:w-auto"
                           onClick={() => handleJoin(group._id)}
                           disabled={actionLoading === group._id}
                         >

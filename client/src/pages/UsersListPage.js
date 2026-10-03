@@ -142,7 +142,7 @@ const UsersListPage = () => {
                 key={u._id}
                 className="card bg-base-100 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
               >
-                <div className="card-body flex-row items-center gap-4 p-4">
+                <div className="card-body flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 p-4">
                   <Link to={`/user/${u._id}`} className="avatar placeholder cursor-pointer">
                     {u.profilePicture ? (
                       <div className="w-12 rounded-full">
@@ -192,7 +192,7 @@ const UsersListPage = () => {
                   {user?.isFullAccount && (
                     <button
                       type="button"
-                      className="btn btn-primary btn-sm"
+                      className="btn btn-primary btn-sm w-full sm:w-auto"
                       onClick={() => handleChat(u)}
                     >
                       💬 Chat

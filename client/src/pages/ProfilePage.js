@@ -120,7 +120,8 @@ const ProfilePage = () => {
   const calculateAge = (dob) => {
     if (!dob) return null;
     const diff = Date.now() - new Date(dob).getTime();
-    return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+    const age = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+    return Number.isFinite(age) && age >= 13 && age <= 120 ? age : null;
   };
 
   // ── New-user step wizard ──
@@ -230,7 +231,7 @@ const ProfilePage = () => {
                     max={new Date(new Date().setFullYear(new Date().getFullYear() - 13)).toISOString().split('T')[0]}
                     className="input input-bordered w-full focus:outline-none focus:input-primary"
                   />
-                  {formData.dateOfBirth && (
+                  {calculateAge(formData.dateOfBirth) !== null && (
                     <label className="label"><span className="label-text-alt text-base-content/50">Age: {calculateAge(formData.dateOfBirth)}</span></label>
                   )}
                 </div>
@@ -455,7 +456,9 @@ const ProfilePage = () => {
                 {user.fullName && <p className="font-semibold text-lg">{user.fullName}</p>}
                 {user.bio && <p className="text-base-content/70 text-sm">{user.bio}</p>}
                 <div className="flex flex-col gap-1 text-sm text-base-content/50">
-                  {user.dateOfBirth && <span>🎂 Age: {calculateAge(user.dateOfBirth)}</span>}
+                  {calculateAge(user.dateOfBirth) !== null && (
+                    <span>🎂 Age: {calculateAge(user.dateOfBirth)}</span>
+                  )}
                   {user.location && <span>📍 {user.location}</span>}
                   <span>📹 Video calls used: {user.freeCallsUsed || 0}</span>
                 </div>
