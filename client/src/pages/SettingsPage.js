@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { updateUserSettings, deleteAccount } from '../api';
 import { disconnectSocket } from '../socket';
 import { useNavigate } from 'react-router-dom';
+import './SettingsPage.css';
 
 const TABS = ['Account', 'Privacy', 'Notifications', 'Appearance'];
 
@@ -113,7 +114,7 @@ const SettingsPage = () => {
         )}
 
         {/* Tabs */}
-        <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] sm:flex bg-base-100 p-1 gap-1 rounded-box">
+        <div className="settings-tabs grid sm:flex bg-base-100 p-1 gap-1 rounded-box">
           {TABS.map(tab => (
             <button
               key={tab}
