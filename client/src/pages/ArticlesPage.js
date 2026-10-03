@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
 import PublicPageHero from '../components/PublicPageHero';
-import AdBanner from '../components/AdBanner';
 import { getArticles } from '../api';
+import publicArticles from '../data/publicArticles';
 
 const ArticlesPage = () => {
   const [articles, setArticles] = useState([]);
@@ -11,10 +11,19 @@ const ArticlesPage = () => {
 
   useEffect(() => {
     document.title = 'Articles & Chat Tips — Vibe Talk Blog';
-    getArticles()
-      .then(setArticles)
-      .catch(() => setArticles([]))
-      .finally(() => setLoading(false));
+    const loadArticles = async () => {
+      try {
+        const remoteArticles = await getArticles();
+        setArticles(remoteArticles.length > 0 ? remoteArticles : publicArticles);
+      } catch (error) {
+        console.error('Article list load error:', error);
+        setArticles(publicArticles);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadArticles();
   }, []);
 
   return (
@@ -25,10 +34,6 @@ const ArticlesPage = () => {
         emoji="📝"
       />
       <div className="max-w-3xl mx-auto px-4 py-10 sm:py-14">
-        <div className="mb-8">
-          <AdBanner slot="public-inline" className="min-h-[90px]" />
-        </div>
-
         {loading ? (
           <div className="flex justify-center py-16">
             <span className="loading loading-spinner loading-lg text-primary" />

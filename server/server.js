@@ -151,6 +151,41 @@ const PUBLIC_PAGE_METADATA = {
     title: 'Articles & Chat Tips — Vibe Talk',
     description: 'Read practical guides about online conversation, meeting people, and safer chat.',
   },
+  '/articles/safe-random-chat-online-guide': {
+    title: 'How to Chat Safely With New People Online — Vibe Talk',
+    description:
+      'Practical guidance for safer random chat, privacy, boundaries, reporting, and respectful online conversations.',
+  },
+  '/articles/how-to-make-friends-online-through-chat': {
+    title: 'How to Make Better Conversations and Friends Online — Vibe Talk',
+    description:
+      'Simple conversation ideas for meeting people online, finding shared interests, and building respectful connections.',
+  },
+  '/articles/video-chat-tips-for-a-better-online-call': {
+    title: 'Video Chat Tips for a Clearer, More Comfortable Call — Vibe Talk',
+    description:
+      'Prepare your camera, microphone, lighting, and privacy for comfortable video calls on phones, tablets, and computers.',
+  },
+  '/articles/random-chat-with-strangers-online': {
+    title: 'Random Chat With Strangers: How to Start a Good Conversation — Vibe Talk',
+    description:
+      'Learn how instant random chat works, what to say first, and how to meet new people online safely and respectfully.',
+  },
+  '/articles/online-group-chat-for-shared-interests': {
+    title: 'Online Group Chat: Find People Who Share Your Interests — Vibe Talk',
+    description:
+      'A practical guide to joining online group chat, finding shared interests, and participating in welcoming conversations.',
+  },
+  '/articles/safe-omegle-alternative-and-video-chat': {
+    title: 'Choosing a Safer Omegle Alternative for Random Video Chat — Vibe Talk',
+    description:
+      'What to look for in an Omegle alternative, including privacy controls, reporting, text chat, video chat, and groups.',
+  },
+  '/articles/respectful-chat-with-women-online': {
+    title: 'How to Chat Respectfully With Women Online — Vibe Talk',
+    description:
+      'Practical advice for friendly online conversations with women, including consent, privacy, boundaries, and respectful chat.',
+  },
   '/start': {
     title: 'Join Chat — Vibe Talk',
     description: 'Pick a nickname and start chatting on Vibe Talk without creating an account.',

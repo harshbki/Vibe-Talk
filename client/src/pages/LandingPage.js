@@ -81,6 +81,23 @@ const LandingPage = () => {
         </div>
       </section>
 
+      <section className="bg-base-200/40 border-y border-base-200">
+        <div className="max-w-3xl mx-auto px-4 py-10 text-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-base-content">
+            Chat With Girls and Meet New People Respectfully
+          </h2>
+          <p className="mt-3 text-sm sm:text-base text-base-content/70 leading-relaxed">
+            Looking for chat with girls, girls chat, or a friendly conversation with women online?
+            Vibe Talk helps people meet new users through random chat, text chat, video chat, and
+            interest-based groups. There is no guaranteed gender match, and every conversation must
+            respect consent, privacy, and the other person&apos;s choice to leave.
+          </p>
+          <Link to="/safety" className="inline-block mt-4 text-sm font-semibold text-primary hover:underline">
+            Read our online chat safety guide →
+          </Link>
+        </div>
+      </section>
+
       <div className="max-w-4xl mx-auto px-4 py-4">
         <AdBanner slot="public-inline" className="min-h-[90px]" />
       </div>

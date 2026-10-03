@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
+import AdBanner from '../components/AdBanner';
 import { getArticleBySlug } from '../api';
+import publicArticles from '../data/publicArticles';
 
 const setArticleMeta = (article, slug) => {
   const canonical = document.head.querySelector('link[rel="canonical"]');
@@ -41,7 +43,13 @@ const ArticleDetailPage = () => {
     setError(false);
     const loadArticle = async () => {
       try {
-        const data = await getArticleBySlug(slug);
+        let data;
+        try {
+          data = await getArticleBySlug(slug);
+        } catch (requestError) {
+          data = publicArticles.find((item) => item.slug === slug);
+          if (!data) throw requestError;
+        }
         if (!active) return;
         setArticle(data);
         setArticleMeta(data, slug);
@@ -90,6 +98,9 @@ const ArticleDetailPage = () => {
             )}
             <div className="prose prose-sm max-w-none text-base-content/85 whitespace-pre-wrap leading-relaxed">
               {article.body}
+            </div>
+            <div className="mt-10 pt-8 border-t border-base-200">
+              <AdBanner slot="public-inline" className="min-h-[90px]" />
             </div>
           </>
         )}
