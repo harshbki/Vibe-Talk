@@ -62,9 +62,9 @@ const LandingPage = () => {
 
       <section className="bg-base-100 border-b border-base-200">
         <div className="max-w-4xl mx-auto px-4 py-10">
-          <h2 className="text-xl sm:text-2xl font-bold text-base-content leading-snug text-center">
-            Meet new people online with free chat and no registration.
-          </h2>
+          <h1 className="text-xl sm:text-2xl font-bold text-base-content leading-snug text-center">
+            Free Random Chat, Video Calls & Meet Strangers Online
+          </h1>
           <p className="mt-4 text-sm sm:text-base text-base-content/70 leading-relaxed">
             {SEO_INTRO}
             {readMore && SEO_MORE}

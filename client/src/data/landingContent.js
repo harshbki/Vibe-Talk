@@ -72,10 +72,10 @@ export const LONG_FEATURES = [
 ];
 
 export const SEO_INTRO =
-  'Vibe Talk is a stranger meeting platform — talk without login, without app, without bots & without spam. Random match, video calls, direct messages, and interest-based Groups (not chat rooms). Female-friendly, clean community for making friends online — not dating. We have groups for music lovers, gamers, anime fans, foodies, and more. Be social & responsible on vibetalk.me.';
+  'Vibe Talk is a free browser-based platform for random chat, text chat, video calls, groups, and meeting new people online. Talk to strangers without login, without app download, without bots & without spam. Our random match feature connects you with people worldwide for text and video conversations. Join interest-based Groups for music, gaming, anime, travel, and more. Female-friendly, clean community focused on friendship — not dating or harassment.';
 
 export const SEO_MORE =
-  ' Do not flirt with strangers on this site. Whether you want to chat with someone to learn English, talk with foreigners, make friends online, or simply have a webcam chat — Vibe Talk gives you a free browser chat for that purpose. No download, no phone number, no bots. Try our Omegle alternative with random match, video calls, and interest groups today.';
+  ' Whether you want to chat with strangers to learn English, practice conversation skills, make international friends, or simply have a safe webcam chat — Vibe Talk provides a free platform for genuine connections. No phone number required, no registration needed to start. Our Omegle alternative offers random video chat, direct messaging, and topic-based groups. Works on mobile, desktop, and tablet. Be social, be respectful, and enjoy meeting new people on vibetalk.me.';
 
 export const FOOTER_SEO_LINKS = [
   { to: '/start', label: 'Vibe Talk Random Chat' },
