@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About' },
+  { to: '/how-it-works', label: 'How It Works' },
   { to: '/privacy', label: 'Privacy' },
   { to: '/articles', label: 'Articles' },
   { to: '/legal', label: 'Legal' },
@@ -11,6 +12,7 @@ const NAV_LINKS = [
 
 const FOOTER_EXPLORE = [
   { to: '/about', label: 'About Us' },
+  { to: '/how-it-works', label: 'How It Works' },
   { to: '/about#groups', label: 'Groups' },
   { to: '/articles', label: 'Articles & Tips' },
   { to: '/start', label: 'Start Chatting' },

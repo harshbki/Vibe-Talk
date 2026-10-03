@@ -118,6 +118,11 @@ const PUBLIC_PAGE_METADATA = {
     description:
       'Learn how Vibe Talk helps people meet new friends through guest chat, random matching, video calls, direct messages, and interest-based groups.',
   },
+  '/how-it-works': {
+    title: 'How Vibe Talk Works — Random Chat & Video Calls',
+    description:
+      'Learn how to start guest chat, find conversations, use Random Match, join groups, and stay safe on Vibe Talk.',
+  },
   '/privacy': {
     title: 'Privacy Policy — Vibe Talk',
     description: 'Read how Vibe Talk handles account, chat, media, and website information.',
@@ -260,6 +265,7 @@ if (hasClientBuild) {
       '/start',
       '/login',
       '/about',
+      '/how-it-works',
       '/privacy',
       '/legal',
       '/safety',

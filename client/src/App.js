@@ -14,6 +14,7 @@ import CreateGroupPage from './pages/CreateGroupPage';
 import GroupChatPage from './pages/GroupChatPage';
 import UserProfilePage from './pages/UserProfilePage';
 import AboutPage from './pages/AboutPage';
+import HowItWorksPage from './pages/HowItWorksPage';
 import PrivacyPage from './pages/PrivacyPage';
 import LegalPage from './pages/LegalPage';
 import SafetyPage from './pages/SafetyPage';
@@ -84,6 +85,7 @@ function App() {
               <Route path="/start" element={<PublicRoute><StartChatPage /></PublicRoute>} />
               <Route path="/login" element={<Navigate to="/start" replace />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/legal" element={<LegalPage />} />
               <Route path="/safety" element={<SafetyPage />} />
