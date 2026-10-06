@@ -244,6 +244,23 @@ const PUBLIC_PAGE_METADATA = {
   },
 };
 
+const HOMEPAGE_SEO_CONTENT = `
+  <main>
+    <h1>Free Random Chat, Video Call &amp; Meet Strangers Online</h1>
+    <p>Vibe Talk is a free browser-based platform for random chat, anonymous chat, video calls, and interest-based groups. Talk to strangers, meet new people online, and start chatting without an app download.</p>
+    <nav aria-label="Vibe Talk information">
+      <a href="/start">Start random chat</a>
+      <a href="/how-it-works">How Vibe Talk works</a>
+      <a href="/about">About Vibe Talk</a>
+      <a href="/articles">Chat tips and articles</a>
+      <a href="/safety">Chat safety</a>
+    </nav>
+    <section>
+      <h2>Random chat, video chat, and groups</h2>
+      <p>Meet people from around the world through text and video chat, or join groups built around shared interests. Vibe Talk is a respectful Omegle alternative for friendly conversations.</p>
+    </section>
+  </main>`;
+
 const escapeHtml = (value) =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -263,6 +280,10 @@ const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
     .replace(/<meta property="og:description" content="[^"]*"\s*\/>/, `<meta property="og:description" content="${escapeHtml(metadata.description)}" />`)
     .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/, `<meta name="twitter:title" content="${escapeHtml(metadata.title)}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/, `<meta name="twitter:description" content="${escapeHtml(metadata.description)}" />`);
+
+  if (req.path === '/') {
+    html = html.replace('<div id="root"></div>', `<div id="root">${HOMEPAGE_SEO_CONTENT}</div>`);
+  }
 
   if (robots !== 'index, follow') {
     res.set('X-Robots-Tag', robots);
@@ -312,7 +333,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Serve React build when present (Render: npm run install-all && npm run build)
 if (hasClientBuild) {
-  app.use(express.static(clientBuild));
+  app.use(express.static(clientBuild, { index: false }));
   app.get('*', async (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
     const publicClientRoutes = [
