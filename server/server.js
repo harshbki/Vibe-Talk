@@ -16,6 +16,7 @@ const groupRoutes = require('./routes/groupRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const articleRoutes = require('./routes/articleRoutes');
+const publicArticles = require('../client/src/data/publicArticles.json');
 const setupSocket = require('./socket');
 const { authLimiter, apiLimiter, requestLogger, errorHandler } = require('./middleware');
 const helmet = require('helmet');
@@ -264,6 +265,35 @@ const HOMEPAGE_SEO_CONTENT = `
 const escapeHtml = (value) =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+const renderPublicArticlesSeoContent = (article) => {
+  if (article) {
+    return `
+      <article>
+        <a href="/articles">All articles</a>
+        <h1>${escapeHtml(article.title)}</h1>
+        ${article.excerpt ? `<p>${escapeHtml(article.excerpt)}</p>` : ''}
+        <div>${escapeHtml(article.body)}</div>
+      </article>`;
+  }
+
+  return `
+    <main>
+      <h1>Articles &amp; Tips</h1>
+      <p>Guides on safe chatting, making friends online, and using Vibe Talk.</p>
+      <ul>
+        ${publicArticles
+          .map(
+            (publicArticle) => `
+              <li>
+                <a href="/articles/${escapeHtml(publicArticle.slug)}">${escapeHtml(publicArticle.title)}</a>
+                ${publicArticle.excerpt ? `<p>${escapeHtml(publicArticle.excerpt)}</p>` : ''}
+              </li>`
+          )
+          .join('')}
+      </ul>
+    </main>`;
+};
+
 const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
   const canonicalPath = req.path === '/' ? '/' : req.path;
   const canonicalUrl = `https://vibetalk.me${canonicalPath}`;
@@ -283,6 +313,20 @@ const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
 
   if (req.path === '/') {
     html = html.replace('<div id="root"></div>', `<div id="root">${HOMEPAGE_SEO_CONTENT}</div>`);
+  } else if (req.path === '/articles') {
+    html = html.replace(
+      '<div id="root"></div>',
+      `<div id="root">${renderPublicArticlesSeoContent()}</div>`
+    );
+  } else if (req.path.startsWith('/articles/')) {
+    const slug = req.path.slice('/articles/'.length);
+    const article = publicArticles.find((publicArticle) => publicArticle.slug === slug);
+    if (article) {
+      html = html.replace(
+        '<div id="root"></div>',
+        `<div id="root">${renderPublicArticlesSeoContent(article)}</div>`
+      );
+    }
   }
 
   if (robots !== 'index, follow') {
