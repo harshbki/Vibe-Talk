@@ -246,20 +246,106 @@ const PUBLIC_PAGE_METADATA = {
 };
 
 const HOMEPAGE_SEO_CONTENT = `
-  <main>
-    <h1>Free Random Chat, Video Call &amp; Meet Strangers Online</h1>
-    <p>Vibe Talk is a free browser-based platform for random chat, anonymous chat, video calls, and interest-based groups. Talk to strangers, meet new people online, and start chatting without an app download.</p>
-    <nav aria-label="Vibe Talk information">
-      <a href="/start">Start random chat</a>
-      <a href="/how-it-works">How Vibe Talk works</a>
-      <a href="/about">About Vibe Talk</a>
-      <a href="/articles">Chat tips and articles</a>
-      <a href="/safety">Chat safety</a>
-    </nav>
-    <section>
-      <h2>Random chat, video chat, and groups</h2>
-      <p>Meet people from around the world through text and video chat, or join groups built around shared interests. Vibe Talk is a respectful Omegle alternative for friendly conversations.</p>
+  <main class="seo-content" style="max-width:960px;margin:0 auto;padding:24px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+    <header style="margin-bottom:32px;">
+      <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">Free Random Chat, Video Call &amp; Meet Strangers Online</h1>
+      <p style="font-size:1.125rem;color:#4b5563;">Vibe Talk is a secure, browser-based communication platform designed for instant 1-on-1 random text chat, live WebRTC video calls, and interest-based communities. Connect with friendly people across the world without compulsory phone verification or software downloads.</p>
+      <nav aria-label="Main Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+        <a href="/start" style="display:inline-block;background:#4f46e5;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:600;">Start Chatting Now</a>
+        <a href="/how-it-works" style="color:#4f46e5;text-decoration:underline;padding:8px 0;">How It Works</a>
+        <a href="/articles" style="color:#4f46e5;text-decoration:underline;padding:8px 0;">Articles &amp; Safety Guides</a>
+        <a href="/safety" style="color:#4f46e5;text-decoration:underline;padding:8px 0;">Community Safety</a>
+        <a href="/about" style="color:#4f46e5;text-decoration:underline;padding:8px 0;">About Vibe Talk</a>
+      </nav>
+    </header>
+
+    <section style="margin-bottom:32px;">
+      <h2 style="font-size:1.5rem;font-weight:700;color:#111827;margin-bottom:12px;">Modern Anonymous Chat Built for Genuine Connections</h2>
+      <p>Finding a respectful, bot-free space to meet new people online should be straightforward. Vibe Talk reimagines the traditional stranger chat experience by prioritizing user safety, clear consent, and instantaneous browser performance. Whether you want to practice speaking a second language, share your favorite music, discuss anime, or have an impromptu video conversation, our platform connects you with active peers in seconds.</p>
     </section>
+
+    <section style="margin-bottom:32px;">
+      <h2 style="font-size:1.5rem;font-weight:700;color:#111827;margin-bottom:12px;">Key Features of Vibe Talk</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:16px;">
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;padding:16px;border-radius:8px;">
+          <h3 style="font-size:1.125rem;font-weight:600;color:#1f2937;margin-bottom:8px;">Instant Guest Access</h3>
+          <p style="font-size:0.95rem;color:#4b5563;">Jump straight into conversations with only a chosen nickname. No credit card, phone number, or social media link is ever required to get started.</p>
+        </div>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;padding:16px;border-radius:8px;">
+          <h3 style="font-size:1.125rem;font-weight:600;color:#1f2937;margin-bottom:8px;">Peer-to-Peer WebRTC Video Calls</h3>
+          <p style="font-size:0.95rem;color:#4b5563;">Enjoy crisp, low-latency video and audio calls directly inside your browser. Video feeds connect peer-to-peer with strict user acceptance controls to prevent unwanted exposure.</p>
+        </div>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;padding:16px;border-radius:8px;">
+          <h3 style="font-size:1.125rem;font-weight:600;color:#1f2937;margin-bottom:8px;">Interest-Based Groups</h3>
+          <p style="font-size:0.95rem;color:#4b5563;">Join curated topic groups focused on Travel, Gaming, Movies, Music, Food, and Technology instead of outdated, spam-filled public chatrooms.</p>
+        </div>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;padding:16px;border-radius:8px;">
+          <h3 style="font-size:1.125rem;font-weight:600;color:#1f2937;margin-bottom:8px;">Active Moderation &amp; Safety Tools</h3>
+          <p style="font-size:0.95rem;color:#4b5563;">Built-in one-tap user reporting and immediate blocking allow you to disconnect and blacklist anyone who violates community standards.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-bottom:32px;">
+      <h2 style="font-size:1.5rem;font-weight:700;color:#111827;margin-bottom:12px;">How Vibe Talk Works: Step-by-Step</h2>
+      <ol style="padding-left:20px;color:#374151;font-size:1rem;margin-top:12px;">
+        <li style="margin-bottom:10px;"><strong>Choose Your Nickname:</strong> Visit <a href="/start" style="color:#4f46e5;text-decoration:underline;">Start Chat</a> and enter any nickname. You can choose to specify your gender or chat completely neutrally.</li>
+        <li style="margin-bottom:10px;"><strong>Select Your Chat Mode:</strong> Hit <em>Random Match</em> to be paired with someone waiting in the global queue, browse online profiles in the <em>Users List</em>, or jump into a public <em>Group</em>.</li>
+        <li style="margin-bottom:10px;"><strong>Engage Safely:</strong> Start with text chat. If both participants agree, initiate a two-way video or audio call with full camera control.</li>
+        <li style="margin-bottom:10px;"><strong>End or Skip Anytime:</strong> If a match is unresponsive or unpleasant, click Next to leave immediately. No personal history is exposed to strangers.</li>
+      </ol>
+    </section>
+
+    <section style="margin-bottom:32px;">
+      <h2 style="font-size:1.5rem;font-weight:700;color:#111827;margin-bottom:12px;">Safety &amp; Privacy Rules Every User Must Follow</h2>
+      <p style="color:#4b5563;">Your digital wellbeing is our top priority. When conversing with strangers on Vibe Talk:</p>
+      <ul style="padding-left:20px;color:#374151;font-size:0.95rem;margin-top:8px;">
+        <li>Never share your real full name, home address, school, phone number, or social media handles.</li>
+        <li>Never send money, gifts, cryptocurrency, or click suspicious external links.</li>
+        <li>Be mindful of your background environment before switching on your webcam.</li>
+        <li>Harassment, non-consensual sexual content, hate speech, and spam result in permanent account bans.</li>
+      </ul>
+      <p style="margin-top:10px;"><a href="/safety" style="color:#4f46e5;font-weight:600;text-decoration:underline;">Read our Complete Online Chat Safety Handbook &rarr;</a></p>
+    </section>
+
+    <section style="margin-bottom:32px;background:#f3f4f6;padding:24px;border-radius:8px;">
+      <h2 style="font-size:1.5rem;font-weight:700;color:#111827;margin-bottom:16px;">Frequently Asked Questions (FAQ)</h2>
+      
+      <div style="margin-bottom:16px;">
+        <h3 style="font-size:1.05rem;font-weight:600;color:#111827;margin-bottom:4px;">Is Vibe Talk 100% free to use?</h3>
+        <p style="font-size:0.95rem;color:#4b5563;">Yes. All basic chat, random stranger matching, WebRTC video calling, and group features are completely free. We keep servers running through non-intrusive banner advertising.</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <h3 style="font-size:1.05rem;font-weight:600;color:#111827;margin-bottom:4px;">Do I need to download an application to use Vibe Talk?</h3>
+        <p style="font-size:0.95rem;color:#4b5563;">No. Vibe Talk runs entirely within modern web browsers (Chrome, Safari, Firefox, Edge) on Android, iPhone, iPad, Windows, macOS, and Linux without installing APKs or desktop software.</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <h3 style="font-size:1.05rem;font-weight:600;color:#111827;margin-bottom:4px;">How does Random Match pair users?</h3>
+        <p style="font-size:0.95rem;color:#4b5563;">Our backend Socket.IO matchmaking engine pairs users based on real-time availability in a first-in, first-out queue. Connections are ephemeral and private between the two participants.</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <h3 style="font-size:1.05rem;font-weight:600;color:#111827;margin-bottom:4px;">Is Vibe Talk an Omegle alternative?</h3>
+        <p style="font-size:0.95rem;color:#4b5563;">Yes. Vibe Talk provides a safe, modern alternative to Omegle and ChatHub, featuring verified guest sessions, WebRTC audio/video calls, and dedicated community groups with proactive anti-abuse reporting.</p>
+      </div>
+
+      <div>
+        <h3 style="font-size:1.05rem;font-weight:600;color:#111827;margin-bottom:4px;">Where can I read more guides on meeting people online?</h3>
+        <p style="font-size:0.95rem;color:#4b5563;">Browse our collection of comprehensive editorial articles on <a href="/articles" style="color:#4f46e5;text-decoration:underline;">Chat Tips &amp; Online Etiquette</a>.</p>
+      </div>
+    </section>
+
+    <footer style="border-top:1px solid #e5e7eb;padding-top:20px;font-size:0.875rem;color:#6b7280;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;">
+      <div>&copy; 2026 Vibe Talk. All rights reserved.</div>
+      <div>
+        <a href="/privacy" style="color:#4b5563;margin-right:12px;text-decoration:underline;">Privacy Policy</a>
+        <a href="/legal" style="color:#4b5563;margin-right:12px;text-decoration:underline;">Terms of Service</a>
+        <a href="/community-guidelines" style="color:#4b5563;margin-right:12px;text-decoration:underline;">Community Guidelines</a>
+        <a href="/contact" style="color:#4b5563;text-decoration:underline;">Contact Support</a>
+      </div>
+    </footer>
   </main>`;
 
 const escapeHtml = (value) =>

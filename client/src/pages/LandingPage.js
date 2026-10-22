@@ -4,6 +4,7 @@ import PublicLayout from '../components/PublicLayout';
 import AdBanner from '../components/AdBanner';
 import {
   HERO_IMG,
+  HERO_IMG_WEBP,
   GROUP_TOPICS,
   LONG_FEATURES,
   SEO_INTRO,
@@ -28,15 +29,17 @@ const LandingPage = () => {
     <PublicLayout heroHeader>
       <section className="relative min-h-[min(88vh,820px)] flex items-center overflow-hidden bg-gradient-to-br from-pink-600 via-fuchsia-600 to-violet-800">
         {heroOk && (
-          <img
-            src={HERO_IMG}
-            alt=""
-            aria-hidden
-            fetchPriority="high"
-            decoding="async"
-            onError={() => setHeroOk(false)}
-            className="absolute inset-0 w-full h-full object-cover object-center scale-105"
-          />
+          <picture className="absolute inset-0 w-full h-full">
+            <source srcSet={HERO_IMG_WEBP} type="image/webp" />
+            <img
+              src={HERO_IMG}
+              alt="Vibe Talk - Free random chat, video call and meet strangers online"
+              fetchPriority="high"
+              decoding="async"
+              onError={() => setHeroOk(false)}
+              className="w-full h-full object-cover object-center scale-105"
+            />
+          </picture>
         )}
         <div
           className="absolute inset-0 bg-gradient-to-r from-pink-600/88 via-fuchsia-600/82 to-violet-800/78"
@@ -62,9 +65,9 @@ const LandingPage = () => {
 
       <section className="bg-base-100 border-b border-base-200">
         <div className="max-w-4xl mx-auto px-4 py-10">
-          <h1 className="text-xl sm:text-2xl font-bold text-base-content leading-snug text-center">
-            Free Random Chat, Video Calls & Meet Strangers Online
-          </h1>
+          <h2 className="text-xl sm:text-2xl font-bold text-base-content leading-snug text-center">
+            Connect Instantly with Strangers Across the Globe
+          </h2>
           <p className="mt-4 text-sm sm:text-base text-base-content/70 leading-relaxed">
             {SEO_INTRO}
             {readMore && SEO_MORE}

@@ -1,4 +1,5 @@
 export const HERO_IMG = `${process.env.PUBLIC_URL || ''}/images/hero-landing.jpg`;
+export const HERO_IMG_WEBP = `${process.env.PUBLIC_URL || ''}/images/hero-landing.webp`;
 
 export const GROUP_TOPICS = [
   { icon: '✈️', title: 'Travel', desc: 'Need ideas on traveling?' },
