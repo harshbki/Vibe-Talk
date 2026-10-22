@@ -215,6 +215,8 @@ const LandingPage = () => {
                       <img
                         src={HERO_IMG}
                         alt="Friends video chatting live on Vibe Talk stranger chat platform"
+                        width="480"
+                        height="430"
                         fetchPriority="high"
                         decoding="async"
                         onError={() => setHeroOk(false)}
