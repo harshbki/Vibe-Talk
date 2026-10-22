@@ -471,6 +471,14 @@ if (hasClientBuild) {
     if (fs.existsSync(publicLlms)) return res.sendFile(publicLlms);
     res.status(404).send('Not Found');
   });
+  app.get(['/ai-catalog.json', '/.well-known/ai-catalog.json'], (req, res) => {
+    res.type('application/json; charset=utf-8');
+    const file = path.join(clientBuild, 'ai-catalog.json');
+    if (fs.existsSync(file)) return res.sendFile(file);
+    const pubFile = path.join(__dirname, '..', 'client', 'public', 'ai-catalog.json');
+    if (fs.existsSync(pubFile)) return res.sendFile(pubFile);
+    res.status(404).json({ error: 'Not Found' });
+  });
   app.use(express.static(clientBuild, { index: false }));
   app.get('*', async (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
