@@ -11,6 +11,23 @@ Disallow: /profile
 Disallow: /settings
 Disallow: /user/
 
+# Explicitly allow AI bots for Generative Engine Optimization (GEO)
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+
 User-agent: Googlebot
 Allow: /
 Disallow: /api/

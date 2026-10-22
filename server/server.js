@@ -463,6 +463,14 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Serve React build when present (Render: npm run install-all && npm run build)
 if (hasClientBuild) {
+  app.get(['/llms.txt', '/.well-known/llms.txt'], (req, res) => {
+    res.type('text/markdown; charset=utf-8');
+    const llmsFile = path.join(clientBuild, 'llms.txt');
+    if (fs.existsSync(llmsFile)) return res.sendFile(llmsFile);
+    const publicLlms = path.join(__dirname, '..', 'client', 'public', 'llms.txt');
+    if (fs.existsSync(publicLlms)) return res.sendFile(publicLlms);
+    res.status(404).send('Not Found');
+  });
   app.use(express.static(clientBuild, { index: false }));
   app.get('*', async (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
