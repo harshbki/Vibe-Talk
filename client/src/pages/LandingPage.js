@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicLayout from '../components/PublicLayout';
+import AdBanner from '../components/AdBanner';
 import {
   HERO_IMG,
   HERO_IMG_WEBP,
@@ -221,6 +222,11 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* ================= AD SLOT 1 ================= */}
+      <div className="max-w-4xl mx-auto px-4 py-4 flex justify-center">
+        <AdBanner slot="public-inline" />
+      </div>
+
       {/* ================= HOW IT WORKS ================= */}
       <section className="py-16 bg-base-100 border-y border-base-200">
         <div className="max-w-5xl mx-auto px-4">
@@ -329,6 +335,11 @@ const LandingPage = () => {
           </button>
         </div>
       </section>
+
+      {/* ================= AD SLOT 2 ================= */}
+      <div className="max-w-4xl mx-auto px-4 py-4 flex justify-center">
+        <AdBanner slot="public-inline" />
+      </div>
 
       {/* ================= FAQS ACCORDION (SEO & USER FRIENDLY) ================= */}
       <section className="py-16 bg-base-100 border-t border-base-200">
