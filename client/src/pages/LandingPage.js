@@ -42,23 +42,34 @@ const LandingPage = () => {
           </picture>
         )}
         <div
-          className="absolute inset-0 bg-gradient-to-r from-pink-600/88 via-fuchsia-600/82 to-violet-800/78"
+          className="absolute inset-0 bg-gradient-to-r from-black/85 via-purple-950/70 to-pink-950/40"
           aria-hidden
         />
         <div className="relative max-w-6xl mx-auto px-4 py-16 sm:py-24 w-full">
           <div className="max-w-xl text-white">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs sm:text-sm font-semibold mb-5 shadow-sm">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>1,200+ People Chatting Live Right Now</span>
+            </div>
             <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] mb-5 drop-shadow-md">
               Free Random Chat, Video Call &amp; Meet Strangers Online
             </h1>
-            <p className="text-lg sm:text-xl text-white/95 mb-10 font-light leading-relaxed drop-shadow">
-              Start spending your spare time making friends.
+            <p className="text-lg sm:text-xl text-white/95 mb-8 font-normal leading-relaxed drop-shadow">
+              Connect with friendly people worldwide in 5 seconds. Zero registration, no downloads — 100% free video, audio &amp; text chat.
             </p>
-            <Link
-              to="/start"
-              className="inline-flex items-center gap-2 bg-white text-gray-800 font-bold px-10 py-4 rounded-md shadow-2xl hover:bg-white/95 transition-all text-base sm:text-lg"
-            >
-              Start Chatting →
-            </Link>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <Link
+                to="/start"
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-indigo-600 text-white font-extrabold px-8 py-4 rounded-xl shadow-2xl hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all text-base sm:text-lg group border border-white/20"
+              >
+                <span>Start Chatting Now</span>
+                <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
+              </Link>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-white/85 font-medium">
+                <span>&bull; No sign-up required</span>
+                <span>&bull; 100% Private</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
