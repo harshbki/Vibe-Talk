@@ -39,7 +39,7 @@ const PublicLayout = ({ children, heroHeader = false }) => {
       <header
         className={`sticky top-0 z-40 border-b shadow-sm ${
           heroHeader
-            ? 'bg-gradient-to-r from-pink-600/95 via-fuchsia-600/95 to-violet-700/95 border-white/10 text-white backdrop-blur-md'
+            ? 'bg-slate-900/90 backdrop-blur-md border-b border-white/10 text-white'
             : 'bg-base-100/95 backdrop-blur-md border-base-200'
         }`}
       >

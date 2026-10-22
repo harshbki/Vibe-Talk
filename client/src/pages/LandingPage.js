@@ -27,7 +27,7 @@ const LandingPage = () => {
 
   return (
     <PublicLayout heroHeader>
-      <section className="relative min-h-[min(88vh,820px)] flex items-center overflow-hidden bg-gradient-to-br from-pink-600 via-fuchsia-600 to-violet-800">
+      <section className="relative min-h-[min(88vh,820px)] flex items-center overflow-hidden bg-slate-900">
         {heroOk && (
           <picture className="absolute inset-0 w-full h-full">
             <source srcSet={HERO_IMG_WEBP} type="image/webp" />
@@ -42,7 +42,7 @@ const LandingPage = () => {
           </picture>
         )}
         <div
-          className="absolute inset-0 bg-gradient-to-r from-black/85 via-purple-950/70 to-pink-950/40"
+          className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/45 to-transparent"
           aria-hidden
         />
         <div className="relative max-w-6xl mx-auto px-4 py-16 sm:py-24 w-full">
