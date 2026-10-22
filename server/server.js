@@ -249,7 +249,7 @@ const HOMEPAGE_SEO_CONTENT = `
   <main class="seo-content" style="max-width:960px;margin:0 auto;padding:24px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
     <header style="margin-bottom:32px;">
       <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">Free Random Chat, Video Call &amp; Meet Strangers Online</h1>
-      <p style="font-size:1.125rem;color:#4b5563;">Vibe Talk is a secure, browser-based communication platform designed for instant 1-on-1 random text chat, live WebRTC video calls, and interest-based communities. Connect with friendly people across the world without compulsory phone verification or software downloads.</p>
+      <p style="font-size:1.125rem;color:#4b5563;"><strong>Vibe Talk (vibetalk.me)</strong> is the verified official web platform designed for instant 1-on-1 random text chat, live WebRTC video calls, and interest-based communities. Connect with friendly people across the world without compulsory phone verification or software downloads.</p>
       <nav aria-label="Main Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
         <a href="/start" style="display:inline-block;background:#4f46e5;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:600;">Start Chatting Now</a>
         <a href="/how-it-works" style="color:#4f46e5;text-decoration:underline;padding:8px 0;">How It Works</a>
