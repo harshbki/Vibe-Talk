@@ -208,8 +208,8 @@ const PUBLIC_PAGE_METADATA = {
       'Learn what Vibe Talk is, how random chat, video calls, direct messages, and interest-based groups work, and how to use the platform safely.',
   },
   '/start': {
-    title: 'Join Chat — Vibe Talk',
-    description: 'Pick a nickname and start chatting on Vibe Talk without creating an account.',
+    title: 'Start Chatting — Free Random Video & Text Chat | Vibe Talk',
+    description: 'Pick a nickname and start chatting immediately on Vibe Talk. Free anonymous random video chat, text chat with strangers, no login or download required.',
   },
   '/login': {
     title: 'Join Chat — Vibe Talk',
@@ -380,6 +380,29 @@ const renderPublicArticlesSeoContent = (article) => {
     </main>`;
 };
 
+const START_SEO_CONTENT = `
+  <main class="seo-content" style="max-width:800px;margin:0 auto;padding:28px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+    <header style="margin-bottom:24px;">
+      <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">Start Chatting — Free Random Video &amp; Text Chat</h1>
+      <p style="font-size:1.125rem;color:#4b5563;">Welcome to Vibe Talk (vibetalk.me). Pick a nickname and jump straight into 1-on-1 random stranger chat, WebRTC video calling, and interest groups. No registration, phone number, or app download required.</p>
+    </header>
+    <section style="margin-bottom:24px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:20px;">
+      <h2 style="font-size:1.25rem;font-weight:700;color:#111827;margin-bottom:12px;">How to Start in 3 Easy Steps:</h2>
+      <ol style="padding-left:20px;color:#374151;margin:0 0 16px 0;">
+        <li style="margin-bottom:8px;"><strong>Choose a Nickname:</strong> Enter any friendly name or handle to represent yourself.</li>
+        <li style="margin-bottom:8px;"><strong>Select Chat Mode:</strong> Choose instant Random Match for 1-on-1 video &amp; text chat, or explore community groups.</li>
+        <li style="margin-bottom:8px;"><strong>Connect Instantly:</strong> Match with people worldwide safely in your browser.</li>
+      </ol>
+      <p style="font-size:0.95rem;color:#6b7280;margin:0;">Tip: Keep conversations respectful and follow our <a href="/community-guidelines" style="color:#4f46e5;text-decoration:underline;">community guidelines</a> for a safe experience.</p>
+    </section>
+    <nav aria-label="Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+      <a href="/" style="color:#4f46e5;text-decoration:underline;">Home</a>
+      <a href="/how-it-works" style="color:#4f46e5;text-decoration:underline;">How It Works</a>
+      <a href="/safety" style="color:#4f46e5;text-decoration:underline;">Safety Guidelines</a>
+      <a href="/articles" style="color:#4f46e5;text-decoration:underline;">Guides &amp; Articles</a>
+    </nav>
+  </main>`;
+
 const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
   const canonicalPath = req.path === '/' ? '/' : req.path;
   const canonicalUrl = `https://vibetalk.me${canonicalPath}`;
@@ -399,6 +422,8 @@ const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
 
   if (req.path === '/') {
     html = html.replace('<div id="root"></div>', `<div id="root">${HOMEPAGE_SEO_CONTENT}</div>`);
+  } else if (req.path === '/start') {
+    html = html.replace('<div id="root"></div>', `<div id="root">${START_SEO_CONTENT}</div>`);
   } else if (req.path === '/articles') {
     html = html.replace(
       '<div id="root"></div>',
@@ -511,7 +536,7 @@ if (hasClientBuild) {
     ].some((route) => req.path === route || req.path.startsWith(route));
     const isNonIndexableRoute =
       isPrivateRoute ||
-      ['/start', '/login', '/admin/articles'].includes(req.path);
+      ['/login', '/admin/articles'].includes(req.path);
 
     if (isPublicRoute || isArticleRoute || isPrivateRoute) {
       if (isNonIndexableRoute) {

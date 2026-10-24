@@ -1,8 +1,8 @@
 User-agent: *
 Allow: /
+Allow: /start
 Disallow: /api/
 Disallow: /admin/
-Disallow: /start
 Disallow: /chat
 Disallow: /users
 Disallow: /match
@@ -30,9 +30,9 @@ Allow: /llms.txt
 
 User-agent: Googlebot
 Allow: /
+Allow: /start
 Disallow: /api/
 Disallow: /admin/
-Disallow: /start
 Disallow: /chat
 Disallow: /users
 Disallow: /match
