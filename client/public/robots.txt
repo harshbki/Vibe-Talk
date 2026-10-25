@@ -27,6 +27,13 @@ User-agent: PerplexityBot
 Allow: /
 Allow: /llms.txt
 
+User-agent: Claude-SearchBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: Claude-User
+Allow: /
+
 User-agent: ClaudeBot
 Allow: /
 Allow: /llms.txt
