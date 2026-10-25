@@ -42,6 +42,10 @@ User-agent: Google-Extended
 Allow: /
 Allow: /llms.txt
 
+# Google AdSense Crawler
+User-agent: Mediapartners-Google
+Allow: /
+
 User-agent: Googlebot
 Allow: /
 Allow: /start
