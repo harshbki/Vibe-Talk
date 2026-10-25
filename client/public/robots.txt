@@ -11,7 +11,14 @@ Disallow: /profile
 Disallow: /settings
 Disallow: /user/
 
-# Explicitly allow AI bots for Generative Engine Optimization (GEO)
+# Explicitly allow AI bots for Generative Engine Optimization (GEO) & ChatGPT Search
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: ChatGPT-User
+Allow: /
+
 User-agent: GPTBot
 Allow: /
 Allow: /llms.txt
