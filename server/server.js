@@ -202,6 +202,10 @@ const PUBLIC_PAGE_METADATA = {
     description:
       'Learn how online chat rooms and interest groups work and how to join conversations safely and respectfully.',
   },
+  '/articles/gen-z-guide-to-low-stakes-stranger-chat': {
+    title: 'Why Gen Z Is Ditching Curated Feeds for Low-Stakes Stranger Chat (No Cap) — Vibe Talk',
+    description: 'Tired of performative Instagram grids, awkward 'seen' zones, and endless doomscrolling? Here is why low-stakes, zero-login stranger chat is Gen Z's ultimate late-night vibe check.',
+  },
   '/articles/what-is-vibetalk': {
     title: 'What Is Vibe Talk? Random Chat, Video Calls, and Groups',
     description:
