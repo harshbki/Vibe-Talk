@@ -53,8 +53,9 @@ const SEO_BY_PATH = {
       'Find Vibe Talk contact details for support, safety questions, feedback, and help with your account.',
   },
   '/articles': {
-    title: 'Articles & Chat Tips — Vibe Talk',
-    description: 'Read practical guides about online conversation, meeting people, and safer chat.',
+    title: 'Random Chat Guides & Online Safety Tips — Vibe Talk',
+    description:
+      'Read practical guides about random chat with strangers, making friends online, video chat, privacy, and safer conversations.',
   },
 };
 

@@ -155,8 +155,9 @@ const PUBLIC_PAGE_METADATA = {
       'Find Vibe Talk contact details for support, safety questions, feedback, and help with your account.',
   },
   '/articles': {
-    title: 'Articles & Chat Tips — Vibe Talk',
-    description: 'Read practical guides about online conversation, meeting people, and safer chat.',
+    title: 'Random Chat Guides & Online Safety Tips — Vibe Talk',
+    description:
+      'Read practical guides about random chat with strangers, making friends online, video chat, privacy, and safer conversations.',
   },
   '/articles/safe-random-chat-online-guide': {
     title: 'How to Chat Safely With New People Online — Vibe Talk',
@@ -267,6 +268,19 @@ const HOMEPAGE_SEO_CONTENT = `
         <a href="/safety" style="color:#4f46e5;text-decoration:underline;padding:8px 0;">Community Safety</a>
         <a href="/about" style="color:#4f46e5;text-decoration:underline;padding:8px 0;">About Vibe Talk</a>
       </nav>
+      <section aria-label="Featured chat guides" style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
+         <h2 style="font-size:1.35rem;font-weight:700;color:#111827;margin-bottom:8px;">Learn to Chat Online With Confidence</h2>
+         <p style="font-size:0.95rem;color:#4b5563;">Explore practical advice for random chat with strangers, making friends online, and protecting your privacy.</p>
+         <ul style="padding-left:20px;margin-top:12px;">
+           ${publicArticles
+             .slice(0, 3)
+             .map(
+               (publicArticle) =>
+                 `<li><a href="/articles/${escapeHtml(publicArticle.slug)}" style="color:#4f46e5;text-decoration:underline;">${escapeHtml(publicArticle.title)}</a></li>`
+             )
+             .join('')}
+         </ul>
+      </section>
     </header>
 
     <section style="margin-bottom:32px;">

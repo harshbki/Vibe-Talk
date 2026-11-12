@@ -9,6 +9,7 @@ import {
   SEO_INTRO,
   SEO_MORE,
 } from '../data/landingContent';
+import publicArticles from '../data/publicArticles';
 
 const QUICK_PILLS = [
   { icon: '⚡', label: '1-Click Match' },
@@ -75,6 +76,8 @@ const KEYWORD_HIGHLIGHTS = [
     desc: 'Works seamlessly on mobile browsers (Android Chrome, iOS Safari) as well as desktop. Start chatting in 3 seconds as a guest with just a nickname.',
   },
 ];
+
+const FEATURED_GUIDES = publicArticles.slice(0, 3);
 
 const WORKFLOW_STEPS = [
   {
@@ -286,6 +289,48 @@ const LandingPage = () => {
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= SEARCH GUIDE CLUSTER ================= */}
+      <section className="py-14 sm:py-18 bg-white border-b border-slate-200/70">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+            <div className="max-w-2xl">
+              <span className="inline-block px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-extrabold uppercase tracking-wider mb-3 border border-purple-100">
+                Chat guides
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Learn to Chat Online With Confidence
+              </h2>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Explore practical advice for random chat with strangers, making friends online, and protecting your privacy.
+              </p>
+            </div>
+            <Link to="/articles" className="text-sm font-bold text-indigo-600 hover:text-indigo-800 shrink-0">
+              View all guides &rarr;
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-5">
+            {FEATURED_GUIDES.map((guide) => (
+              <Link
+                key={guide.slug}
+                to={`/articles/${guide.slug}`}
+                className="group rounded-2xl border border-slate-200 bg-slate-50/60 p-5 hover:border-indigo-300 hover:bg-indigo-50/40 hover:shadow-md transition-all"
+              >
+                <h3 className="font-bold text-base text-slate-900 leading-snug group-hover:text-indigo-700">
+                  {guide.title}
+                </h3>
+                <p className="mt-2 text-xs text-slate-600 leading-relaxed line-clamp-3">
+                  {guide.excerpt}
+                </p>
+                <span className="mt-4 inline-block text-xs font-bold text-indigo-600">
+                  Read guide &rarr;
+                </span>
+              </Link>
             ))}
           </div>
         </div>
