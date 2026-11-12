@@ -24,27 +24,33 @@ const SEO_BY_PATH = {
   },
   '/privacy': {
     title: 'Privacy Policy — Vibe Talk',
-    description: 'Read how Vibe Talk handles account, chat, media, and website information.',
+    description:
+      'Read how Vibe Talk collects and protects account, chat, media, and website information when you use the platform.',
   },
   '/legal': {
     title: 'Terms & Conditions — Vibe Talk',
-    description: 'Read the terms for using Vibe Talk chat, groups, profiles, and video features.',
+    description:
+      'Read the Vibe Talk terms for using chat, groups, profiles, video features, and the community safely.',
   },
   '/safety': {
     title: 'Safety Center — Vibe Talk',
-    description: 'Practical safety guidance for chatting with strangers and using video chat on Vibe Talk.',
+    description:
+      'Follow practical safety guidance for chatting with strangers, protecting privacy, and using video chat on Vibe Talk.',
   },
   '/community-guidelines': {
     title: 'Community Guidelines — Vibe Talk',
-    description: 'Review Vibe Talk guidelines for respectful, friendly, and safe conversations.',
+    description:
+      'Review Vibe Talk guidelines for respectful, friendly, inclusive, and safe conversations with the community.',
   },
   '/cookies': {
     title: 'Cookies Policy — Vibe Talk',
-    description: 'Learn how Vibe Talk uses cookies and similar technologies.',
+    description:
+      'Learn how Vibe Talk uses cookies and similar technologies to support the website and improve your experience.',
   },
   '/contact': {
     title: 'Contact Vibe Talk',
-    description: 'Find contact details for Vibe Talk support and safety questions.',
+    description:
+      'Find Vibe Talk contact details for support, safety questions, feedback, and help with your account.',
   },
   '/articles': {
     title: 'Articles & Chat Tips — Vibe Talk',

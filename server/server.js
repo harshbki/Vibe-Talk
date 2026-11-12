@@ -126,27 +126,33 @@ const PUBLIC_PAGE_METADATA = {
   },
   '/privacy': {
     title: 'Privacy Policy — Vibe Talk',
-    description: 'Read how Vibe Talk handles account, chat, media, and website information.',
+    description:
+      'Read how Vibe Talk collects and protects account, chat, media, and website information when you use the platform.',
   },
   '/legal': {
     title: 'Terms & Conditions — Vibe Talk',
-    description: 'Read the terms for using Vibe Talk chat, groups, profiles, and video features.',
+    description:
+      'Read the Vibe Talk terms for using chat, groups, profiles, video features, and the community safely.',
   },
   '/safety': {
     title: 'Safety Center — Vibe Talk',
-    description: 'Practical safety guidance for chatting with strangers and using video chat on Vibe Talk.',
+    description:
+      'Follow practical safety guidance for chatting with strangers, protecting privacy, and using video chat on Vibe Talk.',
   },
   '/community-guidelines': {
     title: 'Community Guidelines — Vibe Talk',
-    description: 'Review Vibe Talk guidelines for respectful, friendly, and safe conversations.',
+    description:
+      'Review Vibe Talk guidelines for respectful, friendly, inclusive, and safe conversations with the community.',
   },
   '/cookies': {
     title: 'Cookies Policy — Vibe Talk',
-    description: 'Learn how Vibe Talk uses cookies and similar technologies.',
+    description:
+      'Learn how Vibe Talk uses cookies and similar technologies to support the website and improve your experience.',
   },
   '/contact': {
     title: 'Contact Vibe Talk',
-    description: 'Find contact details for Vibe Talk support and safety questions.',
+    description:
+      'Find Vibe Talk contact details for support, safety questions, feedback, and help with your account.',
   },
   '/articles': {
     title: 'Articles & Chat Tips — Vibe Talk',
@@ -168,7 +174,7 @@ const PUBLIC_PAGE_METADATA = {
       'Prepare your camera, microphone, lighting, and privacy for comfortable video calls on phones, tablets, and computers.',
   },
   '/articles/random-chat-with-strangers-online': {
-    title: 'Random Chat With Strangers: How to Start a Good Conversation — Vibe Talk',
+    title: 'Random Chat With Strangers: How to Start — Vibe Talk',
     description:
       'Learn how instant random chat works, what to say first, and how to meet new people online safely and respectfully.',
   },
@@ -352,6 +358,49 @@ const HOMEPAGE_SEO_CONTENT = `
     </footer>
   </main>`;
 
+const PUBLIC_PAGE_SEO_CONTENT = {
+  '/about': `
+    <main>
+      <h1>About Vibe Talk</h1>
+      <p>Learn how Vibe Talk helps people meet new friends through guest chat, random matching, video calls, direct messages, and interest-based groups.</p>
+    </main>`,
+  '/how-it-works': `
+    <main>
+      <h1>How Vibe Talk Works</h1>
+      <p>Start guest chat, find conversations, use Random Match, join groups, and stay safe while meeting people online.</p>
+    </main>`,
+  '/privacy': `
+    <main>
+      <h1>Privacy Policy</h1>
+      <p>Read how Vibe Talk collects and protects account, chat, media, and website information.</p>
+    </main>`,
+  '/legal': `
+    <main>
+      <h1>Terms &amp; Conditions</h1>
+      <p>Read the Vibe Talk terms for using chat, groups, profiles, video features, and the community safely.</p>
+    </main>`,
+  '/safety': `
+    <main>
+      <h1>Vibe Talk Safety Center</h1>
+      <p>Follow practical safety guidance for chatting with strangers, protecting privacy, and using video chat.</p>
+    </main>`,
+  '/community-guidelines': `
+    <main>
+      <h1>Vibe Talk Community Guidelines</h1>
+      <p>Review the rules for respectful, friendly, inclusive, and safe conversations with the community.</p>
+    </main>`,
+  '/cookies': `
+    <main>
+      <h1>Cookies Policy</h1>
+      <p>Learn how Vibe Talk uses cookies and similar technologies to support the website.</p>
+    </main>`,
+  '/contact': `
+    <main>
+      <h1>Contact Vibe Talk</h1>
+      <p>Find Vibe Talk contact details for support, safety questions, feedback, and account help.</p>
+    </main>`,
+};
+
 const escapeHtml = (value) =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -428,6 +477,11 @@ const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
     html = html.replace('<div id="root"></div>', `<div id="root">${HOMEPAGE_SEO_CONTENT}</div>`);
   } else if (req.path === '/start') {
     html = html.replace('<div id="root"></div>', `<div id="root">${START_SEO_CONTENT}</div>`);
+  } else if (PUBLIC_PAGE_SEO_CONTENT[req.path]) {
+    html = html.replace(
+      '<div id="root"></div>',
+      `<div id="root">${PUBLIC_PAGE_SEO_CONTENT[req.path]}</div>`
+    );
   } else if (req.path === '/articles') {
     html = html.replace(
       '<div id="root"></div>',
