@@ -108,6 +108,8 @@ const clientBuild = path.join(__dirname, '..', 'client', 'build');
 const clientIndex = path.join(clientBuild, 'index.html');
 const hasClientBuild = fs.existsSync(clientIndex);
 const clientIndexHtml = hasClientBuild ? fs.readFileSync(clientIndex, 'utf8') : null;
+const escapeHtml = (value) =>
+  value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const PUBLIC_PAGE_METADATA = {
   '/': {
     title: 'Vibe Talk — Free Random Chat, Video Call & Meet Strangers Online',
@@ -414,9 +416,6 @@ const PUBLIC_PAGE_SEO_CONTENT = {
       <p>Find Vibe Talk contact details for support, safety questions, feedback, and account help.</p>
     </main>`,
 };
-
-const escapeHtml = (value) =>
-  value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 const renderPublicArticlesSeoContent = (article) => {
   if (article) {
