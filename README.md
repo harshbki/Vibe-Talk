@@ -3,6 +3,7 @@
 Real-time MERN chat app: guest login, direct messages, groups, **random match**, media upload, **WebRTC video calls**, notifications, and ad slots (AdSense / Monetag).
 
 **Repo:** [github.com/harshbki/Vibe-Talk](https://github.com/harshbki/Vibe-Talk)  
+**Live website:** [vibetalk.me](https://vibetalk.me/)  
 **Deploy (DigitalOcean):** see [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ---
