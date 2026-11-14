@@ -75,8 +75,18 @@ const PageFallback = () => (
 
 function App() {
   useEffect(() => {
-    initializeAds();
-    initAnalytics();
+    // Delay non-critical third-party scripts (Ads & Analytics) until main thread is idle
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        initializeAds();
+        initAnalytics();
+      }, { timeout: 2000 });
+    } else {
+      setTimeout(() => {
+        initializeAds();
+        initAnalytics();
+      }, 1200);
+    }
   }, []);
 
   return (

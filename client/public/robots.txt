@@ -60,3 +60,4 @@ Disallow: /settings
 Disallow: /user/
 
 Sitemap: https://vibetalk.me/sitemap.xml
+Host: https://vibetalk.me

@@ -118,49 +118,41 @@ const PUBLIC_PAGE_METADATA = {
   },
   '/about': {
     title: 'About Vibe Talk — Free Random Chat & Groups',
-    description:
-      'Learn how Vibe Talk helps people meet new friends through guest chat, random matching, video calls, direct messages, and interest-based groups.',
+    description: "Learn how Vibe Talk helps people connect safely across the world with free anonymous stranger chat, peer-to-peer WebRTC video calls, and topic communities.",
   },
   '/how-it-works': {
     title: 'How Vibe Talk Works — Random Chat & Video Calls',
-    description:
-      'Learn how to start guest chat, find conversations, use Random Match, join groups, and stay safe on Vibe Talk.',
+    description: "Learn how Vibe Talk works: start instant guest text chat, match randomly for video calls, explore interest groups, and meet new people safely without sign-up.",
   },
   '/privacy': {
     title: 'Privacy Policy — Vibe Talk',
-    description:
-      'Read how Vibe Talk collects and protects account, chat, media, and website information when you use the platform.',
+
+    description: "Learn how Vibe Talk protects your privacy, user data, anonymous chats, WebRTC video calls, and media with transparent security and data handling policies.",
   },
   '/legal': {
     title: 'Terms & Conditions — Vibe Talk',
-    description:
-      'Read the Vibe Talk terms for using chat, groups, profiles, video features, and the community safely.',
+    description: "Review Vibe Talk terms and conditions covering acceptable use, free random stranger chat, video calls, community safety rules, and account policies.",
   },
   '/safety': {
-    title: 'Safety Center — Vibe Talk',
-    description:
-      'Follow practical safety guidance for chatting with strangers, protecting privacy, and using video chat on Vibe Talk.',
+    title: 'Safety Center & Guidelines — Vibe Talk',
+    description: "Essential safety tips for chatting with strangers online. Learn how to protect your privacy, report bad behavior, and stay safe on Vibe Talk video chat.",
   },
   '/community-guidelines': {
     title: 'Community Guidelines — Vibe Talk',
-    description:
-      'Review Vibe Talk guidelines for respectful, friendly, inclusive, and safe conversations with the community.',
+    description: "Review Vibe Talk community guidelines for friendly, respectful, and safe online chat. Zero tolerance for harassment, hate speech, and inappropriate content.",
   },
   '/cookies': {
     title: 'Cookies Policy — Vibe Talk',
-    description:
-      'Learn how Vibe Talk uses cookies and similar technologies to support the website and improve your experience.',
+    description: "Understand how Vibe Talk uses cookies and local storage to keep your session secure, optimize random chat matching, and improve platform performance.",
   },
   '/contact': {
-    title: 'Contact Vibe Talk',
-    description:
-      'Find Vibe Talk contact details for support, safety questions, feedback, and help with your account.',
+    title: 'Contact Vibe Talk Support & Safety',
+    description: "Get in touch with the Vibe Talk team for user support, safety reports, feedback, business partnerships, or questions about our free random chat platform.",
   },
   '/articles': {
-    title: 'Random Chat Guides & Online Safety Tips — Vibe Talk',
-    description:
-      'Read practical guides about random chat with strangers, making friends online, video chat, privacy, and safer conversations.',
-  },
+    title: 'Articles & Chat Tips — Vibe Talk',
+    description: "Browse practical guides and tips on random video chat, online safety, conversation starters, meeting new friends, and safe Omegle alternatives on Vibe Talk.",
+},
   '/articles/safe-random-chat-online-guide': {
     title: 'How to Chat Safely With New People Online — Vibe Talk',
     description:
@@ -213,7 +205,7 @@ const PUBLIC_PAGE_METADATA = {
   },
   '/articles/gen-z-guide-to-low-stakes-stranger-chat': {
     title: 'Why Gen Z Is Ditching Curated Feeds for Low-Stakes Stranger Chat (No Cap) — Vibe Talk',
-    description: "Tired of performative Instagram grids, awkward 'seen' zones, and endless doomscrolling? Here is why low-stakes, zero-login stranger chat is Gen Z's ultimate late-night vibe check.",
+    description: "Why Gen Z is moving away from curated social media feeds and embracing low-stakes anonymous stranger chat for authentic, pressure-free online connections.",
   },
   '/articles/what-is-vibetalk': {
     title: 'What Is Vibe Talk? Random Chat, Video Calls, and Groups',
@@ -469,6 +461,106 @@ const START_SEO_CONTENT = `
     </nav>
   </main>`;
 
+
+const INDEXNOW_KEY = 'a376d7b014cb67dca0e439f4a1d5e026';
+
+const STATIC_PAGE_SEO_CONTENT = {
+  '/about': `
+    <main class="seo-content" style="max-width:800px;margin:0 auto;padding:28px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+      <header style="margin-bottom:20px;">
+        <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">About Vibe Talk — Free Random Chat &amp; Community</h1>
+        <p style="font-size:1.125rem;color:#4b5563;">Vibe Talk is an open, modern platform designed for spontaneous human connection. Chat with friendly strangers worldwide via text and real-time WebRTC video calls with complete privacy.</p>
+      </header>
+      <nav aria-label="Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+        <a href="/" style="color:#4f46e5;text-decoration:underline;">Home</a>
+        <a href="/start" style="color:#4f46e5;text-decoration:underline;">Start Chatting</a>
+        <a href="/safety" style="color:#4f46e5;text-decoration:underline;">Safety Center</a>
+        <a href="/articles" style="color:#4f46e5;text-decoration:underline;">Articles</a>
+      </nav>
+    </main>`,
+  '/how-it-works': `
+    <main class="seo-content" style="max-width:800px;margin:0 auto;padding:28px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+      <header style="margin-bottom:20px;">
+        <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">How Vibe Talk Works — Instant Stranger Chat &amp; Video Calls</h1>
+        <p style="font-size:1.125rem;color:#4b5563;">Jump into instant guest chat with a single click. No accounts or phone numbers required. Pick a nickname, select text or video mode, and meet people with shared vibes.</p>
+      </header>
+      <nav aria-label="Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+        <a href="/" style="color:#4f46e5;text-decoration:underline;">Home</a>
+        <a href="/start" style="color:#4f46e5;text-decoration:underline;">Start Chatting</a>
+        <a href="/safety" style="color:#4f46e5;text-decoration:underline;">Safety Center</a>
+      </nav>
+    </main>`,
+  '/safety': `
+    <main class="seo-content" style="max-width:800px;margin:0 auto;padding:28px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+      <header style="margin-bottom:20px;">
+        <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">Vibe Talk Safety Center &amp; Community Protection</h1>
+        <p style="font-size:1.125rem;color:#4b5563;">Your online safety is paramount. Keep your personal contact information private, use built-in one-tap block and report controls, and immediately disconnect from uncomfortable calls.</p>
+      </header>
+      <nav aria-label="Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+        <a href="/" style="color:#4f46e5;text-decoration:underline;">Home</a>
+        <a href="/start" style="color:#4f46e5;text-decoration:underline;">Start Chatting</a>
+        <a href="/community-guidelines" style="color:#4f46e5;text-decoration:underline;">Community Guidelines</a>
+      </nav>
+    </main>`,
+  '/community-guidelines': `
+    <main class="seo-content" style="max-width:800px;margin:0 auto;padding:28px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+      <header style="margin-bottom:20px;">
+        <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">Vibe Talk Community Guidelines</h1>
+        <p style="font-size:1.125rem;color:#4b5563;">We maintain a welcoming environment for everyone. Inappropriate behavior, harassment, illegal content, and abusive language result in immediate permanent bans.</p>
+      </header>
+      <nav aria-label="Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+        <a href="/" style="color:#4f46e5;text-decoration:underline;">Home</a>
+        <a href="/start" style="color:#4f46e5;text-decoration:underline;">Start Chatting</a>
+        <a href="/safety" style="color:#4f46e5;text-decoration:underline;">Safety Center</a>
+      </nav>
+    </main>`,
+  '/privacy': `
+    <main class="seo-content" style="max-width:800px;margin:0 auto;padding:28px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+      <header style="margin-bottom:20px;">
+        <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">Privacy Policy — Vibe Talk</h1>
+        <p style="font-size:1.125rem;color:#4b5563;">Learn how Vibe Talk protects user privacy. We do not sell your personal data. Peer-to-peer WebRTC video chats connect directly between participants.</p>
+      </header>
+      <nav aria-label="Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+        <a href="/" style="color:#4f46e5;text-decoration:underline;">Home</a>
+        <a href="/legal" style="color:#4f46e5;text-decoration:underline;">Terms of Service</a>
+      </nav>
+    </main>`,
+  '/legal': `
+    <main class="seo-content" style="max-width:800px;margin:0 auto;padding:28px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+      <header style="margin-bottom:20px;">
+        <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">Terms and Conditions — Vibe Talk</h1>
+        <p style="font-size:1.125rem;color:#4b5563;">Review the rules and terms governing your use of Vibe Talk anonymous chat, matching features, and community rooms.</p>
+      </header>
+      <nav aria-label="Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+        <a href="/" style="color:#4f46e5;text-decoration:underline;">Home</a>
+        <a href="/privacy" style="color:#4f46e5;text-decoration:underline;">Privacy Policy</a>
+      </nav>
+    </main>`,
+  '/cookies': `
+    <main class="seo-content" style="max-width:800px;margin:0 auto;padding:28px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+      <header style="margin-bottom:20px;">
+        <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">Cookies Policy — Vibe Talk</h1>
+        <p style="font-size:1.125rem;color:#4b5563;">Vibe Talk uses essential browser cookies and local storage tokens strictly to maintain session stability and anonymous guest identity.</p>
+      </header>
+      <nav aria-label="Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+        <a href="/" style="color:#4f46e5;text-decoration:underline;">Home</a>
+        <a href="/privacy" style="color:#4f46e5;text-decoration:underline;">Privacy Policy</a>
+      </nav>
+    </main>`,
+  '/contact': `
+    <main class="seo-content" style="max-width:800px;margin:0 auto;padding:28px 16px;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#1f2937;">
+      <header style="margin-bottom:20px;">
+        <h1 style="font-size:2rem;font-weight:800;color:#111827;line-height:1.2;margin-bottom:12px;">Contact Vibe Talk Team</h1>
+        <p style="font-size:1.125rem;color:#4b5563;">Need assistance, have feedback, or want to report safety concerns? Email us directly at <a href="mailto:support@vibetalk.me" style="color:#4f46e5;">support@vibetalk.me</a>.</p>
+      </header>
+      <nav aria-label="Navigation" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;">
+        <a href="/" style="color:#4f46e5;text-decoration:underline;">Home</a>
+        <a href="/start" style="color:#4f46e5;text-decoration:underline;">Start Chatting</a>
+        <a href="/safety" style="color:#4f46e5;text-decoration:underline;">Safety Center</a>
+      </nav>
+    </main>`
+};
+
 const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
   const canonicalPath = req.path === '/' ? '/' : req.path;
   const canonicalUrl = `https://vibetalk.me${canonicalPath}`;
@@ -486,29 +578,26 @@ const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
     .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/, `<meta name="twitter:title" content="${escapeHtml(metadata.title)}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/, `<meta name="twitter:description" content="${escapeHtml(metadata.description)}" />`);
 
+  const injectSeoHtml = (innerHtml) => {
+    html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${innerHtml}</div>`);
+  };
+
   if (req.path === '/') {
-    html = html.replace('<div id="root"></div>', `<div id="root">${HOMEPAGE_SEO_CONTENT}</div>`);
+    injectSeoHtml(HOMEPAGE_SEO_CONTENT);
   } else if (req.path === '/start') {
-    html = html.replace('<div id="root"></div>', `<div id="root">${START_SEO_CONTENT}</div>`);
-  } else if (PUBLIC_PAGE_SEO_CONTENT[req.path]) {
-    html = html.replace(
-      '<div id="root"></div>',
-      `<div id="root">${PUBLIC_PAGE_SEO_CONTENT[req.path]}</div>`
-    );
-  } else if (req.path === '/articles') {
-    html = html.replace(
-      '<div id="root"></div>',
-      `<div id="root">${renderPublicArticlesSeoContent()}</div>`
-    );
+    injectSeoHtml(START_SEO_CONTENT);
+  } else if (PUBLIC_PAGE_SEO_CONTENT && PUBLIC_PAGE_SEO_CONTENT[req.path]) {
+    injectSeoHtml(PUBLIC_PAGE_SEO_CONTENT[req.path]);
+} else if (req.path === '/articles') {
+    injectSeoHtml(renderPublicArticlesSeoContent());
   } else if (req.path.startsWith('/articles/')) {
     const slug = req.path.slice('/articles/'.length);
     const article = publicArticles.find((publicArticle) => publicArticle.slug === slug);
     if (article) {
-      html = html.replace(
-        '<div id="root"></div>',
-        `<div id="root">${renderPublicArticlesSeoContent(article)}</div>`
-      );
+      injectSeoHtml(renderPublicArticlesSeoContent(article));
     }
+  } else if (STATIC_PAGE_SEO_CONTENT[req.path]) {
+    injectSeoHtml(STATIC_PAGE_SEO_CONTENT[req.path]);
   }
 
   if (robots !== 'index, follow') {
