@@ -207,6 +207,18 @@ const PUBLIC_PAGE_METADATA = {
     title: 'Why Gen Z Is Ditching Curated Feeds for Low-Stakes Stranger Chat (No Cap) — Vibe Talk',
     description: "Why Gen Z is moving away from curated social media feeds and embracing low-stakes anonymous stranger chat for authentic, pressure-free online connections.",
   },
+  '/articles/practice-english-speaking-with-strangers-free': {
+    title: 'How to Practice English Speaking With Strangers Online Free — Vibe Talk',
+    description: "Learn how to practice English speaking with friendly strangers online for free. Build conversational confidence and fluency without fear of judgment.",
+  },
+  '/articles/talk-to-someone-when-lonely-anonymous-chat': {
+    title: 'Feeling Lonely? How to Talk to Someone Anonymously Online — Vibe Talk',
+    description: "Feeling lonely or overwhelmed at night? Connect with friendly strangers anonymously online for free, supportive, and non-judgmental conversations.",
+  },
+  '/articles/free-random-video-call-no-credit-card-no-coins': {
+    title: 'Free Random Video Calls Without Credit Cards or Coins — Vibe Talk',
+    description: "Enjoy 100% free stranger video calls directly in your browser without entering credit cards, subscriptions, or coins. Safe peer-to-peer WebRTC chat.",
+  },
   '/articles/what-is-vibetalk': {
     title: 'What Is Vibe Talk? Random Chat, Video Calls, and Groups',
     description:
