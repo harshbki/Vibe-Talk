@@ -219,6 +219,14 @@ const PUBLIC_PAGE_METADATA = {
     title: 'Free Random Video Calls Without Credit Cards or Coins — Vibe Talk',
     description: "Enjoy 100% free stranger video calls directly in your browser without entering credit cards, subscriptions, or coins. Safe peer-to-peer WebRTC chat.",
   },
+  '/articles/anjaan-logo-se-baat-karne-wali-free-website': {
+    title: 'Anjaan Logo Se Baat Karne Wali Free Website — Vibe Talk',
+    description: "Anjaan logo se bina login, bina recharge aur bina number diye online baat karne wali 100% free stranger chat website. Safe aur instant matching.",
+  },
+  '/articles/raat-ko-bore-ho-rahe-ho-to-kya-kare-online-chat': {
+    title: 'Raat Ko Bore Ho Rahe Ho To Kya Karein? — Vibe Talk',
+    description: "Late night neend na aaye aur bore ho rahe ho to kya karein? Janiye anonymous stranger chat aur free online gupshup karne ka aasan aur safe tarika.",
+  },
   '/articles/what-is-vibetalk': {
     title: 'What Is Vibe Talk? Random Chat, Video Calls, and Groups',
     description:
