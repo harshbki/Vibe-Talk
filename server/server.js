@@ -251,6 +251,10 @@ const PUBLIC_PAGE_METADATA = {
     title: "India Mein Sabse Popular Free Chat Websites 2026 — Vibe Talk",
     description: "India mein online anjaan logo se free chat karne ke liye top platforms ka review, features aur safety comparison.",
   },
+  '/articles/outlook-nahi-chal-raha-to-kya-kare-fix': {
+    title: 'Outlook Nahi Chal Raha? Problem Fix & Quick Guide — Vibe Talk',
+    description: 'Microsoft Outlook open nahi ho raha ya down hai? Jaaniye Outlook server outage check karne ka tarika aur 5 instant working desktop & mobile fixes.',
+  },
   '/articles/what-is-vibetalk': {
     title: 'What Is Vibe Talk? Random Chat, Video Calls, and Groups',
     description:
