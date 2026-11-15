@@ -231,6 +231,26 @@ const PUBLIC_PAGE_METADATA = {
     title: 'Raat Ko Bore Ho Rahe Ho To Kya Karein? — Vibe Talk',
     description: "Late night neend na aaye aur bore ho rahe ho to kya karein? Janiye anonymous stranger chat aur free online gupshup karne ka aasan aur safe tarika.",
   },
+  '/articles/online-dosti-kaise-karein-tips': {
+    title: "Online Dosti Kaise Karein? 7 Asaan Tarike — Vibe Talk",
+    description: "Internet par anjaan logo se sachchi dosti kaise shuru karein? Jaaniye safe aur genuine online friends banane ke 7 practical tips.",
+  },
+  '/articles/free-video-call-app-bina-login-ke': {
+    title: "Free Video Call Bina Login Ke: Best Tarika 2026 — Vibe Talk",
+    description: "Bina app download aur bina mobile number diye browser se seedha free peer-to-peer WebRTC video call karne ka aasan tarika.",
+  },
+  '/articles/ladkiyon-se-baat-karne-wali-safe-website': {
+    title: "Ladkiyon Se Baat Karne Wali Safe Website — Vibe Talk",
+    description: "Ladkiyon se safe, respectful aur bina fake coins ke online baat karne wali 100% free stranger chat website.",
+  },
+  '/articles/omegle-band-ho-gaya-ab-kya-use-karein': {
+    title: "Omegle Band Ho Gaya! Ab Kya Use Karein? — Vibe Talk",
+    description: "Omegle band hone ke baad 2026 ka sabse safe, 100% free aur bina login ke chalne wala best Omegle alternative platform.",
+  },
+  '/articles/india-me-sabse-popular-free-chat-website': {
+    title: "India Mein Sabse Popular Free Chat Websites 2026 — Vibe Talk",
+    description: "India mein online anjaan logo se free chat karne ke liye top platforms ka review, features aur safety comparison.",
+  },
   '/articles/what-is-vibetalk': {
     title: 'What Is Vibe Talk? Random Chat, Video Calls, and Groups',
     description:
@@ -607,8 +627,20 @@ const renderClientPage = (req, res, metadata, robots = 'index, follow') => {
     .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/, `<meta name="twitter:title" content="${escapeHtml(metadata.title)}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/, `<meta name="twitter:description" content="${escapeHtml(metadata.description)}" />`);
 
+  // Search bot / crawler detection for optimal SEO and fast, clean human UX
+  const isSearchBot = /bot|googlebot|bingbot|yandex|baiduspider|duckduckbot|slurp|twitterbot|facebookexternalhit|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator|whatsapp|lighthouse|chrome-lighthouse|pagespeed|headlesschrome|screaming frog|semrushbot|ahrefsbot|sitebulb|dotbot|petalbot/i.test(
+    req.headers['user-agent'] || ''
+  );
+
   const injectSeoHtml = (innerHtml) => {
-    html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${innerHtml}</div>`);
+    if (isSearchBot) {
+      // Bots & Search engines get full raw HTML semantic text for 100% SEO indexing & audits
+      html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${innerHtml}</div>`);
+    } else {
+      // Real human visitors get a clean, zero-flicker loading shell so there is NO unstyled text flash
+      const cleanShell = `<div id="app-shell-loader" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;font-family:Inter,system-ui,-apple-system,sans-serif;"><div style="width:36px;height:36px;border:3px solid #e2e8f0;border-top-color:#6366f1;border-radius:50%;animation:vibe-spin 0.7s linear infinite;"></div><div style="margin-top:14px;font-size:0.95rem;font-weight:600;color:#64748b;letter-spacing:-0.01em;">VibeTalk</div><style>@keyframes vibe-spin{to{transform:rotate(360deg)}}</style></div>`;
+      html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${cleanShell}</div>`);
+    }
   };
 
   if (req.path === '/') {

@@ -5,6 +5,7 @@ import AdBanner from '../components/AdBanner';
 import {
   HERO_IMG,
   HERO_IMG_WEBP,
+  HERO_IMG_MOBILE_WEBP,
   GROUP_TOPICS,
   SEO_INTRO,
   SEO_MORE,
@@ -224,6 +225,7 @@ const LandingPage = () => {
                 <div className="relative rounded-3xl overflow-hidden border-4 border-white shadow-2xl shadow-indigo-500/15 bg-slate-100 group">
                   {heroOk && (
                     <picture>
+                      <source media="(max-width: 640px)" srcSet={HERO_IMG_MOBILE_WEBP} type="image/webp" />
                       <source srcSet={HERO_IMG_WEBP} type="image/webp" />
                       <img
                         src={HERO_IMG}

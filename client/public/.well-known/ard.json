@@ -3,7 +3,7 @@
   "version": "1.0",
   "name": "Vibe Talk",
   "description": "Free random video chat, anonymous text messaging, and community hangout hubs.",
-  "resources": [
+  "entries": [
     {
       "type": "llms-txt",
       "uri": "https://vibetalk.me/llms.txt"
