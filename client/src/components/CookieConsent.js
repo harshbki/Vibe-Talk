@@ -20,10 +20,10 @@ const CookieConsent = () => {
   return (
     <div className="fixed bottom-0 inset-x-0 z-50 bg-base-100 border-t border-base-300 shadow-lg px-4 py-3">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
-        <p className="text-base-content/75 text-center sm:text-left">
+        <p className="text-slate-800 text-center sm:text-left font-medium">
           This website uses cookies to ensure you get the best experience.{' '}
-          <Link to="/privacy" className="text-primary underline">
-            More info
+          <Link to="/privacy" className="text-indigo-600 hover:text-indigo-800 font-semibold underline">
+            Read Cookie &amp; Privacy Policy
           </Link>
         </p>
         <button

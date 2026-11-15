@@ -1,0 +1,16 @@
+{
+  "$schema": "https://agenticresourcediscovery.org/schema/v1/ard.json",
+  "version": "1.0",
+  "name": "Vibe Talk",
+  "description": "Free random video chat, anonymous text messaging, and community hangout hubs.",
+  "resources": [
+    {
+      "type": "llms-txt",
+      "uri": "https://vibetalk.me/llms.txt"
+    },
+    {
+      "type": "ai-catalog",
+      "uri": "https://vibetalk.me/ai-catalog.json"
+    }
+  ]
+}

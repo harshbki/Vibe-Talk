@@ -210,7 +210,7 @@ const PublicLayout = ({ children }) => {
         <div className="border-t border-slate-200/80 py-6 px-4">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 text-center sm:text-left">
             <p>© {new Date().getFullYear()} Vibe Talk (vibetalk.me). All rights reserved.</p>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-600 font-medium">
               Safe 18+ stranger chat &amp; video platform · Free Omegle alternative
             </p>
           </div>

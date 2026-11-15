@@ -684,6 +684,14 @@ if (hasClientBuild) {
     if (fs.existsSync(pubFile)) return res.sendFile(pubFile);
     res.status(404).json({ error: 'Not Found' });
   });
+  app.get(['/ard.json', '/.well-known/ard.json'], (req, res) => {
+    res.type('application/json; charset=utf-8');
+    const file = path.join(clientBuild, '.well-known', 'ard.json');
+    if (fs.existsSync(file)) return res.sendFile(file);
+    const pubFile = path.join(__dirname, '..', 'client', 'public', '.well-known', 'ard.json');
+    if (fs.existsSync(pubFile)) return res.sendFile(pubFile);
+    res.status(404).json({ error: 'Not Found' });
+  });
   app.use(express.static(clientBuild, { index: false }));
   app.get('*', async (req, res, next) => {
     if (req.path.startsWith('/api')) return next();

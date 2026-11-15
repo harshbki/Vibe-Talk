@@ -277,6 +277,7 @@ const LandingPage = () => {
       {/* ================= KEYWORD HIGHLIGHT STRIP (SEO & SEARCH VISIBILITY) ================= */}
       <section className="py-12 bg-slate-50/60 border-b border-slate-200/70">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="sr-only">Why Choose Vibe Talk for Random Stranger Chat</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {KEYWORD_HIGHLIGHTS.map((item) => (
               <div
