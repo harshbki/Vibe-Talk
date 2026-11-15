@@ -16,10 +16,17 @@ const ArticlesPage = () => {
     const loadArticles = async () => {
       try {
         const remoteArticles = await getArticles();
-        setArticles(remoteArticles.length > 0 ? remoteArticles : publicArticles);
+        const list = remoteArticles.length > 0 ? remoteArticles : publicArticles;
+        const sortedList = [...list].sort(
+          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+        );
+        setArticles(sortedList);
       } catch (error) {
         console.error('Article list load error:', error);
-        setArticles(publicArticles);
+        const sortedFallback = [...publicArticles].sort(
+          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+        );
+        setArticles(sortedFallback);
       } finally {
         setLoading(false);
       }
