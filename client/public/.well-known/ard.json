@@ -1,16 +1,42 @@
 {
-  "$schema": "https://agenticresourcediscovery.org/schema/v1/ard.json",
-  "version": "1.0",
-  "name": "Vibe Talk",
-  "description": "Free random video chat, anonymous text messaging, and community hangout hubs.",
+  "$schema": "https://raw.githubusercontent.com/ards-project/ard-spec/main/spec/schemas/ai-catalog.schema.json",
+  "host": {
+    "displayName": "Vibe Talk Official",
+    "identifier": "did:web:vibetalk.me",
+    "documentationUrl": "https://vibetalk.me/llms.txt"
+  },
   "entries": [
     {
-      "type": "llms-txt",
-      "uri": "https://vibetalk.me/llms.txt"
+      "@context": "https://agenticresourcediscovery.org/context/v1",
+      "identifier": "urn:air:vibetalk.me:docs:llms-txt",
+      "displayName": "Vibe Talk Platform Guide",
+      "type": "text/plain",
+      "url": "https://vibetalk.me/llms.txt",
+      "capabilities": [
+        "ReadDocumentation",
+        "CommunityGuidelines"
+      ],
+      "representativeQueries": [
+        "What is Vibe Talk and how to use it?",
+        "Free Omegle alternative without registration"
+      ]
     },
     {
-      "type": "ai-catalog",
-      "uri": "https://vibetalk.me/ai-catalog.json"
+      "@context": "https://agenticresourcediscovery.org/context/v1",
+      "identifier": "urn:air:vibetalk.me:catalog:services",
+      "displayName": "Vibe Talk Services Catalog",
+      "type": "application/json",
+      "url": "https://vibetalk.me/ai-catalog.json",
+      "capabilities": [
+        "RandomMatchChat",
+        "WebRTCVideoCall",
+        "CommunityInterestGroups"
+      ],
+      "representativeQueries": [
+        "Start free random video chat online",
+        "Anonymous stranger text chat without login",
+        "Online chat rooms for shared interests"
+      ]
     }
   ]
 }
