@@ -112,7 +112,7 @@ const escapeHtml = (value) =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const PUBLIC_PAGE_METADATA = {
   '/': {
-    title: 'Vibe Talk — Free Random Chat, Video Call & Meet Strangers Online',
+    title: 'Vibe Talk — Free Random Video & Stranger Chat Online',
     description:
       'Vibe Talk is a free browser-based platform for random chat, text chat, video calls, groups, and meeting new people online.',
   },
