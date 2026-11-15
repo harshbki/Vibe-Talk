@@ -25,6 +25,7 @@ const LegalPage = lazy(() => import('./pages/LegalPage'));
 const SafetyPage = lazy(() => import('./pages/SafetyPage'));
 const CommunityGuidelinesPage = lazy(() => import('./pages/CommunityGuidelinesPage'));
 const CookiesPage = lazy(() => import('./pages/CookiesPage'));
+const DisclaimerPage = lazy(() => import('./pages/DisclaimerPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
 const ArticleDetailPage = lazy(() => import('./pages/ArticleDetailPage'));
@@ -112,6 +113,7 @@ function App() {
                   <Route path="/safety" element={<SafetyPage />} />
                   <Route path="/community-guidelines" element={<CommunityGuidelinesPage />} />
                   <Route path="/cookies" element={<CookiesPage />} />
+                  <Route path="/disclaimer" element={<DisclaimerPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/articles" element={<ArticlesPage />} />
                   <Route path="/articles/:slug" element={<ArticleDetailPage />} />

@@ -28,6 +28,7 @@ const FOOTER_LEGAL = [
   { to: '/privacy', label: 'Privacy Policy' },
   { to: '/legal', label: 'Terms of Service' },
   { to: '/cookies', label: 'Cookies Policy' },
+  { to: '/disclaimer', label: 'Disclaimer & Publisher Policy' },
 ];
 
 const PublicLayout = ({ children }) => {

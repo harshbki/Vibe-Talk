@@ -77,7 +77,17 @@ const KEYWORD_HIGHLIGHTS = [
   },
 ];
 
-const FEATURED_GUIDES = publicArticles.slice(0, 3);
+const FEATURED_SLUGS = [
+  'free-random-video-call-no-credit-card-no-coins',
+  'practice-english-speaking-with-strangers-free',
+  'talk-to-someone-when-lonely-anonymous-chat',
+  'anjaan-logo-se-baat-karne-wali-free-website',
+  'raat-ko-bore-ho-rahe-ho-to-kya-kare-online-chat',
+  'safe-random-chat-online-guide',
+];
+const FEATURED_GUIDES = FEATURED_SLUGS.map((slug) =>
+  publicArticles.find((a) => a.slug === slug)
+).filter(Boolean);
 
 const WORKFLOW_STEPS = [
   {

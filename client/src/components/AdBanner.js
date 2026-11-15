@@ -24,15 +24,11 @@ const SLOT_MAP = {
   'public-sidebar': process.env.REACT_APP_ADSENSE_SLOT_RANDOM_MATCH_INLINE,
 };
 
+// AdSense is strictly restricted to high-value editorial & public landing surfaces only.
+// Google policy strictly prohibits ads on legal/compliance pages (Privacy, Terms, Cookies, Contact).
 const PUBLIC_AD_PATHS = new Set([
   '/',
   '/about',
-  '/privacy',
-  '/legal',
-  '/safety',
-  '/community-guidelines',
-  '/cookies',
-  '/contact',
   '/articles',
 ]);
 

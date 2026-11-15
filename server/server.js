@@ -141,6 +141,10 @@ const PUBLIC_PAGE_METADATA = {
     title: 'Community Guidelines — Vibe Talk',
     description: "Review Vibe Talk community guidelines for friendly, respectful, and safe online chat. Zero tolerance for harassment, hate speech, and inappropriate content.",
   },
+  '/disclaimer': {
+    title: 'Disclaimer & Publisher Policy — Vibe Talk',
+    description: "Official Disclaimer, publisher transparency policy, and advertising disclosure for Vibe Talk (vibetalk.me).",
+  },
   '/cookies': {
     title: 'Cookies Policy — Vibe Talk',
     description: "Understand how Vibe Talk uses cookies and local storage to keep your session secure, optimize random chat matching, and improve platform performance.",
@@ -416,6 +420,11 @@ const PUBLIC_PAGE_SEO_CONTENT = {
     <main>
       <h1>Vibe Talk Community Guidelines</h1>
       <p>Review the rules for respectful, friendly, inclusive, and safe conversations with the community.</p>
+    </main>`,
+  '/disclaimer': `
+    <main>
+      <h1>Disclaimer &amp; Publisher Policy</h1>
+      <p>Official Disclaimer, publisher transparency policy, user interaction notice, and advertising disclosure for Vibe Talk.</p>
     </main>`,
   '/cookies': `
     <main>
@@ -706,6 +715,7 @@ if (hasClientBuild) {
       '/safety',
       '/community-guidelines',
       '/cookies',
+      '/disclaimer',
       '/contact',
       '/articles',
       '/admin/articles',
